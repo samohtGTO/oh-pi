@@ -1,9 +1,10 @@
 import * as p from "@clack/prompts";
+import chalk from "chalk";
 import { selectLanguage, getLocale } from "./i18n.js";
 import { t } from "./i18n.js";
 import { welcome } from "./tui/welcome.js";
 import { selectMode } from "./tui/mode-select.js";
-import { setupProviders } from "./tui/provider-setup.js";
+import { setupProviders, type ProviderSetupResult } from "./tui/provider-setup.js";
 import { selectPreset } from "./tui/preset-select.js";
 import { selectTheme } from "./tui/theme-select.js";
 import { selectKeybindings } from "./tui/keybinding-select.js";
@@ -12,6 +13,9 @@ import { selectAgents } from "./tui/agents-select.js";
 import { confirmApply } from "./tui/confirm-apply.js";
 import { detectEnv, type EnvInfo } from "./utils/detect.js";
 import type { OhPConfig } from "./types.js";
+import { EXTENSIONS } from "./registry.js";
+
+type CustomTab = "providers" | "appearance" | "features" | "agents" | "finish";
 
 /**
  * 主入口函数。检测环境、选择语言、展示欢迎界面，根据用户选择的模式执行对应配置流程，最终确认并应用配置。
@@ -71,18 +75,59 @@ async function presetFlow(env: EnvInfo): Promise<OhPConfig> {
  * @returns 生成的配置对象
  */
 async function customFlow(env: EnvInfo): Promise<OhPConfig> {
-  const providerSetup = await setupProviders(env);
-  const theme = await selectTheme();
-  const keybindings = await selectKeybindings();
-  const extensions = await selectExtensions();
-  const agents = await selectAgents();
+  const defaultExtensions = EXTENSIONS.filter(e => e.default).map(e => e.name);
+  let providerSetup: ProviderSetupResult | null = null;
+  let theme = "dark";
+  let keybindings = "default";
+  let extensions = defaultExtensions;
+  let agents = "general-developer";
 
-  // Advanced: auto-compaction is now automatic based on model context window
-  const wantAdvanced = await p.confirm({
-    message: t("advanced.configure"),
-    initialValue: false,
-  });
-  if (p.isCancel(wantAdvanced)) { p.cancel(t("cancelled")); process.exit(0); }
+  while (true) {
+    const tabBar = [
+      chalk.cyan(`[${t("custom.tabProviders")}]`),
+      chalk.cyan(`[${t("custom.tabAppearance")}]`),
+      chalk.cyan(`[${t("custom.tabFeatures")}]`),
+      chalk.cyan(`[${t("custom.tabAgents")}]`),
+      chalk.green(`[${t("custom.tabFinish")}]`),
+    ].join(chalk.gray("  |  "));
+    const providerStatus = summarizeProviders(providerSetup);
+    p.note(`${tabBar}\n${providerStatus}`, t("custom.tabHeader"));
+
+    const tab = await p.select({
+      message: t("custom.tabPrompt"),
+      options: [
+        { value: "providers" as CustomTab, label: t("custom.tabProviders"), hint: providerStatus },
+        { value: "appearance" as CustomTab, label: t("custom.tabAppearance"), hint: `${theme} · ${keybindings}` },
+        { value: "features" as CustomTab, label: t("custom.tabFeatures"), hint: t("custom.tabFeaturesHint", { count: extensions.length }) },
+        { value: "agents" as CustomTab, label: t("custom.tabAgents"), hint: agents },
+        { value: "finish" as CustomTab, label: t("custom.tabFinish"), hint: t("custom.tabFinishHint") },
+      ],
+    });
+    if (p.isCancel(tab)) { p.cancel(t("cancelled")); process.exit(0); }
+
+    if (tab === "providers") {
+      providerSetup = await setupProviders(env);
+      continue;
+    }
+    if (tab === "appearance") {
+      theme = await selectTheme();
+      keybindings = await selectKeybindings();
+      continue;
+    }
+    if (tab === "features") {
+      extensions = await selectExtensions();
+      continue;
+    }
+    if (tab === "agents") {
+      agents = await selectAgents();
+      continue;
+    }
+    if (!providerSetup) {
+      p.log.warn(t("custom.needProviders"));
+      continue;
+    }
+    break;
+  }
 
   return {
     ...providerSetup,
@@ -93,4 +138,16 @@ async function customFlow(env: EnvInfo): Promise<OhPConfig> {
     agents,
     thinking: "medium",
   };
+}
+
+function summarizeProviders(setup: ProviderSetupResult | null): string {
+  if (!setup) return t("custom.providersUnset");
+  if (setup.providerStrategy === "keep") return t("confirm.providerStrategyKeep");
+  if (setup.providerStrategy === "add") {
+    return setup.providers.length > 0
+      ? t("custom.providersAdd", { list: setup.providers.map(p => p.name).join(", ") })
+      : t("confirm.providerStrategyAdd");
+  }
+  if (setup.providers.length === 0) return t("confirm.providerStrategyReplace");
+  return t("custom.providersReplace", { list: setup.providers.map(p => p.name).join(", ") });
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isUnsafeUrl, resolveOpenAIApiMode } from "./provider-setup.js";
+import { isOpenAICompatibleApi, isUnsafeUrl, normalizeDiscoveryBaseUrl, resolveOpenAIApiMode } from "./provider-setup.js";
 
 describe("isUnsafeUrl", () => {
   it("https remote is safe", () => {
@@ -66,5 +66,41 @@ describe("resolveOpenAIApiMode", () => {
 
   it("auto resolves gpt-4o to completions", () => {
     expect(resolveOpenAIApiMode("auto", "gpt-4o")).toBe("openai-completions");
+  });
+});
+
+describe("normalizeDiscoveryBaseUrl", () => {
+  it("keeps regular host URL", () => {
+    expect(normalizeDiscoveryBaseUrl("https://api.openai.com")).toBe("https://api.openai.com");
+  });
+
+  it("strips trailing slash", () => {
+    expect(normalizeDiscoveryBaseUrl("https://api.openai.com/")).toBe("https://api.openai.com");
+  });
+
+  it("strips trailing /v1 to avoid /v1/v1 probe", () => {
+    expect(normalizeDiscoveryBaseUrl("https://proxy.example.com/v1")).toBe("https://proxy.example.com");
+  });
+
+  it("strips trailing /v1/ to avoid /v1/v1 probe", () => {
+    expect(normalizeDiscoveryBaseUrl("http://localhost:11434/v1/")).toBe("http://localhost:11434");
+  });
+});
+
+describe("isOpenAICompatibleApi", () => {
+  it("treats undefined as openai-compatible", () => {
+    expect(isOpenAICompatibleApi(undefined)).toBe(true);
+  });
+
+  it("treats openai-completions as openai-compatible", () => {
+    expect(isOpenAICompatibleApi("openai-completions")).toBe(true);
+  });
+
+  it("treats openai-responses as openai-compatible", () => {
+    expect(isOpenAICompatibleApi("openai-responses")).toBe(true);
+  });
+
+  it("treats anthropic api as non-openai-compatible", () => {
+    expect(isOpenAICompatibleApi("anthropic-messages")).toBe(false);
   });
 });

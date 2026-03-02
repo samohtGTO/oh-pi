@@ -16,6 +16,15 @@ const PROVIDER_API_URLS: Record<string, string> = {
   mistral:    "https://api.mistral.ai",
 };
 
+/**
+ * Normalize user-entered base URL for model discovery probes.
+ * Discovery always calls `${base}/v1/models`, so strip trailing `/v1` to avoid `/v1/v1/models`.
+ */
+export function normalizeDiscoveryBaseUrl(baseUrl: string): string {
+  const trimmed = baseUrl.trim().replace(/\/+$/, "");
+  return trimmed.replace(/\/v1$/i, "");
+}
+
 /** Block internal/private IPs to prevent SSRF */
 export function isUnsafeUrl(urlStr: string): boolean {
   try {
@@ -55,6 +64,10 @@ export function resolveOpenAIApiMode(mode: OpenAIApiMode, modelId: string): "ope
   return "openai-completions";
 }
 
+export function isOpenAICompatibleApi(api?: string): boolean {
+  return !api || api === "openai-completions" || api === "openai-responses";
+}
+
 /**
  * 动态获取模型列表，依次尝试 Anthropic、Google、OpenAI 兼容 API 风格。
  * @param provider - 提供商名称
@@ -63,7 +76,7 @@ export function resolveOpenAIApiMode(mode: OpenAIApiMode, modelId: string): "ope
  * @returns 发现的模型列表及检测到的 API 类型
  */
 async function fetchModels(provider: string, baseUrl: string, apiKey: string): Promise<FetchResult> {
-  const base = baseUrl.replace(/\/+$/, "");
+  const base = normalizeDiscoveryBaseUrl(baseUrl);
   const resolvedKey = process.env[apiKey] ?? apiKey;
 
   // Try Anthropic-style first (for known anthropic or any provider)
@@ -270,7 +283,7 @@ async function setupProviderChoice(choice: string): Promise<ProviderConfig | nul
   if (useCustomUrl) {
     const url = await p.text({
       message: t("provider.baseUrl", { label: info.label }),
-      placeholder: "https://proxy.example.com",
+      placeholder: t("provider.baseUrlPlaceholder"),
       validate: (v) => (!v || !v.startsWith("http")) ? t("provider.baseUrlValidation") : isUnsafeUrl(v) ? "URL must use HTTPS for remote hosts (private IPs blocked)" : undefined,
     });
     if (p.isCancel(url)) { p.cancel(t("cancelled")); process.exit(0); }
@@ -339,10 +352,13 @@ async function setupCustomProvider(): Promise<ProviderConfig | null> {
   }
 
   const { defaultModel, discoveredModels, api } = await selectModelWithMeta(name, name, [], baseUrl, apiKey);
+  const finalApi = isOpenAICompatibleApi(api)
+    ? await selectOpenAIApiMode(name, defaultModel)
+    : api;
 
   p.log.success(t("provider.customConfigured", { name, url: baseUrl }));
 
-  return { name, apiKey, defaultModel, baseUrl, api, discoveredModels };
+  return { name, apiKey, defaultModel, baseUrl, api: finalApi, discoveredModels };
 }
 
 interface SelectResult {
