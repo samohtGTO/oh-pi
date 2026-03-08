@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.2.2 (2026-03-08)
+
+### Features
+
+- rewrite configuration wizard UX
+- monorepo restructure under @ifi/* scope
+- detailed changesets, markdown formatting, knope publish workflow
+
+### Fixes
+
+- CI builds core before typecheck and tests
+- remove composite/references, use plain tsgo resolution
+- rename npm scope from @ifi to @ifiokjr
+
+#### Renamed npm scope from `@ifi` to `@ifiokjr`
+
+The `@ifi` scope didn't exist as an npm organization. All packages are now published under
+`@ifiokjr/*` which matches the npm username and works without org setup.
+
+- `@ifi/oh-pi` → `@ifiokjr/oh-pi`
+- `@ifi/oh-pi-core` → `@ifiokjr/oh-pi-core`
+- `@ifi/oh-pi-cli` → `@ifiokjr/oh-pi-cli`
+- `@ifi/oh-pi-extensions` → `@ifiokjr/oh-pi-extensions`
+- `@ifi/oh-pi-ant-colony` → `@ifiokjr/oh-pi-ant-colony`
+- `@ifi/oh-pi-themes` → `@ifiokjr/oh-pi-themes`
+- `@ifi/oh-pi-prompts` → `@ifiokjr/oh-pi-prompts`
+- `@ifi/oh-pi-skills` → `@ifiokjr/oh-pi-skills`
+- `@ifi/oh-pi-agents` → `@ifiokjr/oh-pi-agents`
+
 ## 0.2.1 (2026-03-08)
 
 ### Features
