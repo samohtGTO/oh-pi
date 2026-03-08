@@ -31,7 +31,7 @@ jobs:
             echo "See: https://knope.tech/tutorials/bot-workflow/"
             exit 1
           fi
-          echo "✅ Found $CHANGESETS changeset(s)"
+          echo "✅ Found $CHANGESET changeset(s)"
 
   lint:
     name: Lint & Format
@@ -66,6 +66,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build core (required for CLI type resolution)
+        run: pnpm --filter @ifi/oh-pi-core build
+
       - name: Type check with tsgo
         run: pnpm typecheck
 
@@ -86,6 +89,9 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Build core (required for CLI test resolution)
+        run: pnpm --filter @ifi/oh-pi-core build
 
       - name: Run tests
         run: pnpm test
