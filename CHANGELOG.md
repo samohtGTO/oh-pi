@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.9 (2026-03-09)
+
+### Features
+
+- isolate ant colonies in worktrees and track background inference (#1)
+- add rust workspace bootstrap scaffolder (#3)
+- add flutter serverpod mvp bootstrap skill
+
+### Fixes
+
+- classify CLI 401 auth failures in usage tracker
+- make safe-guard opt-in by default
+
 ## 0.2.8 (2026-03-08)
 
 ### Fixes
