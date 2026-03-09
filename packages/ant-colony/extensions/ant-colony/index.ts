@@ -1001,6 +1001,12 @@ export default function antColonyExtension(pi: ExtensionAPI) {
 			soldierModel: Type.Optional(
 				Type.String({ description: "Model for soldier ants (default: current session model)" }),
 			),
+			designWorkerModel: Type.Optional(Type.String({ description: "Model override for design worker class" })),
+			multimodalWorkerModel: Type.Optional(
+				Type.String({ description: "Model override for multimodal worker class (cheap-first default route)" }),
+			),
+			backendWorkerModel: Type.Optional(Type.String({ description: "Model override for backend worker class" })),
+			reviewWorkerModel: Type.Optional(Type.String({ description: "Model override for review worker class" })),
 		}),
 
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -1021,6 +1027,18 @@ export default function antColonyExtension(pi: ExtensionAPI) {
 			}
 			if (params.soldierModel) {
 				modelOverrides.soldier = params.soldierModel;
+			}
+			if (params.designWorkerModel) {
+				modelOverrides.design = params.designWorkerModel;
+			}
+			if (params.multimodalWorkerModel) {
+				modelOverrides.multimodal = params.multimodalWorkerModel;
+			}
+			if (params.backendWorkerModel) {
+				modelOverrides.backend = params.backendWorkerModel;
+			}
+			if (params.reviewWorkerModel) {
+				modelOverrides.review = params.reviewWorkerModel;
 			}
 
 			const colonyParams = {

@@ -68,6 +68,18 @@ export interface CasteBudget {
 }
 
 /** Full budget plan for a colony run. */
+export interface RoutingTelemetrySnapshot {
+	totalRoutes: number;
+	avgLatencyMs: number;
+	outcomeCounts: {
+		claimed: number;
+		completed: number;
+		failed: number;
+		escalated: number;
+	};
+	escalationReasonCounts: Record<string, number>;
+}
+
 export interface BudgetPlan {
 	/** Per-caste allocations. */
 	castes: Record<AntCaste, CasteBudget>;
@@ -79,6 +91,8 @@ export interface BudgetPlan {
 	lowestRateLimitPct: number;
 	/** Human-readable summary for prompt injection. */
 	summary: string;
+	/** Aggregated routing telemetry used for reporting and debugging. */
+	routingTelemetry: RoutingTelemetrySnapshot;
 }
 
 // ═══ Constants ═══
@@ -210,6 +224,7 @@ export function buildBudgetSummary(
 	maxCost: number | null,
 	tasksDone: number,
 	tasksTotal: number,
+	routingTelemetry?: RoutingTelemetrySnapshot,
 ): string {
 	const parts: string[] = [];
 
@@ -231,6 +246,16 @@ export function buildBudgetSummary(
 	// Progress
 	if (tasksTotal > 0) {
 		parts.push(`Progress: ${tasksDone}/${tasksTotal} tasks completed.`);
+	}
+
+	if (routingTelemetry && routingTelemetry.totalRoutes > 0) {
+		parts.push(
+			`Routing: ${routingTelemetry.totalRoutes} outcomes, avg latency ${routingTelemetry.avgLatencyMs}ms, escalations ${routingTelemetry.outcomeCounts.escalated}.`,
+		);
+		const topEscalation = Object.entries(routingTelemetry.escalationReasonCounts).sort((a, b) => b[1] - a[1])[0];
+		if (topEscalation) {
+			parts.push(`Top escalation reason: ${topEscalation[0]} (${topEscalation[1]}).`);
+		}
 	}
 
 	// Severity-specific guidance
@@ -265,6 +290,33 @@ export function buildBudgetSummary(
  * @param concurrency - Current concurrency config for max bounds.
  * @returns A complete budget plan with per-caste allocations.
  */
+export function buildRoutingTelemetrySnapshot(metrics: ColonyMetrics): RoutingTelemetrySnapshot {
+	const entries = metrics.routingTelemetry ?? [];
+	const outcomeCounts = {
+		claimed: 0,
+		completed: 0,
+		failed: 0,
+		escalated: 0,
+	};
+	const escalationReasonCounts: Record<string, number> = {};
+	let latencyTotal = 0;
+
+	for (const entry of entries) {
+		outcomeCounts[entry.outcome] += 1;
+		latencyTotal += entry.latencyMs;
+		for (const reason of entry.escalationReasons) {
+			escalationReasonCounts[reason] = (escalationReasonCounts[reason] ?? 0) + 1;
+		}
+	}
+
+	return {
+		totalRoutes: entries.length,
+		avgLatencyMs: entries.length > 0 ? Math.round(latencyTotal / entries.length) : 0,
+		outcomeCounts,
+		escalationReasonCounts,
+	};
+}
+
 export function planBudget(
 	usageLimits: UsageLimitsEvent | null,
 	metrics: ColonyMetrics,
@@ -311,6 +363,7 @@ export function planBudget(
 		};
 	}
 
+	const routingTelemetry = buildRoutingTelemetrySnapshot(metrics);
 	const summary = buildBudgetSummary(
 		severity,
 		lowestRateLimitPct,
@@ -318,6 +371,7 @@ export function planBudget(
 		maxCost,
 		metrics.tasksDone,
 		metrics.tasksTotal,
+		routingTelemetry,
 	);
 
 	return {
@@ -326,6 +380,7 @@ export function planBudget(
 		severity,
 		lowestRateLimitPct,
 		summary,
+		routingTelemetry,
 	};
 }
 

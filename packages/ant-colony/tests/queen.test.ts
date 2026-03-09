@@ -24,6 +24,7 @@ import { Nest } from "../extensions/ant-colony/nest.js";
 import {
 	classifyError,
 	createUsageLimitsTracker,
+	decidePromoteOrFinalize,
 	quorumMergeTasks,
 	shouldUseScoutQuorum,
 	validateExecutionPlan,
@@ -89,6 +90,45 @@ describe("shouldUseScoutQuorum", () => {
 
 	it("returns false for simple single-step goals", () => {
 		expect(shouldUseScoutQuorum("List top-level files")).toBe(false);
+	});
+});
+
+describe("decidePromoteOrFinalize", () => {
+	it("finalizes when all thresholds and guards pass", () => {
+		const decision = decidePromoteOrFinalize({
+			confidenceScore: 0.82,
+			coverageScore: 0.9,
+			riskFlags: [],
+			policyViolations: [],
+			sloBreached: false,
+			cheapPassSummary: "cheap-pass: parsed 12 files",
+		});
+
+		expect(decision).toEqual({
+			action: "finalize",
+			escalationReasons: [],
+		});
+	});
+
+	it("promotes with machine-readable escalation reasons and cheap-pass context", () => {
+		const decision = decidePromoteOrFinalize({
+			confidenceScore: 0.7,
+			coverageScore: 0.8,
+			riskFlags: ["pii_detected"],
+			policyViolations: ["disallowed_tool"],
+			sloBreached: true,
+			cheapPassSummary: "cheap-pass",
+		});
+
+		expect(decision.action).toBe("promote");
+		expect(decision.escalationReasons).toEqual([
+			"low_confidence",
+			"low_coverage",
+			"risk_flag",
+			"policy_violation",
+			"slo_breach",
+		]);
+		expect(decision.cheapPassSummary).toBe("cheap-pass");
 	});
 });
 

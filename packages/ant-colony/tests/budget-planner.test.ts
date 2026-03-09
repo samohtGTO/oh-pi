@@ -18,6 +18,7 @@ import {
 	type BudgetPlan,
 	buildBudgetPromptSection,
 	buildBudgetSummary,
+	buildRoutingTelemetrySnapshot,
 	type CasteBudget,
 	classifySeverity,
 	getLowestRateLimitPct,
@@ -57,6 +58,7 @@ function makeMetrics(overrides: Partial<ColonyMetrics> = {}): ColonyMetrics {
 		totalTokens: overrides.totalTokens ?? 15000,
 		startTime: overrides.startTime ?? Date.now() - 60000,
 		throughputHistory: overrides.throughputHistory ?? [],
+		routingTelemetry: overrides.routingTelemetry ?? [],
 	};
 }
 
@@ -235,6 +237,39 @@ describe("classifySeverity", () => {
 
 // ─── buildBudgetSummary ──────────────────────────────────────────────────────
 
+describe("buildRoutingTelemetrySnapshot", () => {
+	it("aggregates latency, outcomes, and escalation reasons", () => {
+		const metrics = makeMetrics({
+			routingTelemetry: [
+				{
+					taskId: "t1",
+					caste: "worker",
+					outcome: "completed",
+					latencyMs: 250,
+					escalationReasons: [],
+					timestamp: Date.now(),
+				},
+				{
+					taskId: "t2",
+					caste: "worker",
+					outcome: "escalated",
+					latencyMs: 750,
+					escalationReasons: ["risk_flag", "low_confidence"],
+					timestamp: Date.now(),
+				},
+			],
+		});
+
+		const snapshot = buildRoutingTelemetrySnapshot(metrics);
+		expect(snapshot.totalRoutes).toBe(2);
+		expect(snapshot.avgLatencyMs).toBe(500);
+		expect(snapshot.outcomeCounts.completed).toBe(1);
+		expect(snapshot.outcomeCounts.escalated).toBe(1);
+		expect(snapshot.escalationReasonCounts.risk_flag).toBe(1);
+		expect(snapshot.escalationReasonCounts.low_confidence).toBe(1);
+	});
+});
+
 describe("buildBudgetSummary", () => {
 	it("includes rate limit info when below 100%", () => {
 		const summary = buildBudgetSummary("moderate", 45, 0, null, 0, 0);
@@ -278,6 +313,18 @@ describe("buildBudgetSummary", () => {
 	it("includes moderate guidance for moderate severity", () => {
 		const summary = buildBudgetSummary("moderate", 35, 4, 10, 3, 10);
 		expect(summary).toContain("moderate");
+	});
+
+	it("includes routing telemetry rollup when available", () => {
+		const summary = buildBudgetSummary("moderate", 35, 4, 10, 3, 10, {
+			totalRoutes: 4,
+			avgLatencyMs: 420,
+			outcomeCounts: { claimed: 1, completed: 2, failed: 0, escalated: 1 },
+			escalationReasonCounts: { low_confidence: 1 },
+		});
+		expect(summary).toContain("Routing: 4 outcomes");
+		expect(summary).toContain("420ms");
+		expect(summary).toContain("Top escalation reason: low_confidence (1)");
 	});
 
 	it("no severity guidance for comfortable", () => {

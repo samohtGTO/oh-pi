@@ -112,6 +112,21 @@ pi --tools read,grep,find,ls -p "Review"     # Read-only mode
 pi --thinking high "Complex problem"         # High thinking
 ```
 
+### Completion Verification Harness
+
+Use the deterministic harness below to verify slash-command argument completion behavior:
+
+```bash
+pnpm verify:completion
+```
+
+What it does:
+- Runs a focused Vitest suite at `packages/ant-colony/tests/commands.test.ts`
+- Verifies `/colony-status`, `/colony-stop`, and `/colony-resume` completion wiring
+- Avoids interactive/TUI startup and shell-specific behavior
+
+Note: `oh-pi` itself does not provide shell completion generation; this harness validates in-product command completion callbacks.
+
 ---
 
 ## 2. Directory Structure Overview

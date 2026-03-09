@@ -19,7 +19,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Ant, ColonyState, ConcurrencySample, Pheromone, Task, TaskStatus } from "./types.js";
+import type { Ant, ColonyState, ConcurrencySample, EscalationReason, Pheromone, Task, TaskStatus } from "./types.js";
 
 /** Minimum pheromone strength to keep (below this, entries are garbage-collected). */
 const PHEROMONE_MIN_STRENGTH = 0.05;
@@ -247,6 +247,31 @@ export class Nest {
 			task.error = error;
 		}
 		this.writeTask(task);
+	}
+
+	recordRoutingOutcome(
+		taskId: string,
+		caste: "scout" | "worker" | "soldier" | "drone",
+		outcome: "claimed" | "completed" | "failed" | "escalated",
+		latencyMs: number,
+		escalationReasons: EscalationReason[] = [],
+	): void {
+		this.withStateLock(() => {
+			if (!this.stateCache) {
+				this.stateCache = this.readJson<ColonyState>(this.stateFile);
+			}
+			const routingTelemetry = [...(this.stateCache.metrics.routingTelemetry ?? [])];
+			routingTelemetry.push({
+				taskId,
+				caste,
+				outcome,
+				latencyMs: Math.max(0, Math.floor(latencyMs)),
+				escalationReasons,
+				timestamp: Date.now(),
+			});
+			this.stateCache.metrics.routingTelemetry = routingTelemetry.slice(-500);
+			this.writeJson(this.stateFile, this.stateCache);
+		});
 	}
 
 	/** Register a child task and link it to its parent's `spawnedTasks` list. */

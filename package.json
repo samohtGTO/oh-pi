@@ -5,6 +5,7 @@
 		"build": "pnpm -r --filter @ifi/oh-pi-core --filter @ifi/oh-pi-cli run build",
 		"build:fast": "pnpm -r --filter @ifi/oh-pi-core --filter @ifi/oh-pi-cli run build:fast",
 		"typecheck": "pnpm -r --filter @ifi/oh-pi-core --filter @ifi/oh-pi-cli run typecheck",
+		"verify:completion": "pnpm exec vitest run packages/ant-colony/tests/commands.test.ts",
 		"test": "vitest run",
 		"lint": "biome check --error-on-warnings .",
 		"lint:fix": "biome check --fix .",

@@ -24,6 +24,7 @@ import {
 } from "./budget-planner.js";
 import { adapt, defaultConcurrency, sampleSystem } from "./concurrency.js";
 import { buildImportGraph, type ImportGraph, taskDependsOn } from "./deps.js";
+import { preprocessMultimodalTask, shouldEscalateMultimodalRoute } from "./multimodal-routing.js";
 import { Nest } from "./nest.js";
 import { makePheromoneId, makeTaskId, resetAntCounter, runDrone, spawnAnt } from "./spawner.js";
 import type {
@@ -36,8 +37,11 @@ import type {
 	ColonyState,
 	ColonyWorkspace,
 	ModelOverrides,
+	PromoteFinalizeGateDecision,
+	PromoteFinalizeGateInput,
 	Task,
 	TaskPriority,
+	WorkerClass,
 } from "./types.js";
 import { DEFAULT_ANT_CONFIGS } from "./types.js";
 
@@ -158,6 +162,20 @@ function makeInitialScoutTask(goal: string): Task {
 	};
 }
 
+function classifyWorkerClass(title: string, description: string, files: string[]): WorkerClass {
+	const haystack = `${title}\n${description}\n${files.join("\n")}`.toLowerCase();
+	if (/(ui|ux|design|layout|style|css|figma|theme|color|typography|component)/.test(haystack)) {
+		return "design";
+	}
+	if (/(image|video|audio|vision|ocr|multimodal|caption|embedding)/.test(haystack)) {
+		return "multimodal";
+	}
+	if (/(review|qa|validate|verify|audit|test|lint|check)/.test(haystack)) {
+		return "review";
+	}
+	return "backend";
+}
+
 function childTaskFromParsed(
 	parentId: string,
 	parsed: {
@@ -179,6 +197,8 @@ function childTaskFromParsed(
 		priority: parsed.priority,
 		files: parsed.files,
 		context: parsed.context || undefined,
+		workerClass:
+			parsed.caste === "worker" ? classifyWorkerClass(parsed.title, parsed.description, parsed.files) : undefined,
 		claimedBy: null,
 		result: null,
 		error: null,
@@ -240,6 +260,38 @@ export interface PlanValidation {
 export function shouldUseScoutQuorum(goal: string): boolean {
 	// Multi-step/compound goals benefit from at least 2 scout votes
 	return /(\n\s*\d+[.)]|[;；]| and |以及|并且|同时|步骤|phase|then|之后)/i.test(goal);
+}
+
+export function decidePromoteOrFinalize(input: PromoteFinalizeGateInput): PromoteFinalizeGateDecision {
+	const escalationReasons: PromoteFinalizeGateDecision["escalationReasons"] = [];
+	if (input.confidenceScore < 0.78) {
+		escalationReasons.push("low_confidence");
+	}
+	if (input.coverageScore < 0.85) {
+		escalationReasons.push("low_coverage");
+	}
+	if (input.riskFlags.length > 0) {
+		escalationReasons.push("risk_flag");
+	}
+	if (input.policyViolations.length > 0) {
+		escalationReasons.push("policy_violation");
+	}
+	if (input.sloBreached) {
+		escalationReasons.push("slo_breach");
+	}
+
+	if (escalationReasons.length > 0) {
+		return {
+			action: "promote",
+			escalationReasons,
+			cheapPassSummary: input.cheapPassSummary,
+		};
+	}
+
+	return {
+		action: "finalize",
+		escalationReasons,
+	};
 }
 
 export function validateExecutionPlan(tasks: Task[]): PlanValidation {
@@ -378,7 +430,7 @@ interface WaveOptions {
 	modelOverrides?: ModelOverrides;
 	signal?: AbortSignal;
 	callbacks: QueenCallbacks;
-	emitSignal: (phase: ColonyState["status"], message: string) => void;
+	emitSignal: (phase: ColonyState["status"], message: string, extras?: Partial<ColonySignal>) => void;
 	authStorage?: AuthStorage;
 	modelRegistry?: ModelRegistry;
 	importGraph?: ImportGraph;
@@ -462,14 +514,30 @@ async function runAntWave(opts: WaveOptions): Promise<"ok" | "budget"> {
 		if (!task) {
 			return "empty";
 		}
+		nest.recordRoutingOutcome(task.id, caste, "claimed", 0);
 
+		const multimodalReport = caste === "worker" ? preprocessMultimodalTask(task) : null;
+		const multimodalEscalationReasons =
+			caste === "worker" && multimodalReport ? shouldEscalateMultimodalRoute(task, multimodalReport) : [];
+		if (multimodalEscalationReasons.length > 0) {
+			nest.recordRoutingOutcome(task.id, caste, "escalated", 0, multimodalEscalationReasons);
+		}
+
+		const shouldUseCheapMultimodalFirst = caste === "worker" && task.workerClass === "multimodal";
+		let selectedModel =
+			caste === "worker"
+				? (task.workerClass ? opts.modelOverrides?.[task.workerClass] : undefined) || casteModel
+				: casteModel;
+		if (shouldUseCheapMultimodalFirst && opts.modelOverrides?.multimodal) {
+			selectedModel = opts.modelOverrides.multimodal;
+		}
 		const ant: Ant = {
 			id: "",
 			caste,
 			status: "idle",
 			taskId: task.id,
 			pid: null,
-			model: casteModel,
+			model: selectedModel,
 			usage: { input: 0, output: 0, cost: 0, turns: 0 },
 			startedAt: Date.now(),
 			finishedAt: null,
@@ -483,7 +551,7 @@ async function runAntWave(opts: WaveOptions): Promise<"ok" | "budget"> {
 			const antSignal = antAbort.signal;
 			// Bio 7: Age polymorphism — conservative early, convergent late
 			const progress = state.metrics.tasksTotal > 0 ? state.metrics.tasksDone / state.metrics.tasksTotal : 0;
-			const config = { ...baseConfig };
+			const config = { ...baseConfig, model: selectedModel };
 			if (progress < 0.3) {
 				config.maxTurns = Math.max(baseConfig.maxTurns - 3, 5); // Conservative early phase
 			} else if (progress > 0.7) {
@@ -491,6 +559,11 @@ async function runAntWave(opts: WaveOptions): Promise<"ok" | "budget"> {
 			}
 			// Build budget-awareness prompt section for non-drone ants
 			const budgetSection = opts.budgetPlan ? buildBudgetPromptSection(opts.budgetPlan) : undefined;
+			const ingestionSection = multimodalReport?.hasMultimodalInput
+				? `## Multimodal Ingestion\n${multimodalReport.summary}\nArtifacts:\n${multimodalReport.artifacts
+						.map((artifact) => `- ${artifact.kind}: ${artifact.path}`)
+						.join("\n")}`
+				: undefined;
 			const antPromise =
 				caste === "drone"
 					? runDrone(cwd, nest, task)
@@ -504,7 +577,7 @@ async function runAntWave(opts: WaveOptions): Promise<"ok" | "budget"> {
 							callbacks.onAntUsage,
 							opts.authStorage,
 							opts.modelRegistry,
-							budgetSection,
+							[budgetSection, ingestionSection].filter(Boolean).join("\n\n") || undefined,
 						);
 			let timeoutId: ReturnType<typeof setTimeout>;
 			const result = await Promise.race([
@@ -519,8 +592,11 @@ async function runAntWave(opts: WaveOptions): Promise<"ok" | "budget"> {
 			callbacks.onAntDone?.(result.ant, task, result.output);
 
 			if (result.rateLimited) {
+				nest.recordRoutingOutcome(task.id, caste, "escalated", Date.now() - ant.startedAt, ["slo_breach"]);
 				return "rate_limited";
 			}
+
+			nest.recordRoutingOutcome(task.id, caste, "completed", Date.now() - ant.startedAt);
 
 			// Cost warning: signal when >80% of budget is spent
 			const curState = nest.getStateLight();
@@ -589,8 +665,10 @@ async function runAntWave(opts: WaveOptions): Promise<"ok" | "budget"> {
 			const count = retryCount.get(task.id) ?? 0;
 			if (isRetryable && count < MAX_RETRIES) {
 				retryCount.set(task.id, count + 1);
+				nest.recordRoutingOutcome(task.id, caste, "escalated", Date.now() - ant.startedAt, ["slo_breach"]);
 				nest.updateTaskStatus(task.id, "pending");
 			} else {
+				nest.recordRoutingOutcome(task.id, caste, "failed", Date.now() - ant.startedAt);
 				// Negative pheromone: failed task releases warning proportional to task scope
 				if (task.files.length > 0) {
 					const warnStrength = Math.min(1.0, 0.5 + task.files.length * 0.1);
@@ -800,12 +878,12 @@ export async function runColony(opts: QueenOptions): Promise<ColonyState> {
 		}
 	};
 
-	const emitSignal = (phase: ColonyState["status"], message: string) => {
+	const emitSignal = (phase: ColonyState["status"], message: string, extras?: Partial<ColonySignal>) => {
 		const state = nest.getStateLight();
 		const m = state.metrics;
 		const active = state.ants.filter((a) => a.status === "working").length;
 		const progress = m.tasksTotal > 0 ? m.tasksDone / m.tasksTotal : 0;
-		callbacks.onSignal?.({ phase, progress, active, cost: m.totalCost, message, colonyId: state.id });
+		callbacks.onSignal?.({ phase, progress, active, cost: m.totalCost, message, colonyId: state.id, ...extras });
 	};
 
 	const waveBase: Omit<WaveOptions, "caste"> & { importGraph?: ImportGraph } = {
@@ -1070,12 +1148,12 @@ export async function resumeColony(opts: QueenOptions): Promise<ColonyState> {
 
 	const { signal, callbacks } = opts;
 
-	const emitSignal = (phase: ColonyState["status"], message: string) => {
+	const emitSignal = (phase: ColonyState["status"], message: string, extras?: Partial<ColonySignal>) => {
 		const state = nest.getStateLight();
 		const m = state.metrics;
 		const active = state.ants.filter((a) => a.status === "working").length;
 		const progress = m.tasksTotal > 0 ? m.tasksDone / m.tasksTotal : 0;
-		callbacks.onSignal?.({ phase, progress, active, cost: m.totalCost, message, colonyId: state.id });
+		callbacks.onSignal?.({ phase, progress, active, cost: m.totalCost, message, colonyId: state.id, ...extras });
 	};
 
 	const waveBase: Omit<WaveOptions, "caste"> & { budgetPlan?: BudgetPlan | null } = {

@@ -197,6 +197,7 @@ function createMockPi() {
 			},
 		},
 		_handlers: handlers,
+		_eventHandlers: eventHandlers,
 		_commands: commands,
 		_tools: tools,
 		_emit(event: string, ...args: any[]) {
@@ -325,5 +326,46 @@ describe("ant-colony extension commands", () => {
 
 		expect(resumeColonyMock).toHaveBeenCalledTimes(2);
 		expect(ctx._notifications.filter((n) => n.msg.includes("Resuming:")).length).toBe(2);
+	});
+});
+
+describe("index-level telemetry propagation", () => {
+	it("passes eventBus into ant_colony runtime tool execution", async () => {
+		runInvocations.length = 0;
+		const pi = createMockPi();
+		antColonyExtension(pi as any);
+
+		const antColonyTool = pi._tools.get("ant_colony");
+		expect(antColonyTool?.execute).toBeTypeOf("function");
+
+		const ctx = {
+			hasUI: false,
+			cwd: process.cwd(),
+			model: { provider: "test", id: "model" },
+			modelRegistry: {},
+		};
+
+		await antColonyTool.execute("id", { goal: "test telemetry" }, undefined, undefined, ctx);
+
+		expect(runInvocations).toHaveLength(1);
+		expect(runInvocations[0].opts.eventBus).toBe(pi.events);
+	});
+
+	it("wires event-bus handlers for runtime callback propagation on session_start", () => {
+		const pi = createMockPi();
+		antColonyExtension(pi as any);
+		const ctx = {
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+				custom: vi.fn().mockResolvedValue(undefined),
+			},
+		};
+
+		pi._emit("session_start", {}, ctx);
+
+		expect(pi._eventHandlers.has("ant-colony:render")).toBe(true);
+		expect(pi._eventHandlers.has("ant-colony:clear-ui")).toBe(true);
+		expect(pi._eventHandlers.has("ant-colony:notify")).toBe(true);
 	});
 });

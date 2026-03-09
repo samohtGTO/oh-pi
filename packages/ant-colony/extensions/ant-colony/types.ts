@@ -27,8 +27,10 @@ export const DEFAULT_ANT_CONFIGS: Record<AntCaste, Omit<AntConfig, "systemPrompt
 	drone: { caste: "drone", model: "", tools: ["bash"], maxTurns: 1 },
 };
 
-/** Per-caste model overrides from user config */
-export type ModelOverrides = Partial<Record<AntCaste, string>>;
+export type WorkerClass = "design" | "multimodal" | "backend" | "review";
+
+/** Per-caste / per-worker-class model overrides from user config */
+export type ModelOverrides = Partial<Record<AntCaste | WorkerClass, string>>;
 
 // ═══ Tasks (Food Sources) ═══
 export type TaskStatus = "pending" | "claimed" | "active" | "done" | "failed" | "blocked";
@@ -44,6 +46,7 @@ export interface Task {
 	priority: TaskPriority;
 	files: string[]; // Files locked by this task
 	context?: string; // Code snippets pre-loaded by scout
+	workerClass?: WorkerClass; // worker specialization for model routing
 	claimedBy: string | null; // ant id
 	result: string | null;
 	error: string | null;
@@ -162,6 +165,32 @@ export interface ConcurrencySample {
 	throughput: number; // tasks completed per minute
 }
 
+export type EscalationReason = "low_confidence" | "low_coverage" | "risk_flag" | "policy_violation" | "slo_breach";
+
+export interface PromoteFinalizeGateInput {
+	confidenceScore: number;
+	coverageScore: number;
+	riskFlags: string[];
+	policyViolations: string[];
+	sloBreached: boolean;
+	cheapPassSummary: string;
+}
+
+export interface PromoteFinalizeGateDecision {
+	action: "promote" | "finalize";
+	escalationReasons: EscalationReason[];
+	cheapPassSummary?: string;
+}
+
+export interface RoutingTelemetry {
+	taskId: string;
+	caste: AntCaste;
+	outcome: "claimed" | "completed" | "failed" | "escalated";
+	latencyMs: number;
+	escalationReasons: EscalationReason[];
+	timestamp: number;
+}
+
 export interface ColonyMetrics {
 	tasksTotal: number;
 	tasksDone: number;
@@ -171,6 +200,7 @@ export interface ColonyMetrics {
 	totalTokens: number;
 	startTime: number;
 	throughputHistory: number[]; // Sliding window of tasks/min throughput
+	routingTelemetry?: RoutingTelemetry[];
 }
 
 /** Colony signal — the single abstraction observers need to handle. */

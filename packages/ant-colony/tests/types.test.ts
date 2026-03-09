@@ -1,6 +1,29 @@
 import { describe, expect, it } from "vitest";
-import type { AntCaste } from "../extensions/ant-colony/types.js";
+import type {
+	AntCaste,
+	PromoteFinalizeGateDecision,
+	PromoteFinalizeGateInput,
+} from "../extensions/ant-colony/types.js";
 import { DEFAULT_ANT_CONFIGS } from "../extensions/ant-colony/types.js";
+
+describe("promote/finalize gate types", () => {
+	it("supports machine-readable input/output contracts", () => {
+		const input: PromoteFinalizeGateInput = {
+			confidenceScore: 0.8,
+			coverageScore: 0.9,
+			riskFlags: [],
+			policyViolations: [],
+			sloBreached: false,
+			cheapPassSummary: "summary",
+		};
+		const decision: PromoteFinalizeGateDecision = {
+			action: "promote",
+			escalationReasons: [],
+			cheapPassSummary: input.cheapPassSummary,
+		};
+		expect(decision.action).toBe("promote");
+	});
+});
 
 describe("DEFAULT_ANT_CONFIGS", () => {
 	const castes: AntCaste[] = ["scout", "worker", "soldier", "drone"];
