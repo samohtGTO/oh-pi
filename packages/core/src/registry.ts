@@ -60,7 +60,7 @@ export const THEMES = [
 
 /** Available extensions — each has a name, label, and whether it's enabled by default. */
 export const EXTENSIONS = [
-	{ name: "safe-guard", label: "🛡️  Safe Guard — Dangerous command confirm + path protection", default: true },
+	{ name: "safe-guard", label: "🛡️  Safe Guard — Dangerous command confirm + path protection", default: false },
 	{ name: "git-guard", label: "📦 Git Guard — Auto stash checkpoint + dirty repo warning + notify", default: true },
 	{ name: "auto-session-name", label: "📝 Auto Session Name — Name sessions from first message", default: true },
 	{

@@ -53,10 +53,13 @@ meta-package.
 
 ## Extensions
 
-### 🛡️ Safe Guard (`safe-guard`) — **default: on**
+### 🛡️ Safe Guard (`safe-guard`) — **default: off (opt-in)**
 
 Intercepts dangerous commands before execution. Blocks `rm -rf`, `git push --force`, `DROP TABLE`,
 `chmod 777`, and other destructive operations. Also protects configured paths from modification.
+
+This extension is available in `@ifi/oh-pi-extensions` but is no longer enabled by default in
+`@ifi/oh-pi`. Enable it explicitly via `pi config` if you want safety prompts.
 
 **How it works:** Hooks into the `tool_call` event for `bash`, `edit`, and `write` tools. When a
 dangerous pattern is detected, it prompts for confirmation or blocks outright.

@@ -11,7 +11,8 @@
   ],
   "pi": {
     "extensions": [
-      "node_modules/@ifi/oh-pi-extensions/extensions",
+      "node_modules/@ifi/oh-pi-extensions/extensions/*.ts",
+      "!node_modules/@ifi/oh-pi-extensions/extensions/safe-guard.ts",
       "node_modules/@ifi/oh-pi-ant-colony/extensions"
     ],
     "themes": [

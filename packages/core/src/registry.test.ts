@@ -68,6 +68,12 @@ describe("EXTENSIONS", () => {
 			expect(ext).toHaveProperty("default");
 		}
 	});
+
+	it("does not enable safe-guard by default", () => {
+		const safeGuard = EXTENSIONS.find((ext) => ext.name === "safe-guard");
+		expect(safeGuard).toBeDefined();
+		expect(safeGuard?.default).toBe(false);
+	});
 });
 
 describe("KEYBINDING_SCHEMES", () => {

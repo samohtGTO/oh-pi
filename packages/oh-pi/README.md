@@ -17,6 +17,9 @@ features:
 | `@ifi/oh-pi-prompts`    | `pi install npm:@ifi/oh-pi-prompts`    | review, fix, explain, refactor, test, commit, pr, and more                                  |
 | `@ifi/oh-pi-skills`     | `pi install npm:@ifi/oh-pi-skills`     | web-search, debug-helper, git-workflow, rust-workspace-bootstrap, and more                  |
 
+> Note: the meta-package now excludes `safe-guard` by default. Enable it manually via `pi config`
+> if you want command/path safety prompts.
+
 ## TUI Configurator
 
 ```bash
