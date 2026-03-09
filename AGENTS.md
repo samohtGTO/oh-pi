@@ -102,6 +102,9 @@ packages/
 - **Chinese text in regex patterns and locales.ts is intentional** — bilingual parsing support
 - **`noDefaultExport: off`** — extensions use default exports as their API pattern
 - **Test files**: Relaxed lint rules (no explicit any, no unused vars, etc.)
+- **Ant colony workspace default**: ant-colony runs use isolated git worktrees by default, with
+  shared-cwd fallback when worktrees are unavailable. User-facing details live in
+  `docs/07-cli-reference.md`.
 
 ## CI Pipeline
 

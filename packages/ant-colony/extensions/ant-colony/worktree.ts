@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
 import type { ColonyWorkspace } from "./types.js";
 
 const WORKTREE_ENV_FLAG = "PI_ANT_COLONY_WORKTREE";
@@ -56,6 +56,59 @@ function resolveExecutionCwd(worktreeRoot: string, repoRoot: string, originCwd: 
 	}
 	const candidate = join(worktreeRoot, rel);
 	return existsSync(candidate) ? candidate : worktreeRoot;
+}
+
+export function cleanupIsolatedWorktree(workspace: ColonyWorkspace): string | null {
+	if (workspace.mode !== "worktree" || !workspace.repoRoot || !workspace.worktreeRoot || !workspace.branch) {
+		return null;
+	}
+
+	const notes: string[] = [];
+	try {
+		if (existsSync(workspace.worktreeRoot)) {
+			git(workspace.repoRoot, ["worktree", "remove", "--force", workspace.worktreeRoot]);
+			notes.push("removed isolated worktree");
+		}
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		notes.push(`worktree remove failed (${reason})`);
+	}
+
+	try {
+		if (workspace.branch) {
+			git(workspace.repoRoot, ["branch", "-D", workspace.branch]);
+			notes.push("deleted temporary branch");
+		}
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		notes.push(`branch cleanup skipped (${reason})`);
+	}
+
+	try {
+		git(workspace.repoRoot, ["worktree", "prune"]);
+	} catch {
+		// ignore prune failures; this is best-effort hygiene.
+	}
+
+	try {
+		const parent = dirname(workspace.worktreeRoot);
+		rmSync(workspace.worktreeRoot, { recursive: true, force: true });
+		if (existsSync(parent) && isEmptyDir(parent)) {
+			rmSync(parent, { recursive: true, force: true });
+		}
+	} catch {
+		// ignore filesystem cleanup failures.
+	}
+
+	return notes.length > 0 ? `Cleanup: ${notes.join("; ")}.` : "Cleanup: no stale isolated worktree artifacts found.";
+}
+
+function isEmptyDir(path: string): boolean {
+	try {
+		return readdirSync(path).length === 0;
+	} catch {
+		return false;
+	}
 }
 
 export function worktreeEnabledByDefault(): boolean {

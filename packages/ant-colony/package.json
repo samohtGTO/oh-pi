@@ -16,6 +16,12 @@
     "!**/*.test.ts"
   ],
   "license": "MIT",
+  "scripts": {
+    "build": "pnpm run typecheck:worktree && pnpm run test:worktree",
+    "typecheck": "pnpm run typecheck:worktree",
+    "typecheck:worktree": "tsgo --project ./tsconfig.json --noEmit",
+    "test:worktree": "vitest run --config ./vitest.worktree.config.ts"
+  },
   "peerDependencies": {
     "@mariozechner/pi-ai": "*",
     "@mariozechner/pi-agent-core": "*",

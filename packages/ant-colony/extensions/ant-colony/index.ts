@@ -35,6 +35,7 @@ import {
 	statusLabel,
 } from "./ui.js";
 import {
+	cleanupIsolatedWorktree,
 	formatWorkspaceReport,
 	formatWorkspaceSummary,
 	prepareColonyWorkspace,
@@ -549,6 +550,17 @@ export default function antColonyExtension(pi: ExtensionAPI) {
 		lastBgStatusSnapshotAt = 0;
 		throttledRender();
 
+		const cleanupWorkspace = (reason: "completion" | "crash") => {
+			const cleanupResult = cleanupIsolatedWorktree(workspace);
+			if (!cleanupResult) {
+				return;
+			}
+			pushLog(colony, {
+				level: /failed|skipped/i.test(cleanupResult) ? "warning" : "info",
+				text: `WORKTREE ${reason.toUpperCase()} CLEANUP · ${cleanupResult}`,
+			});
+		};
+
 		// Wait for completion in background, inject results
 		colony.promise
 			.then((state) => {
@@ -565,6 +577,7 @@ export default function antColonyExtension(pi: ExtensionAPI) {
 					level: ok ? "info" : "error",
 					text: `${statusLabel(phase)} · ${m.tasksDone}/${m.tasksTotal} · ${formatCost(m.totalCost)}`,
 				});
+				cleanupWorkspace("completion");
 
 				colonies.delete(colonyId);
 				if (colonies.size === 0) {
@@ -588,6 +601,7 @@ export default function antColonyExtension(pi: ExtensionAPI) {
 			})
 			.catch((e) => {
 				pushLog(colony, { level: "error", text: `CRASHED · ${String(e).slice(0, 120)}` });
+				cleanupWorkspace("crash");
 				colonies.delete(colonyId);
 				if (colonies.size === 0) {
 					pi.events.emit("ant-colony:clear-ui");
