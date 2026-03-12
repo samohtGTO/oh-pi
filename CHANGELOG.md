@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.12 (2026-03-12)
+
+### Features
+
+- add bin installer for one-command setup
+
+### Fixes
+
+- install sub-packages directly instead of bundling
+
 ## 0.2.11 (2026-03-12)
 
 ### Fixes
