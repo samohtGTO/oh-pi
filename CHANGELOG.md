@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.11 (2026-03-12)
+
+### Fixes
+
+- bundle croner so scheduler extension loads after install
+
 ## 0.2.10 (2026-03-12)
 
 ### Features
