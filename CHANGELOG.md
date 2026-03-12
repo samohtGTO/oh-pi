@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.10 (2026-03-12)
+
+### Features
+
+- implement cheap-first routing and telemetry instrumentation
+- add /btw and /qq side-conversation extension and skill (#4)
+- add scheduler extension with /loop, /remind, /schedule, and /unschedule commands (#5)
+
+### Fixes
+
+- ensure ctrl+u shortcut overrides deleteToLineStart
+- clean up isolated worktrees and add worktree checks
+- bundle dependencies so npm install resolves all pi resources
+
 ## 0.2.9 (2026-03-09)
 
 ### Features
