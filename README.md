@@ -25,6 +25,7 @@ npx @ifi/oh-pi-cli
 ## 30-Second Start
 
 ```bash
+npx @ifi/oh-pi       # install all extensions, themes, prompts, and skills
 npx @ifi/oh-pi-cli   # configure everything
 pi                    # start coding
 ```
@@ -34,20 +35,28 @@ you. Already configured? It detects existing files and offers **backup before ov
 
 ## Packages
 
-This is a monorepo. Each package can be installed independently as a pi package or together via the
-meta-package.
+This is a monorepo. Install everything at once with `npx @ifi/oh-pi`, or pick individual packages.
 
-| Package                                          | Description                             | Install                                |
-| ------------------------------------------------ | --------------------------------------- | -------------------------------------- |
-| [`@ifi/oh-pi`](./packages/oh-pi)                 | Meta-package — bundles everything below | `pi install npm:@ifi/oh-pi`            |
-| [`@ifi/oh-pi-cli`](./packages/cli)               | Interactive TUI configurator            | `npx @ifi/oh-pi-cli`                   |
-| [`@ifi/oh-pi-core`](./packages/core)             | Shared types, registries, i18n          | (library, not installed directly)      |
-| [`@ifi/oh-pi-extensions`](./packages/extensions) | 9 extensions (see below)                | `pi install npm:@ifi/oh-pi-extensions` |
-| [`@ifi/oh-pi-ant-colony`](./packages/ant-colony) | Multi-agent swarm extension             | `pi install npm:@ifi/oh-pi-ant-colony` |
-| [`@ifi/oh-pi-themes`](./packages/themes)         | 6 color themes                          | `pi install npm:@ifi/oh-pi-themes`     |
-| [`@ifi/oh-pi-prompts`](./packages/prompts)       | 10 prompt templates                     | `pi install npm:@ifi/oh-pi-prompts`    |
-| [`@ifi/oh-pi-skills`](./packages/skills)         | 12 skill packs                          | `pi install npm:@ifi/oh-pi-skills`     |
-| [`@ifi/oh-pi-agents`](./packages/agents)         | 5 AGENTS.md templates                   | (used by CLI only)                     |
+| Package                                          | Description                        | Install                                |
+| ------------------------------------------------ | ---------------------------------- | -------------------------------------- |
+| [`@ifi/oh-pi`](./packages/oh-pi)                 | One-command installer for all pkgs | `npx @ifi/oh-pi`                       |
+| [`@ifi/oh-pi-cli`](./packages/cli)               | Interactive TUI configurator       | `npx @ifi/oh-pi-cli`                   |
+| [`@ifi/oh-pi-core`](./packages/core)             | Shared types, registries, i18n     | (library, not installed directly)      |
+| [`@ifi/oh-pi-extensions`](./packages/extensions) | 9 extensions (see below)           | `pi install npm:@ifi/oh-pi-extensions` |
+| [`@ifi/oh-pi-ant-colony`](./packages/ant-colony) | Multi-agent swarm extension        | `pi install npm:@ifi/oh-pi-ant-colony` |
+| [`@ifi/oh-pi-themes`](./packages/themes)         | 6 color themes                     | `pi install npm:@ifi/oh-pi-themes`     |
+| [`@ifi/oh-pi-prompts`](./packages/prompts)       | 10 prompt templates                | `pi install npm:@ifi/oh-pi-prompts`    |
+| [`@ifi/oh-pi-skills`](./packages/skills)         | 12 skill packs                     | `pi install npm:@ifi/oh-pi-skills`     |
+| [`@ifi/oh-pi-agents`](./packages/agents)         | 5 AGENTS.md templates              | (used by CLI only)                     |
+
+### Installer Options
+
+```bash
+npx @ifi/oh-pi                      # install latest versions (global)
+npx @ifi/oh-pi --version 0.2.12     # pin to a specific version
+npx @ifi/oh-pi --local              # install to project .pi/settings.json
+npx @ifi/oh-pi --remove             # uninstall all oh-pi packages from pi
+```
 
 ---
 
@@ -414,7 +423,7 @@ oh-pi/
 │   ├── prompts/           10 markdown prompt templates
 │   ├── skills/            12 skill directories
 │   ├── agents/            5 AGENTS.md templates
-│   └── oh-pi/             Meta-package (bundles everything)
+│   └── oh-pi/             Installer CLI (npx @ifi/oh-pi)
 ├── docs/                  Full documentation
 ├── benchmarks/            Performance benchmarks
 ├── .changeset/            Pending changesets (knope)

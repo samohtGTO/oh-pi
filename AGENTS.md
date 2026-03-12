@@ -90,8 +90,36 @@ packages/
   prompts/       → @ifi/oh-pi-prompts (markdown prompt templates)
   skills/        → @ifi/oh-pi-skills (skill directories)
   agents/        → @ifi/oh-pi-agents (AGENTS.md templates)
-  oh-pi/         → @ifi/oh-pi (meta-package, bundles everything)
+  oh-pi/         → @ifi/oh-pi (installer CLI: `npx @ifi/oh-pi`)
 ```
+
+## Install & Packaging
+
+`@ifi/oh-pi` is a **bin installer**, not a bundling meta-package. Each sub-package is a standalone
+pi package with its own `pi` field in `package.json`. Pi loads each package with its own module
+root, so extensions must be installed separately for peer-dep imports
+(`@mariozechner/pi-coding-agent`, etc.) to resolve.
+
+```bash
+npx @ifi/oh-pi                      # install all packages (latest, global)
+npx @ifi/oh-pi --version 0.2.12     # pin to a specific version
+npx @ifi/oh-pi --local              # install to project .pi/settings.json
+npx @ifi/oh-pi --remove             # uninstall all oh-pi packages from pi
+```
+
+The installer calls `pi install npm:@ifi/oh-pi-<name>` for each sub-package. Individual packages
+can also be installed directly:
+
+```bash
+pi install npm:@ifi/oh-pi-extensions
+pi install npm:@ifi/oh-pi-ant-colony
+pi install npm:@ifi/oh-pi-themes
+pi install npm:@ifi/oh-pi-prompts
+pi install npm:@ifi/oh-pi-skills
+```
+
+**Do not use `bundledDependencies`** in the oh-pi package — pnpm's isolated linker does not support
+it, and npm hoists bundled deps away from `node_modules/` paths that the `pi` field expects.
 
 ## Key Conventions
 
