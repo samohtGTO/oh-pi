@@ -1,5 +1,214 @@
 # Changelog
 
+## 0.2.14 (2026-03-13)
+
+### Features
+
+- add pi-plan planning mode package (#8)
+- add native /spec workflow package
+
+#### Improve colony isolation and cost visibility:
+
+- run ant-colony executions in isolated git worktrees by default (with shared-cwd fallback when unavailable)
+- persist/report workspace metadata so users can see where colony edits were made
+- resume colonies with saved workspace hints, including worktree re-attachment when possible
+- emit ant inference usage events (`usage:record`) from colony workers/soldiers/scouts
+- aggregate external/background inference in usage-tracker reports, widget, and session totals
+- add tests for worktree isolation and external usage ingestion
+
+#### Add `/btw` and `/qq` side-conversation extension and skill:
+
+- `/btw` opens a parallel side conversation without interrupting the main agent run
+- `/qq` is an alias for `/btw` ("quick question")
+- streams answers into a widget above the editor
+- maintains a continuous thread across exchanges, persisted in session state
+- keeps BTW entries out of the main agent's LLM context
+- supports `--save` to persist an exchange as a visible session note
+- sub-commands: `:new`, `:clear`, `:inject`, `:summarize` for thread management
+- includes a `btw` skill for discoverability and guidance
+
+Based on https://github.com/dbachelder/pi-btw by Dan Bachelder (MIT).
+
+#### Add concrete multimodal/telemetry routing capabilities and completion verification coverage:
+
+- add worker-class routing (`design`, `multimodal`, `backend`, `review`) with per-class model override support
+- add cheap-first multimodal ingestion preprocessing and route metadata handling for worker tasks
+- add promote/finalize gate types + decision logic with confidence/coverage/risk/policy/SLO reasons
+- record routing telemetry (claimed/completed/failed/escalated, latency, reasons) and roll it into budget summary snapshots
+- expose new ant-colony tool model override parameters for worker classes
+- add focused tests for gate decisions, budget telemetry rollups, and index-level event-bus propagation
+- add deterministic completion verification harness (`pnpm verify:completion`) with slash-command completion tests
+
+#### Add a new `flutter-serverpod-mvp` skill for bootstrapping OpenBudget-style full-stack projects:
+
+- monorepo-first Flutter + Serverpod architecture guidance
+- devenv-based local runtime workflow (scripts, services, CI setup)
+- hooks-first Riverpod conventions for app state and UI composition
+- strict i18n rules with ARB + generated localizations and hardcoded-text checks
+- GoRouter route-name constants and shell-based routing patterns with auth redirects
+- end-to-end MVP scaffolding checklist from workspace setup to first feature slice
+
+#### Add `bin` installer so `npx @ifi/oh-pi` registers all sub-packages with pi.
+
+Supports `--version <ver>` to pin a specific version, `--local` for project-scoped
+installs, and `--remove` to uninstall all oh-pi packages from pi.
+
+#### Add `@ifi/pi-extension-subagents`, a full-featured subagent orchestration package built on top of
+
+`nicobailon/pi-subagents`.
+
+- vendor the upstream subagent extension runtime, TUI manager, async runner, and bundled builtin agents
+- publish it as `@ifi/pi-extension-subagents` with raw TypeScript sources via the package `pi` field
+- add a small `npx @ifi/pi-extension-subagents` installer/remover wrapper around `pi install/remove`
+- cover the packaged helpers and discovery logic with an extensive Vitest suite
+- include the new package in the `@ifi/oh-pi` installer bundle and docs
+
+#### Add a new planning mode package, `@ifi/pi-plan`, plus a shared first-party `@ifi/pi-shared-qna`
+
+library in the monorepo.
+
+- vendor the `plan-md` workflow from `sids/pi-extensions` into `packages/plan` and adapt it to the `/plan` command
+- back plan research tasks with the in-repo subagent runtime from `@ifi/pi-extension-subagents`
+- vendor the shared Q&A TUI component into `packages/shared-qna` to avoid third-party pi package dependencies
+- include `@ifi/pi-plan` in the `@ifi/oh-pi` bundle and monorepo docs
+- add Vitest coverage for plan flow, prompts, state, request-user-input, task agents, utilities, and shared Q&A helpers
+
+#### Add `@ifi/pi-spec`, a native spec-driven workflow package for pi built as raw TypeScript instead of
+
+shell-script wrappers.
+
+- publish a new `@ifi/pi-spec` package that registers a single `/spec` command with status, init,
+  constitution, specify, clarify, checklist, plan, tasks, analyze, implement, list, and next flows
+- vendor spec-kit-inspired workflow templates into the package and scaffold them into `.specify/`
+  for per-repository customization
+- implement native repo detection, feature numbering, branch naming, git branch creation, checklist
+  summaries, and prompt handoff entirely in TypeScript
+- add comprehensive Vitest coverage for workspace helpers, scaffold creation, prompt generation, and
+  command behavior
+- integrate the new package into the oh-pi installer, CLI resource copying, extension registry, and
+  repo documentation
+
+#### Add a new `rust-workspace-bootstrap` skill that scaffolds a Rust workspace template inspired by `mdt` and `pina`, including:
+
+- knope changeset + release workflows
+- devenv/direnv setup with common Rust scripts
+- GitHub Actions for CI, coverage, semver checks, release preview, and release assets
+- core + CLI crate starter structure
+- enforced crate naming convention using underscores (`_`) instead of hyphens (`-`)
+
+#### Add scheduler extension with `/loop`, `/remind`, `/schedule`, and `/unschedule` commands:
+
+- `/loop` creates recurring scheduled prompts with interval or cron expressions
+- `/remind` creates one-time reminders with delay durations
+- `/schedule` manages tasks via TUI manager or subcommands (list, enable, disable, delete, clear)
+- `/unschedule` is an alias for `/schedule delete <id>`
+- Exposes `schedule_prompt` LLM-callable tool for agent-driven scheduling
+- Tasks run only when pi is idle; recurring tasks auto-expire after 3 days
+- State is persisted to `.pi/scheduler.json` across sessions
+- Supports both interval (5m, 2h) and cron expressions (5-field and 6-field)
+- Max 50 active tasks with jitter to prevent thundering herd
+
+Based on pi-scheduler by @manojlds (MIT).
+
+#### Enhance the usage tracker dashboard to provide CodexBar-style depth:
+
+- richer provider window rows with both **% left** and **% used**
+- inferred **pace analysis** for time-based windows (expected usage vs actual, runout hint)
+- provider metadata in reports (plan/account when discoverable)
+- constrained-window summary and updated-age lines
+- expanded session analytics (avg per turn, cache read/write, cost burn rate)
+- richer per-model breakdown (cost share, avg tokens/turn, cache lines)
+- force-refresh probing for `/usage`, `Ctrl+U`, and `usage_report`
+- fallback to `claude auth status` metadata when modern Claude CLI builds do not expose usage windows
+- clearer notes when provider windows are unavailable (e.g. non-interactive TTY/permission constraints)
+- regression tests for the new detailed report/overlay content
+
+### Fixes
+
+- skip dependency review when dependency graph is unavailable (#9)
+- add missing exports to pi-shared-qna and pi-spec packages
+- Make the CI dependency review job skip cleanly when GitHub dependency graph manifests are not yet available for the repository, instead of failing the whole pull request with a repository settings error.
+- Add missing `exports` to `pi-shared-qna` and `pi-spec` packages so `require.resolve` can find their `package.json`.
+
+#### Harden and align ant-colony runtime behavior:
+
+- fix final report signal emission to be status-aware (`COMPLETE` for success, failure status otherwise)
+- replace raw drone shell execution with an allowlisted `execFileSync` command policy
+- update `/colony-resume` to resume all resumable colonies by default when no ID is provided
+- add stable colony ID tracking alongside runtime IDs and support both in status/stop command resolution
+- share usage-limits tracker instances across runs to avoid listener buildup in runtimes without `off()`
+- add integration tests for multi-colony command workflows and signal consistency
+- refresh ant-colony README command and installation docs
+
+#### Fix ant-colony JSON task-plan parsing so malformed scout output no longer produces invalid execution plans:
+
+- only accept fenced JSON plans when they are task arrays, nested `tasks` arrays, or single task-like objects
+- ignore JSON entries that omit both `title` and `description`
+- normalize JSON task titles/descriptions consistently with markdown task parsing
+- add parser regression tests for nested JSON plans and missing task fields
+
+#### Improve project automation ergonomics:
+
+- fix pull-request conventional-commit validation to lint real PR commits instead of synthetic merge commit messages
+- update `knope document-change` workflow to run `pnpm format` after creating a changeset file
+
+#### Update GitHub Actions workflow dependencies to current releases:
+
+- upgrade `actions/checkout` to `v6.0.2`
+- upgrade `actions/setup-node` to `v6.3.0`
+- upgrade `pnpm/action-setup` to `v4.4.0`
+- upgrade `actions/dependency-review-action` to `v4.9.0`
+
+#### Document and enforce the lockstep knope changeset format:
+
+- document the `default`-only frontmatter rule in AGENTS, README, and CONTRIBUTING
+- require `.changeset/*.md` files to use `default` as the only frontmatter key
+- validate the rule in CI so package-name frontmatter entries fail fast
+- normalize pending changesets to the lockstep `default` format
+
+#### Drop `bundledDependencies` and the `pi` resource manifest from the meta-package.
+
+Pi loads each package with its own module root, so extensions nested inside a
+meta-package's `node_modules/` cannot resolve peer-dep imports
+(`@mariozechner/pi-coding-agent`, etc.). This caused commands like `/colony` and
+`/loop` to silently fail to register.
+
+Each sub-package (`@ifi/oh-pi-extensions`, `@ifi/oh-pi-ant-colony`, etc.) is
+already a fully self-contained pi package with its own `pi` field. Users should
+install them directly via `pi install npm:@ifi/oh-pi-<name>` so pi can load
+extensions with correct module resolution.
+
+The `@ifi/oh-pi` npm package remains as a convenience dependency that pulls all
+sub-packages, but no longer declares pi resources itself.
+
+#### Harden release safety with security gates:
+
+- add `pnpm security:check` (dependency allowlist + vulnerability audits)
+- run security checks in CI (`security` job) and PR dependency review (`dependency-review` job)
+- require security checks in local release flow (`scripts/release.sh`) and `knope release` workflow
+- use strict production audit threshold (`pnpm audit --prod --audit-level=high`)
+- pin vulnerable transitive `file-type` to `21.3.1` via pnpm override
+
+#### Remove Mandarin Chinese from the project:
+
+- delete `README.zh.md` and `docs/DEMO-SCRIPT.zh.md`
+- remove `zh` locale from core types, i18n, and locales
+- remove Chinese keywords from ant-colony parser regex patterns
+- remove Chinese detection from colony status and scout quorum
+- translate Chinese JSDoc comments to English
+- update language selectors across all READMEs
+
+#### Disable `safe-guard` as a default-enabled extension going forward:
+
+- mark `safe-guard` as opt-in in the core extension registry used by setup flows
+- remove `safe-guard` from quick-mode default extension selection in the CLI
+- update the `@ifi/oh-pi` meta-package manifest to exclude `safe-guard` from default loaded extensions
+- refresh docs to clarify `safe-guard` is available but not enabled by default
+
+#### Keep `safe-guard` opt-in across the configurator defaults by removing it from the "Full Power"
+
+preset, updating preset copy/docs, and adding a regression test for preset extension selections.
+
 ## 0.2.13 (2026-03-13)
 
 ### Features
