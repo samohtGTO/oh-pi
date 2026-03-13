@@ -17,6 +17,9 @@
 			"./extension"
 		]
 	},
+	"exports": {
+		"./package.json": "./package.json"
+	},
 	"files": [
 		"extension",
 		"README.md",
