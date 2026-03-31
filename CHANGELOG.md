@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.2 (2026-03-31)
+
+### Features
+
+- show workspace and prompt in review UI (#69)
+- add clear-all review shortcut (#70)
+
+### Fixes
+
+- persist provider usage windows (#72)
+- add a clear-all shortcut to the scheduler review UI so scheduled tasks can be removed directly from the task list.
+- persist provider rate limit data so usage widgets and dashboards can keep showing the last known subscription windows when live provider probes are temporarily rate-limited.
+- improve the scheduler review UI by showing the workspace in task listings and the full automated prompt when a scheduled task is selected.
+
 ## 0.4.1 (2026-03-30)
 
 ### Fixes
