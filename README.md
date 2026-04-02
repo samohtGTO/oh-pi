@@ -90,13 +90,23 @@ Policy:
 This repo uses [MDT](https://github.com/ifiokjr/mdt) to keep selected markdown sections and exported
 TypeScript API docs synchronized from shared provider blocks under `docs/mdt/`.
 
+<!-- {=repoMdtUsageRuleDocs} -->
+
+Use MDT through `pnpm mdt ...`, not a globally installed `mdt` binary. This keeps documentation
+reuse commands pinned to the repo's declared `@ifi/mdt` version and makes local runs, CI, and agent
+instructions consistent.
+
+<!-- {/repoMdtUsageRuleDocs} -->
+
+<!-- {=repoMdtCommandsDocs} -->
+
 ```bash
-mdt list
-mdt update
-mdt check
+pnpm mdt list
+pnpm mdt update
+pnpm mdt check
 ```
 
-Or through workspace scripts:
+Convenience wrappers remain available too:
 
 ```bash
 pnpm docs:list
@@ -104,7 +114,14 @@ pnpm docs:update
 pnpm docs:check
 ```
 
-CI runs `mdt check` so provider and consumer blocks stay in sync.
+<!-- {/repoMdtCommandsDocs} -->
+
+<!-- {=repoMdtCiDocs} -->
+
+CI runs `pnpm mdt check` so provider and consumer blocks stay in sync with the repo-pinned MDT
+version.
+
+<!-- {/repoMdtCiDocs} -->
 
 ---
 
@@ -237,19 +254,21 @@ Agent: bash npm run dev
 
 ### 💰 Usage Tracker (`usage-tracker`) — **default: off**
 
-**CodexBar-inspired** rate limit and cost monitor. The main feature is showing **provider-level rate
-limits** — how much of your weekly/session Claude and Codex quota remains, with reset countdowns.
-Also tracks per-model token usage and session costs.
+<!-- {=extensionsUsageTrackerOverview} -->
 
-**How it works:** Probes the `claude` and `codex` CLIs (same approach as
-[CodexBar](https://github.com/steipete/CodexBar)) to get real rate limit data. Tracks local token
-usage from `AssistantMessage.usage` on every `turn_end` event. Alerts when session cost crosses
-$0.50, $1, $2, $5, $10+ thresholds.
+The usage-tracker extension is a CodexBar-inspired provider quota and cost monitor for pi. It
+shows provider-level rate limits for Anthropic, OpenAI, and Google using pi-managed auth, while
+also tracking per-model token usage and session costs locally.
 
-> Note: some newer Claude CLI builds no longer expose quota windows via `claude usage`, and some
-> Codex environments require an interactive TTY for rate-limit output. In those cases, oh-pi still
-> shows provider metadata (e.g. Claude account/plan from `claude auth status`) and clearly marks
-> windows as unavailable.
+<!-- {/extensionsUsageTrackerOverview} -->
+
+<!-- {=extensionsUsageTrackerPersistenceDocs} -->
+
+Usage-tracker persists rolling 30-day cost history and the last known provider rate-limit snapshot
+under the pi agent directory. That lets the widget and dashboard survive restarts and keep showing
+recent subscription windows when a live provider probe is temporarily rate-limited or unavailable.
+
+<!-- {/extensionsUsageTrackerPersistenceDocs} -->
 
 **Widget** (always visible above editor):
 
@@ -281,14 +300,18 @@ Claude [████████░░░░] 67% ↻in 3d 2h │ 💰$0.42 │ 
 ╰────────────────────────────────────────────────────────╯
 ```
 
-| Command          | Shortcut | What it does                 |
-| ---------------- | -------- | ---------------------------- |
-| `/usage`         | `Ctrl+U` | Full dashboard overlay       |
-| `/usage-toggle`  | —        | Show/hide the widget         |
-| `/usage-refresh` | —        | Force re-probe provider CLIs |
+<!-- {=extensionsUsageTrackerCommandsDocs} -->
 
-The `usage_report` tool is LLM-callable — the agent can answer "how much quota do I have left?"
-directly.
+Key usage-tracker surfaces:
+
+- widget above the editor for at-a-glance quotas and session totals
+- `/usage` for the full dashboard overlay
+- `Ctrl+U` as a shortcut for the same overlay
+- `/usage-toggle` to show or hide the widget
+- `/usage-refresh` to force fresh provider probes
+- `usage_report` so the agent can answer quota and spend questions directly
+
+<!-- {/extensionsUsageTrackerCommandsDocs} -->
 
 ### 🐜 Ant Colony (`ant-colony`) — **default: off**
 
