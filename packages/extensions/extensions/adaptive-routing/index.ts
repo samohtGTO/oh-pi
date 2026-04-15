@@ -28,6 +28,7 @@ import type {
 } from "./types.js";
 
 const STATUS_KEY = "adaptive-routing";
+const STARTUP_STATE_REFRESH_DELAY_MS = 250;
 
 type RuntimeState = {
 	state: AdaptiveRoutingState;
@@ -102,10 +103,32 @@ export default function adaptiveRoutingExtension(pi: ExtensionAPI) {
 		};
 	});
 
-	pi.on("session_start", async (_event, ctx) => {
+	let startupRefreshTimer: ReturnType<typeof setTimeout> | undefined;
+	const cancelStartupRefresh = () => {
+		if (!startupRefreshTimer) {
+			return;
+		}
+		clearTimeout(startupRefreshTimer);
+		startupRefreshTimer = undefined;
+	};
+	const refreshRuntimeState = (ctx: ExtensionContext) => {
+		cancelStartupRefresh();
 		runtime.state = readAdaptiveRoutingState();
 		refreshUsageSnapshot();
 		updateStatus(ctx);
+	};
+
+	pi.on("session_start", async (_event, ctx) => {
+		cancelStartupRefresh();
+		startupRefreshTimer = setTimeout(() => {
+			startupRefreshTimer = undefined;
+			refreshRuntimeState(ctx);
+		}, STARTUP_STATE_REFRESH_DELAY_MS);
+		startupRefreshTimer.unref?.();
+	});
+
+	pi.on("session_shutdown", async () => {
+		cancelStartupRefresh();
 	});
 
 	pi.on("model_select", async (event, ctx) => {

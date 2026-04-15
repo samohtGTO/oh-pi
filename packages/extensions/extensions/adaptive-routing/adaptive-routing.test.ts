@@ -82,12 +82,14 @@ describe("adaptive routing extension", () => {
 	let tempAgentDir: string;
 
 	beforeEach(() => {
+		vi.useFakeTimers();
 		tempAgentDir = mkdtempSync(join(tmpdir(), "adaptive-routing-ext-"));
 		getAgentDir.mockReturnValue(tempAgentDir);
 		mkdirSync(join(tempAgentDir, "extensions", "adaptive-routing"), { recursive: true });
 	});
 
 	afterEach(() => {
+		vi.useRealTimers();
 		rmSync(tempAgentDir, { recursive: true, force: true });
 		vi.clearAllMocks();
 	});
@@ -112,6 +114,44 @@ describe("adaptive routing extension", () => {
 
 		expect(harness.ctx.model).toMatchObject({ provider: "google", id: "gemini-2.5-flash" });
 		expect(harness.notifications.some((item) => item.msg.includes("Adaptive route suggestion"))).toBe(false);
+		expect(harness.statusMap.has("adaptive-routing")).toBe(false);
+	});
+
+	it("defers session_start state refresh until after the startup window", async () => {
+		writeFileSync(
+			join(tempAgentDir, "extensions", "adaptive-routing", "config.json"),
+			`${JSON.stringify({ mode: "shadow" }, null, 2)}\n`,
+		);
+		writeFileSync(
+			join(tempAgentDir, "extensions", "adaptive-routing", "state.json"),
+			`${JSON.stringify({ mode: "shadow" }, null, 2)}\n`,
+		);
+		const harness = createExtensionHarness();
+
+		adaptiveRoutingExtension(harness.pi as never);
+		harness.emit("session_start", { type: "session_start" }, harness.ctx);
+		expect(harness.statusMap.has("adaptive-routing")).toBe(false);
+
+		await vi.advanceTimersByTimeAsync(250);
+		expect(harness.statusMap.get("adaptive-routing")).toContain("shadow");
+	});
+
+	it("cancels deferred session_start refresh on session_shutdown", async () => {
+		writeFileSync(
+			join(tempAgentDir, "extensions", "adaptive-routing", "config.json"),
+			`${JSON.stringify({ mode: "shadow" }, null, 2)}\n`,
+		);
+		writeFileSync(
+			join(tempAgentDir, "extensions", "adaptive-routing", "state.json"),
+			`${JSON.stringify({ mode: "shadow" }, null, 2)}\n`,
+		);
+		const harness = createExtensionHarness();
+
+		adaptiveRoutingExtension(harness.pi as never);
+		harness.emit("session_start", { type: "session_start" }, harness.ctx);
+		harness.emit("session_shutdown", { type: "session_shutdown" }, harness.ctx);
+		await vi.advanceTimersByTimeAsync(250);
+
 		expect(harness.statusMap.has("adaptive-routing")).toBe(false);
 	});
 
