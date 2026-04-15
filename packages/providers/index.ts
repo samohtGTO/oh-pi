@@ -1,5 +1,10 @@
 import type { AuthCredential, ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { createApiKeyOAuthProvider, refreshProviderCredential, refreshProviderCredentialModels } from "./auth.js";
+import {
+	createApiKeyOAuthProvider,
+	loginProvider,
+	refreshProviderCredential,
+	refreshProviderCredentialModels,
+} from "./auth.js";
 import {
 	getCatalogModels,
 	getCredentialModels,
@@ -9,16 +14,51 @@ import {
 } from "./catalog.js";
 import { getEnvApiKey, resolveApiKeyConfig, SUPPORTED_PROVIDERS, type SupportedProviderDefinition } from "./config.js";
 
+type ProviderUi = {
+	notify: (message: string, level: "info" | "warning" | "error" | "success") => void;
+	select?: (title: string, options: string[]) => Promise<string | null>;
+	input?: (title: string, placeholder?: string) => Promise<string | null>;
+};
+
+type ProviderRegistryContext = {
+	modelRegistry: {
+		authStorage: {
+			get: (provider: string) => AuthCredential | undefined;
+			set: (provider: string, credential: AuthCredential) => void;
+		};
+		refresh?: () => void;
+	};
+};
+
+type ProviderCommandContext = ProviderRegistryContext & {
+	ui: ProviderUi;
+};
+
+type ProviderStatusContext = {
+	modelRegistry: {
+		authStorage: {
+			get: (provider: string) => unknown;
+		};
+	};
+};
+
 type RuntimeProviderState = {
 	models: Map<string, ProviderCatalogModel[]>;
 	lastRefresh: Map<string, number>;
 	lastError: Map<string, string | null>;
+	registered: Set<string>;
 };
+
+const PROVIDER_SELECTION_PAGE_SIZE = 10;
+const PROVIDER_PICKER_PREVIOUS = "← Previous 10";
+const PROVIDER_PICKER_NEXT = "Next 10 →";
+const PROVIDER_PICKER_SEARCH = "Search providers…";
 
 const runtimeState: RuntimeProviderState = {
 	models: new Map(),
 	lastRefresh: new Map(),
 	lastError: new Map(),
+	registered: new Set(),
 };
 
 function registerProvider(pi: ExtensionAPI, provider: SupportedProviderDefinition): void {
@@ -29,18 +69,28 @@ function registerProvider(pi: ExtensionAPI, provider: SupportedProviderDefinitio
 		oauth: createApiKeyOAuthProvider(provider),
 		models: toProviderModels(runtimeState.models.get(provider.id) ?? []),
 	});
+	runtimeState.registered.add(provider.id);
 }
 
 function registerProvidersCommand(pi: ExtensionAPI): void {
 	pi.registerCommand("providers", {
 		description:
-			"Inspect or refresh the OpenCode-backed multi-provider catalog: /providers [status|list [query]|info <provider>|models <provider>|refresh-models [provider|all]]",
+			"Inspect, log in to, or refresh the OpenCode-backed multi-provider catalog: /providers [status|list [query]|info <provider>|models <provider>|login [provider]|refresh-models [provider|all]]",
 		// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This explicit command router keeps each provider subcommand readable.
 		async handler(args, ctx) {
 			const trimmed = args.trim();
 			const [rawAction = "status", ...rest] = trimmed ? trimmed.split(/\s+/) : ["status"];
 			const action = rawAction.toLowerCase();
 			const query = rest.join(" ").trim();
+
+			if (action === "login") {
+				const provider = await resolveProviderSelection(query, ctx);
+				if (!provider) {
+					return;
+				}
+				await loginProviderFromCommand(pi, ctx, provider);
+				return;
+			}
 
 			if (action === "refresh-models") {
 				const providers = query && query.toLowerCase() !== "all" ? findProviders(query) : SUPPORTED_PROVIDERS;
@@ -94,15 +144,7 @@ function registerProvidersCommand(pi: ExtensionAPI): void {
 
 async function refreshProviders(
 	pi: ExtensionAPI,
-	ctx: {
-		modelRegistry: {
-			authStorage: {
-				get: (provider: string) => AuthCredential | undefined;
-				set: (provider: string, credential: AuthCredential) => void;
-			};
-			refresh?: () => void;
-		};
-	},
+	ctx: ProviderRegistryContext,
 	providers: readonly SupportedProviderDefinition[],
 ): Promise<
 	Array<{
@@ -128,6 +170,10 @@ async function refreshProviders(
 						? await refreshProviderCredential(provider, credential)
 						: await refreshProviderCredentialModels(provider, credential);
 				ctx.modelRegistry.authStorage.set(provider.id, { type: "oauth", ...refreshed });
+				runtimeState.models.set(provider.id, getCredentialModels(refreshed));
+				runtimeState.lastRefresh.set(provider.id, refreshed.lastModelRefresh);
+				runtimeState.lastError.set(provider.id, null);
+				registerProvider(pi, provider);
 				results.push({ provider, status: "refreshed", models: getCredentialModels(refreshed).length });
 				continue;
 			} catch (error) {
@@ -172,7 +218,7 @@ async function refreshProviders(
 	return results;
 }
 
-function renderStatus(ctx: { modelRegistry: { authStorage: { get: (provider: string) => unknown } } }): string {
+function renderStatus(ctx: ProviderStatusContext): string {
 	const configured = SUPPORTED_PROVIDERS.filter(
 		(provider) => hasStoredCredential(ctx, provider.id) || getEnvApiKey(provider),
 	);
@@ -180,9 +226,7 @@ function renderStatus(ctx: { modelRegistry: { authStorage: { get: (provider: str
 
 	if (configured.length === 0) {
 		lines.push("No provider from this package is configured yet.");
-		lines.push(
-			"Tip: run /login <provider-id> or set one of the advertised env vars, then use /providers refresh-models.",
-		);
+		lines.push("Tip: run /providers login to open the paged provider picker, then use /providers refresh-models.");
 		return lines.join("\n");
 	}
 
@@ -215,10 +259,7 @@ function renderProviderList(query: string): string {
 		.join("\n");
 }
 
-async function renderProviderInfo(
-	provider: SupportedProviderDefinition,
-	ctx: { modelRegistry: { authStorage: { get: (provider: string) => unknown } } },
-): Promise<string> {
+async function renderProviderInfo(provider: SupportedProviderDefinition, ctx: ProviderStatusContext): Promise<string> {
 	const credential = getStoredCredential(ctx, provider.id);
 	const currentModels = credential ? getCredentialModels(credential) : (runtimeState.models.get(provider.id) ?? []);
 	const catalogModels = currentModels.length > 0 ? currentModels : await getCatalogModels(provider).catch(() => []);
@@ -240,7 +281,7 @@ async function renderProviderInfo(
 
 async function renderProviderModels(
 	provider: SupportedProviderDefinition,
-	ctx: { modelRegistry: { authStorage: { get: (provider: string) => unknown } } },
+	ctx: ProviderStatusContext,
 ): Promise<string> {
 	const credential = getStoredCredential(ctx, provider.id);
 	const currentModels = credential ? getCredentialModels(credential) : (runtimeState.models.get(provider.id) ?? []);
@@ -287,17 +328,11 @@ function renderRefreshSummary(
 	return lines.join("\n");
 }
 
-function hasStoredCredential(
-	ctx: { modelRegistry: { authStorage: { get: (provider: string) => unknown } } },
-	providerId: string,
-): boolean {
+function hasStoredCredential(ctx: ProviderStatusContext, providerId: string): boolean {
 	return getStoredCredential(ctx, providerId) !== null;
 }
 
-function getStoredCredential(
-	ctx: { modelRegistry: { authStorage: { get: (provider: string) => unknown } } },
-	providerId: string,
-): ProviderCatalogCredentials | null {
+function getStoredCredential(ctx: ProviderStatusContext, providerId: string): ProviderCatalogCredentials | null {
 	const credential = ctx.modelRegistry.authStorage.get(providerId);
 	return credential && typeof credential === "object" && (credential as { type?: string }).type === "oauth"
 		? (credential as ProviderCatalogCredentials)
@@ -320,6 +355,139 @@ function findProviders(query: string): SupportedProviderDefinition[] {
 	return SUPPORTED_PROVIDERS.filter(
 		(provider) => provider.id.toLowerCase().includes(normalized) || provider.name.toLowerCase().includes(normalized),
 	);
+}
+
+async function resolveProviderSelection(
+	query: string,
+	ctx: ProviderCommandContext,
+): Promise<SupportedProviderDefinition | null> {
+	const matchedProviders = query ? findProviders(query) : SUPPORTED_PROVIDERS;
+	if (matchedProviders.length === 0) {
+		ctx.ui.notify(`No provider matched "${query}". Run /providers list first.`, "warning");
+		return null;
+	}
+
+	if (matchedProviders.length === 1) {
+		return matchedProviders[0] ?? null;
+	}
+
+	return await selectProviderPage(ctx, matchedProviders);
+}
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Provider picker coordinates pagination, search, and selection in one loop.
+async function selectProviderPage(
+	ctx: ProviderCommandContext,
+	providers: readonly SupportedProviderDefinition[],
+): Promise<SupportedProviderDefinition | null> {
+	if (providers.length === 0) {
+		return null;
+	}
+	if (providers.length === 1 || typeof ctx.ui.select !== "function") {
+		return providers[0] ?? null;
+	}
+
+	let visibleProviders = [...providers];
+	let page = 0;
+
+	while (visibleProviders.length > 0) {
+		const pageCount = Math.max(1, Math.ceil(visibleProviders.length / PROVIDER_SELECTION_PAGE_SIZE));
+		page = Math.min(page, pageCount - 1);
+		const start = page * PROVIDER_SELECTION_PAGE_SIZE;
+		const pageProviders = visibleProviders.slice(start, start + PROVIDER_SELECTION_PAGE_SIZE);
+		const optionToProvider = new Map<string, SupportedProviderDefinition>();
+		const options = pageProviders.map((provider) => {
+			const option = formatProviderPickerOption(provider, ctx);
+			optionToProvider.set(option, provider);
+			return option;
+		});
+
+		if (page > 0) {
+			options.push(PROVIDER_PICKER_PREVIOUS);
+		}
+		if (page < pageCount - 1) {
+			options.push(PROVIDER_PICKER_NEXT);
+		}
+		if (typeof ctx.ui.input === "function") {
+			options.push(PROVIDER_PICKER_SEARCH);
+		}
+
+		const selection = await ctx.ui.select(
+			[
+				`Select provider to log in (${visibleProviders.length} total)`,
+				`Page ${page + 1}/${pageCount} · max ${PROVIDER_SELECTION_PAGE_SIZE} providers per page`,
+			].join("\n"),
+			options,
+		);
+		if (!selection) {
+			return null;
+		}
+
+		if (selection === PROVIDER_PICKER_PREVIOUS) {
+			page = Math.max(0, page - 1);
+			continue;
+		}
+		if (selection === PROVIDER_PICKER_NEXT) {
+			page = Math.min(pageCount - 1, page + 1);
+			continue;
+		}
+		if (selection === PROVIDER_PICKER_SEARCH) {
+			const search = (await ctx.ui.input("Provider search", "Type a provider id or name"))?.trim() ?? "";
+			const nextProviders = search ? findProviders(search) : [...providers];
+			if (nextProviders.length === 0) {
+				ctx.ui.notify(`No provider matched "${search}".`, "warning");
+				continue;
+			}
+			visibleProviders = nextProviders;
+			page = 0;
+			continue;
+		}
+
+		return optionToProvider.get(selection) ?? null;
+	}
+
+	return null;
+}
+
+function formatProviderPickerOption(provider: SupportedProviderDefinition, ctx: ProviderStatusContext): string {
+	const state = hasStoredCredential(ctx, provider.id) ? "✓ logged in" : getEnvApiKey(provider) ? "env key" : "login";
+	return `${provider.name} — ${provider.id} · ${state}`;
+}
+
+async function loginProviderFromCommand(
+	pi: ExtensionAPI,
+	ctx: ProviderCommandContext,
+	provider: SupportedProviderDefinition,
+): Promise<void> {
+	try {
+		registerProvider(pi, provider);
+		const credential = await loginProvider(provider, {
+			onAuth(params) {
+				ctx.ui.notify(`${params.instructions}\n${params.url}`, "info");
+			},
+			onProgress(message) {
+				if (message) {
+					ctx.ui.notify(message, "info");
+				}
+			},
+			async onPrompt(params) {
+				return (await ctx.ui.input(`Log in to ${provider.name}`, `${params.message}\n${provider.authUrl}`)) ?? "";
+			},
+		});
+		ctx.modelRegistry.authStorage.set(provider.id, { type: "oauth", ...credential });
+		runtimeState.models.set(provider.id, getCredentialModels(credential));
+		runtimeState.lastRefresh.set(provider.id, credential.lastModelRefresh);
+		runtimeState.lastError.set(provider.id, null);
+		registerProvider(pi, provider);
+		ctx.modelRegistry.refresh?.();
+		ctx.ui.notify(
+			`Logged in to ${provider.name}. ${getCredentialModels(credential).length} model${getCredentialModels(credential).length === 1 ? "" : "s"} available.`,
+			"success",
+		);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		runtimeState.lastError.set(provider.id, message);
+		ctx.ui.notify(`Failed to log in to ${provider.name}: ${message}`, "error");
+	}
 }
 
 function toProviderModels(models: readonly ProviderCatalogModel[]): ProviderCatalogModel[] {
@@ -354,7 +522,7 @@ function formatRefreshAge(timestamp: number | null | undefined): string {
 }
 
 function bootstrapProviders(pi: ExtensionAPI): void {
-	for (const provider of SUPPORTED_PROVIDERS) {
+	for (const provider of SUPPORTED_PROVIDERS.filter((candidate) => Boolean(getEnvApiKey(candidate)))) {
 		registerProvider(pi, provider);
 	}
 
@@ -372,6 +540,23 @@ function bootstrapProviders(pi: ExtensionAPI): void {
 	);
 }
 
+function registerPersistedProviders(pi: ExtensionAPI): void {
+	pi.on("session_start", (_event, ctx: ProviderRegistryContext) => {
+		let changed = false;
+		for (const provider of SUPPORTED_PROVIDERS) {
+			if (!(hasStoredCredential(ctx, provider.id) || getEnvApiKey(provider))) {
+				continue;
+			}
+			const wasRegistered = runtimeState.registered.has(provider.id);
+			registerProvider(pi, provider);
+			changed ||= !wasRegistered;
+		}
+		if (changed) {
+			ctx.modelRegistry.refresh?.();
+		}
+	});
+}
+
 export type { ProviderCatalogCredentials, ProviderCatalogModel } from "./catalog.js";
 export { SUPPORTED_PROVIDERS } from "./config.js";
 export {
@@ -383,7 +568,15 @@ export {
 	resolveProviderModels,
 };
 
+export function resetProviderCatalogRuntimeStateForTests(): void {
+	runtimeState.models.clear();
+	runtimeState.lastRefresh.clear();
+	runtimeState.lastError.clear();
+	runtimeState.registered.clear();
+}
+
 export default function providerCatalogExtension(pi: ExtensionAPI): void {
 	bootstrapProviders(pi);
+	registerPersistedProviders(pi);
 	registerProvidersCommand(pi);
 }
