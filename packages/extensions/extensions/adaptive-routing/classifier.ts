@@ -100,48 +100,62 @@ function detectIntent(text: string): RouteIntent {
 	if (/(design|ui|ux|layout|visual|styling|theme|color|aesthetic)/.test(text)) {
 		return "design";
 	}
+
 	if (/(architecture|system design|tradeoff|approach|deep refactor|cross-cutting)/.test(text)) {
 		return "architecture";
 	}
+
 	if (/(debug|failing|error|stack trace|why is|broken|fix)/.test(text)) {
 		return "debugging";
 	}
+
 	if (/(review|audit|look over|inspect this change|code review)/.test(text)) {
 		return "review";
 	}
+
 	if (/(refactor|clean up|restructure)/.test(text)) {
 		return "refactor";
 	}
+
 	if (/(plan|roadmap|spec|outline|break down|approach this)/.test(text)) {
 		return "planning";
 	}
+
 	if (/(research|investigate|compare|look up|search)/.test(text)) {
 		return "research";
 	}
+
 	if (/(autonomous|work through|handle all of|keep going until)/.test(text)) {
 		return "autonomous";
 	}
+
 	if (/(implement|build|add|create|wire up|integrate)/.test(text)) {
 		return "implementation";
 	}
+
 	return text.split(/\s+/).length < 18 ? "quick-qna" : "implementation";
 }
 
 function detectComplexity(text: string, intent: RouteIntent): 1 | 2 | 3 | 4 | 5 {
 	let score = 1;
 	const length = text.split(/\s+/).length;
+
 	if (length > 20) {
 		score += 1;
 	}
+
 	if (length > 50) {
 		score += 1;
 	}
+
 	if (/(multiple|across|migration|all of these|thoroughly|deeply|telemetry|fallback|quota|policy)/.test(text)) {
 		score += 1;
 	}
+
 	if (["architecture", "autonomous", "design"].includes(intent)) {
 		score += 1;
 	}
+
 	return Math.min(score, 5) as 1 | 2 | 3 | 4 | 5;
 }
 
@@ -149,25 +163,31 @@ function detectTier(intent: RouteIntent, complexity: number) {
 	if (intent === "quick-qna" && complexity <= 2) {
 		return "cheap" as const;
 	}
+
 	if ((intent === "design" || intent === "architecture" || intent === "autonomous") && complexity >= 4) {
 		return "peak" as const;
 	}
+
 	if (complexity >= 4 || intent === "debugging" || intent === "refactor") {
 		return "premium" as const;
 	}
+
 	return complexity <= 2 ? ("cheap" as const) : ("balanced" as const);
 }
 
-function detectThinking(tier: PromptRouteClassification["recommendedTier"], intent: RouteIntent): RouteThinkingLevel {
+function detectThinking(tier: PromptRouteClassification["recommendedTier"]): RouteThinkingLevel {
 	if (tier === "cheap") {
 		return "minimal";
 	}
+
 	if (tier === "balanced") {
 		return "medium";
 	}
+
 	if (tier === "premium") {
-		return intent === "design" ? "high" : "high";
+		return "high";
 	}
+
 	return "xhigh";
 }
 
@@ -195,9 +215,11 @@ async function resolveApiKey(
 	if (typeof registry.getApiKey === "function") {
 		return registry.getApiKey(model);
 	}
+
 	if (typeof registry.getApiKeyForProvider === "function") {
 		return registry.getApiKeyForProvider(model.provider);
 	}
+
 	if (typeof registry.authStorage?.getApiKey === "function") {
 		return registry.authStorage.getApiKey(model.provider);
 	}

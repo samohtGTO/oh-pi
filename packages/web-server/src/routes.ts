@@ -21,13 +21,17 @@ export function createRoutes(options: RoutesOptions): Hono {
 	// Auth middleware for all other /api routes
 	app.use("/api/*", async (c, next) => {
 		const auth = c.req.header("Authorization");
+
 		if (!auth?.startsWith("Bearer ")) {
 			return c.json({ error: "Authorization required" }, 401);
 		}
+
 		const provided = auth.slice(7);
+
 		if (!validateToken(provided, options.token)) {
 			return c.json({ error: "Invalid token" }, 401);
 		}
+
 		await next();
 	});
 
@@ -43,9 +47,11 @@ export function createRoutes(options: RoutesOptions): Hono {
 	// Session state
 	app.get("/api/session/state", (c) => {
 		const session = options.getSession();
+
 		if (!session) {
 			return c.json({ error: "No session attached" }, 503);
 		}
+
 		return c.json({
 			model: session.model,
 			thinkingLevel: session.thinkingLevel,
@@ -58,18 +64,22 @@ export function createRoutes(options: RoutesOptions): Hono {
 	// Session messages
 	app.get("/api/session/messages", (c) => {
 		const session = options.getSession();
+
 		if (!session) {
 			return c.json({ error: "No session attached" }, 503);
 		}
+
 		return c.json({ messages: session.messages });
 	});
 
 	// Session stats
 	app.get("/api/session/stats", (c) => {
 		const session = options.getSession();
+
 		if (!session) {
 			return c.json({ error: "No session attached" }, 503);
 		}
+
 		return c.json({
 			sessionId: session.sessionId,
 			messageCount: session.messages.length,
@@ -80,9 +90,11 @@ export function createRoutes(options: RoutesOptions): Hono {
 	// Available models
 	app.get("/api/models", (c) => {
 		const session = options.getSession();
+
 		if (!session) {
 			return c.json({ error: "No session attached" }, 503);
 		}
+
 		return c.json({
 			currentModel: session.model,
 			thinkingLevel: session.thinkingLevel,

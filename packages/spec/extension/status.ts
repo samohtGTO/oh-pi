@@ -78,6 +78,7 @@ function nextStepsFor(paths: WorkflowPaths, initialized: boolean): string[] {
 
 	steps.push("/spec analyze");
 	steps.push(hasIncompleteChecklist ? "/spec implement (after checklist review)" : "/spec implement");
+
 	return steps;
 }
 
@@ -116,12 +117,15 @@ export function buildWorkflowStatus(options: {
 			exists: existsSync(options.paths.featureSpec),
 		});
 	}
+
 	if (options.paths.planFile) {
 		artifacts.push({ label: "plan.md", path: options.paths.planFile, exists: existsSync(options.paths.planFile) });
 	}
+
 	if (options.paths.tasksFile) {
 		artifacts.push({ label: "tasks.md", path: options.paths.tasksFile, exists: existsSync(options.paths.tasksFile) });
 	}
+
 	if (options.paths.researchFile) {
 		artifacts.push({
 			label: "research.md",
@@ -129,6 +133,7 @@ export function buildWorkflowStatus(options: {
 			exists: existsSync(options.paths.researchFile),
 		});
 	}
+
 	if (options.paths.dataModelFile) {
 		artifacts.push({
 			label: "data-model.md",
@@ -136,6 +141,7 @@ export function buildWorkflowStatus(options: {
 			exists: existsSync(options.paths.dataModelFile),
 		});
 	}
+
 	if (options.paths.quickstartFile) {
 		artifacts.push({
 			label: "quickstart.md",
@@ -143,6 +149,7 @@ export function buildWorkflowStatus(options: {
 			exists: existsSync(options.paths.quickstartFile),
 		});
 	}
+
 	if (options.paths.contractsDir) {
 		artifacts.push({
 			label: "contracts/",

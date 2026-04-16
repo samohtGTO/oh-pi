@@ -282,7 +282,7 @@ That is important because the package should seed a workflow, not keep fighting 
 
 ## How to use it in practice
 
-## 1) Initialize the workflow
+### 1) Initialize the workflow
 
 ```bash
 /spec init
@@ -297,7 +297,7 @@ What happens:
 - constitution and pi-agent memory files are created if missing
 - a report is rendered in pi explaining what was created
 
-## 2) Define the project's constitution
+### 2) Define the project's constitution
 
 ```bash
 /spec constitution Security-first, testable, backwards-compatible changes by default
@@ -311,7 +311,7 @@ Typical outcomes:
 - related templates may be aligned with those rules
 - future workflow steps can refer back to the same governance file
 
-## 3) Create a feature spec
+### 3) Create a feature spec
 
 ```bash
 /spec specify Add SSO login for enterprise tenants
@@ -328,7 +328,7 @@ What happens:
 
 This is the key step that turns a vague idea into a concrete feature workspace.
 
-## 4) Clarify open questions
+### 4) Clarify open questions
 
 ```bash
 /spec clarify
@@ -342,7 +342,7 @@ or
 
 This step is meant to remove the highest-impact ambiguities before planning.
 
-## 5) Generate a requirement-quality checklist
+### 5) Generate a requirement-quality checklist
 
 ```bash
 /spec checklist Authentication quality gates
@@ -351,7 +351,7 @@ This step is meant to remove the highest-impact ambiguities before planning.
 This is not supposed to generate implementation TODOs. It is meant to verify that the spec is precise,
 complete, and testable.
 
-## 6) Build the implementation plan
+### 6) Build the implementation plan
 
 ```bash
 /spec plan Use TypeScript, Vitest, and existing auth services; avoid new infrastructure
@@ -363,7 +363,7 @@ What happens:
 - pi is instructed to use the local `plan` workflow template
 - `pi-agent.md` is treated as the pi-native context artifact instead of shell-generated agent files
 
-## 7) Generate tasks
+### 7) Generate tasks
 
 ```bash
 /spec tasks
@@ -377,7 +377,7 @@ or
 
 This step should produce a `tasks.md` with a strict checkbox-oriented execution plan.
 
-## 8) Analyze for contradictions
+### 8) Analyze for contradictions
 
 ```bash
 /spec analyze
@@ -386,7 +386,7 @@ This step should produce a `tasks.md` with a strict checkbox-oriented execution 
 This step is intentionally read-only. It is there to catch inconsistencies between the spec, plan,
 checklists, and tasks before coding begins.
 
-## 9) Implement
+### 9) Implement
 
 ```bash
 /spec implement
@@ -404,7 +404,7 @@ Behavior worth knowing:
 - if incomplete checklist items exist and the UI supports confirmation, pi asks whether you want to continue
 - the implementation prompt reminds pi to mark completed tasks as `[x]`
 
-## 10) Inspect progress any time
+### 10) Inspect progress any time
 
 ```bash
 /spec status

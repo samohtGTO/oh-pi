@@ -5,6 +5,7 @@ On-demand skill packs for pi.
 ## What this package includes
 
 This package bundles reusable skills for common workflows, including areas like:
+
 - web search and fetch
 - debugging
 - git workflow help

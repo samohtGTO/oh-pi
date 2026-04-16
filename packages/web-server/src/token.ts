@@ -20,9 +20,11 @@ export function generateInstanceId(token: string): string {
 export function validateToken(provided: string, expected: string): boolean {
 	const a = Buffer.from(provided, "utf8");
 	const b = Buffer.from(expected, "utf8");
+
 	if (a.length !== b.length) {
 		return false;
 	}
+
 	return timingSafeEqual(a, b);
 }
 
@@ -36,6 +38,7 @@ export function loadOrCreateToken(filePath?: string): TokenInfo {
 	if (filePath) {
 		try {
 			const existing = readFileSync(filePath, "utf8").trim();
+
 			if (existing.length === 64) {
 				return { token: existing, instanceId: generateInstanceId(existing), isNew: false };
 			}

@@ -49,6 +49,7 @@ export default function (pi: ExtensionAPI) {
 
 			// Try to start tunnel
 			const tunnelProvider = detectTunnelProvider();
+
 			if (tunnelProvider) {
 				try {
 					const port = Number.parseInt(result.url.match(/:(\d+)/)?.[1] ?? "3100", 10);
@@ -94,6 +95,7 @@ export default function (pi: ExtensionAPI) {
 
 function buildConnectUrl(server: PiWebServer): string {
 	const tunnelUrl = server.tunnelUrl;
+
 	if (tunnelUrl) {
 		return `${HOSTED_UI_URL}?host=${encodeURIComponent(tunnelUrl)}&t=${server.token}`;
 	}

@@ -41,9 +41,11 @@ export function expandHomeDir(inputPath: string, options?: AgentPathOptions): st
 	if (inputPath === "~") {
 		return homeDir;
 	}
+
 	if (inputPath.startsWith("~/") || inputPath.startsWith(`~${path.sep}`)) {
 		return path.join(homeDir, inputPath.slice(2));
 	}
+
 	return inputPath;
 }
 
@@ -62,6 +64,7 @@ export function resolvePiAgentDir(options?: AgentPathOptions): string {
 	if (envPath) {
 		return path.resolve(expandHomeDir(envPath, options));
 	}
+
 	return path.join(defaultHomeDir(options), ".pi", "agent");
 }
 

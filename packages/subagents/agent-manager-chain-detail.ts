@@ -14,14 +14,22 @@ const CHAIN_DETAIL_VIEWPORT_HEIGHT = 12;
 export function buildDependencyMap(steps: ChainStepConfig[]): Map<number, number[]> {
 	const outputMap = new Map<string, number>();
 	const deps = new Map<number, number[]>();
+
 	for (let i = 0; i < steps.length; i++) {
 		const step = steps[i]!;
-		if (typeof step.output === "string" && step.output.length > 0) outputMap.set(step.output, i);
+
+		if (typeof step.output === "string" && step.output.length > 0) {
+			outputMap.set(step.output, i);
+		}
+
 		if (Array.isArray(step.reads) && step.reads.length > 0) {
 			const sources = step.reads.map((file) => outputMap.get(file)).filter((idx): idx is number => idx !== undefined);
-			if (sources.length > 0) deps.set(i, sources);
+			if (sources.length > 0) {
+				deps.set(i, sources);
+			}
 		}
 	}
+
 	return deps;
 }
 
@@ -72,25 +80,38 @@ function buildChainDetailLines(chain: ChainConfig, width: number): string[] {
 }
 
 export function handleChainDetailInput(state: ChainDetailState, data: string): ChainDetailAction | undefined {
-	if (matchesKey(data, "escape") || matchesKey(data, "ctrl+c")) return { type: "back" };
-	if (data === "l") return { type: "launch" };
-	if (data === "e") return { type: "edit" };
+	if (matchesKey(data, "escape") || matchesKey(data, "ctrl+c")) {
+		return { type: "back" };
+	}
+
+	if (data === "l") {
+		return { type: "launch" };
+	}
+
+	if (data === "e") {
+		return { type: "edit" };
+	}
+
 	if (matchesKey(data, "up")) {
 		state.scrollOffset--;
 		return;
 	}
+
 	if (matchesKey(data, "down")) {
 		state.scrollOffset++;
 		return;
 	}
+
 	if (matchesKey(data, "pageup") || matchesKey(data, "shift+up")) {
 		state.scrollOffset -= CHAIN_DETAIL_VIEWPORT_HEIGHT;
 		return;
 	}
+
 	if (matchesKey(data, "pagedown") || matchesKey(data, "shift+down")) {
 		state.scrollOffset += CHAIN_DETAIL_VIEWPORT_HEIGHT;
 		return;
 	}
+
 	return;
 }
 

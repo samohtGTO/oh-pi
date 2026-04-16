@@ -15,9 +15,11 @@ export function countExisting(env: EnvInfo, dir: string): number {
 }
 
 /**
- * Display the configuration summary, handle backup/overwrite of existing config, install pi if needed, and apply the final configuration.
- * @param config - the user's selected configuration
- * @param env - current environment info
+ * Display the configuration summary, handle backup or overwrite flows,
+ * install pi when needed, and apply the final configuration.
+ *
+ * @param config - The user's selected configuration
+ * @param env - Current environment info
  */
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Interactive wizard confirmation flow with many user branches.
 export async function confirmApply(config: OhPConfig, env: EnvInfo) {
@@ -99,8 +101,6 @@ export async function confirmApply(config: OhPConfig, env: EnvInfo) {
 			const backupDir = backupConfig();
 			s.stop(t("confirm.backedUp", { dir: chalk.dim(backupDir) }));
 		}
-	} else {
-		// New user — skip confirmation, apply directly
 	}
 
 	// ═══ Install pi if needed ═══

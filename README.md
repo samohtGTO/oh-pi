@@ -97,6 +97,7 @@ oh-pi tracks upstream pi fairly closely and currently treats **pi `0.56.1` or ne
 minimum supported runtime baseline for packages that integrate directly with the pi SDK.
 
 Policy:
+
 - new oh-pi releases target the current pi runtime family first
 - compatibility with older pi builds is best-effort unless explicitly documented otherwise
 - peer dependency ranges on pi-facing packages express the minimum supported baseline more clearly

@@ -17,6 +17,7 @@ export function t(key: string, vars?: Record<string, string | number>): string {
 			text = text.replace(`{${k}}`, String(v));
 		}
 	}
+
 	return text;
 }
 
@@ -47,9 +48,11 @@ function detectLocale(): Locale | undefined {
 	if (lang.startsWith("fr")) {
 		return "fr";
 	}
+
 	if (lang.startsWith("en")) {
 		return "en";
 	}
+
 	return undefined;
 }
 
@@ -72,6 +75,7 @@ export async function selectLanguage(): Promise<Locale> {
 		p.cancel("Cancelled.");
 		process.exit(0);
 	}
+
 	setLocale(locale);
 	return locale;
 }

@@ -5,6 +5,7 @@ Pi extension that adds the `/remote` command for sharing sessions via a web UI.
 ## What it does
 
 This package registers a `/remote` command that can:
+
 - start remote access for the current pi session
 - expose a connection URL or tunnel-backed URL
 - show connection status

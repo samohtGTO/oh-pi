@@ -29,33 +29,42 @@ export function isUnsafeUrl(urlStr: string): boolean {
 	try {
 		const u = new URL(urlStr);
 		const host = u.hostname;
+
 		// Allow localhost for local dev servers (Ollama, vLLM, etc.)
 		if (host === "localhost" || host === "127.0.0.1" || host === "::1") {
 			return false;
 		}
+
 		// Block private IP ranges
 		if (/^10\./.test(host)) {
 			return true;
 		}
+
 		if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) {
 			return true;
 		}
+
 		if (/^192\.168\./.test(host)) {
 			return true;
 		}
+
 		if (/^0\./.test(host) || host === "0.0.0.0") {
 			return true;
 		}
+
 		if (host.includes(":") || host.startsWith("[")) {
 			return true;
 		}
+
 		if (/^169\.254\./.test(host)) {
 			return true;
 		}
+
 		// Block non-https for remote hosts
 		if (u.protocol !== "https:") {
 			return true;
 		}
+
 		return false;
 	} catch {
 		return true;
@@ -244,9 +253,11 @@ export async function setupProviders(env?: EnvInfo): Promise<ProviderSetupResult
 			p.cancel(t("cancelled"));
 			process.exit(0);
 		}
+
 		if (action === "keep") {
 			return { providers: [], providerStrategy: "keep" };
 		}
+
 		providerStrategy = action;
 	}
 
@@ -375,6 +386,7 @@ async function setupProviderChoice(choice: string): Promise<ProviderConfig | nul
 		p.log.error(`Unknown provider: ${name}`);
 		return null;
 	}
+
 	const envVal = process.env[info.env];
 
 	const useCustomUrl = await p.confirm({
@@ -567,6 +579,7 @@ async function selectModelWithMeta(
 			p.cancel(t("cancelled"));
 			process.exit(0);
 		}
+
 		return { defaultModel: model, discoveredModels, api };
 	}
 

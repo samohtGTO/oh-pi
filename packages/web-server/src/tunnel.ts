@@ -26,6 +26,7 @@ export function detectTunnelProvider(): TunnelProvider | undefined {
 
 export function startTunnel(port: number, provider?: TunnelProvider): Promise<TunnelInfo> {
 	const resolved = provider ?? detectTunnelProvider();
+
 	if (!resolved) {
 		return Promise.reject(new Error("No tunnel provider found. Install cloudflared or tailscale."));
 	}
@@ -52,8 +53,10 @@ function startCloudflaredTunnel(port: number): Promise<TunnelInfo> {
 
 		const onData = (data: Buffer) => {
 			const text = data.toString();
+
 			// Cloudflared prints the URL to stderr
 			const match = text.match(/https:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com/);
+
 			if (match && !resolved) {
 				resolved = true;
 				clearTimeout(timeout);
@@ -105,6 +108,7 @@ function startTailscaleTunnel(port: number): Promise<TunnelInfo> {
 		const onData = (data: Buffer) => {
 			const text = data.toString();
 			const match = text.match(/https:\/\/[^\s]+/);
+
 			if (match && !resolved) {
 				resolved = true;
 				clearTimeout(timeout);

@@ -35,30 +35,39 @@ export function buildWorkflowPrompt(context: WorkflowPromptContext): string {
 	if (context.paths.featureBranch) {
 		lines.push(`- Active feature branch/name: ${context.paths.featureBranch}`);
 	}
+
 	if (context.paths.featureDir) {
 		lines.push(`- Feature directory: ${context.paths.featureDir}`);
 	}
+
 	if (context.paths.featureSpec) {
 		lines.push(`- Feature spec: ${context.paths.featureSpec}`);
 	}
+
 	if (context.paths.planFile) {
 		lines.push(`- Implementation plan: ${context.paths.planFile}`);
 	}
+
 	if (context.paths.tasksFile) {
 		lines.push(`- Task list: ${context.paths.tasksFile}`);
 	}
+
 	if (context.paths.researchFile) {
 		lines.push(`- Research file: ${context.paths.researchFile}`);
 	}
+
 	if (context.paths.dataModelFile) {
 		lines.push(`- Data model: ${context.paths.dataModelFile}`);
 	}
+
 	if (context.paths.quickstartFile) {
 		lines.push(`- Quickstart: ${context.paths.quickstartFile}`);
 	}
+
 	if (context.paths.contractsDir) {
 		lines.push(`- Contracts directory: ${context.paths.contractsDir}`);
 	}
+
 	if (context.paths.checklistsDir) {
 		lines.push(`- Checklists directory: ${context.paths.checklistsDir}`);
 	}

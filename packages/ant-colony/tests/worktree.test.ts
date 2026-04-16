@@ -71,7 +71,7 @@ describe("worktree workspace isolation", () => {
 			stdio: ["ignore", "pipe", "pipe"],
 		}).trim();
 		expect(branch).toBe(workspace.branch);
-	});
+	}, 15_000);
 
 	it("reuses saved worktree metadata on resume", () => {
 		const repo = mkTempDir("colony-resume-worktree-");

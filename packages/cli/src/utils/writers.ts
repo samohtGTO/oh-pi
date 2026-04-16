@@ -40,6 +40,7 @@ function syncPackageRoot(src: string, dest: string, excludedEntries: string[]) {
 			copyFileSync(srcPath, destPath);
 		}
 	}
+
 	for (const entry of readdirSync(dest, { withFileTypes: true })) {
 		if (!allowedEntries.has(entry.name)) {
 			rmSync(join(dest, entry.name), { recursive: true, force: true });
@@ -103,9 +104,11 @@ export function writeProviderEnv(agentDir: string, config: OhPConfig) {
 		if (p.discoveredModels?.length) {
 			return p.discoveredModels.map((m) => m.id);
 		}
+
 		const info = PROVIDERS[p.name];
 		return info ? info.models : [];
 	});
+
 	if (strategy === "add") {
 		const current = Array.isArray(existingSettings.enabledModels) ? (existingSettings.enabledModels as string[]) : [];
 		const merged = [...new Set([...current, ...nextEnabledModels])];
@@ -135,6 +138,7 @@ export function writeModelConfig(agentDir: string, config: OhPConfig) {
 
 	const providers: Record<string, unknown> =
 		strategy === "add" ? (readJson<{ providers?: Record<string, unknown> }>(modelsPath)?.providers ?? {}) : {};
+
 	for (const cp of modelProviders) {
 		const isBuiltin = !!PROVIDERS[cp.name];
 		if (!cp.baseUrl && isBuiltin && cp.api) {
@@ -212,9 +216,11 @@ export function writeAgents(agentDir: string, config: OhPConfig) {
 			const lang = langNames[config.locale] ?? config.locale;
 			content = `## Language\nAlways respond in ${lang}. Use the user's language for all conversations and explanations. Code, commands, and technical terms can remain in English.\n\n${content}`;
 		}
+
 		if (config.extensions.includes("ant-colony") && config.agents !== "colony-operator") {
 			content = `${content.trimEnd()}\n\n${ANT_COLONY_AUTOTRIGGER_GUIDE}`;
 		}
+
 		writeFileSync(join(agentDir, "AGENTS.md"), content);
 	} catch {
 		/* template not found, skip */
@@ -261,14 +267,17 @@ export function writeExtensions(agentDir: string, config: OhPConfig) {
 			copyDedicatedExtension(extDir, "ant-colony", resources.antColonyDir());
 			continue;
 		}
+
 		if (ext === "plan") {
 			copyPlanExtension(extDir);
 			continue;
 		}
+
 		if (ext === "spec") {
 			copyDedicatedExtension(extDir, "spec", resources.specDir());
 			continue;
 		}
+
 		const dirSrc = resources.extension(ext);
 		const fileSrc = resources.extensionFile(ext);
 		if (existsSync(dirSrc) && statSync(dirSrc).isDirectory()) {
@@ -287,10 +296,11 @@ export function writeExtensions(agentDir: string, config: OhPConfig) {
 export function writePrompts(agentDir: string, config: OhPConfig) {
 	const promptDir = join(agentDir, "prompts");
 	ensureDir(promptDir);
-	for (const p of config.prompts) {
-		const src = resources.prompt(p);
+
+	for (const promptName of config.prompts) {
+		const src = resources.prompt(promptName);
 		try {
-			copyFileSync(src, join(promptDir, `${p}.md`));
+			copyFileSync(src, join(promptDir, `${promptName}.md`));
 		} catch {
 			/* skip */
 		}
