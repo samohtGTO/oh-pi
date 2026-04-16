@@ -4,19 +4,25 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import { createTestOllamaBackend, type TestOllamaBackend } from "./test-backend.js";
 
-const execFileSyncMock = vi.fn();
+const execFileMock = vi.fn();
 const spawnMock = vi.fn();
 const envSnapshot = { ...process.env };
 const backends: TestOllamaBackend[] = [];
 
 vi.mock("node:child_process", () => ({
-	execFileSync: execFileSyncMock,
+	execFile: execFileMock,
 	spawn: spawnMock,
 }));
 
 beforeEach(() => {
-	execFileSyncMock.mockReset();
+	execFileMock.mockReset();
 	spawnMock.mockReset();
+	execFileMock.mockImplementation((_command, _args, _options, callback) => {
+		queueMicrotask(() => {
+			callback(null, "ollama version 0.8.0", "");
+		});
+		return {};
+	});
 });
 
 afterEach(async () => {
@@ -35,7 +41,12 @@ afterEach(async () => {
 
 describe("ollama local downloads", () => {
 	it("registers downloadable local models with cloud context metadata when the CLI is available", async () => {
-		execFileSyncMock.mockReturnValue("ollama version 0.8.0");
+		execFileMock.mockImplementation((_command, _args, _options, callback) => {
+			queueMicrotask(() => {
+				callback(null, "ollama version 0.8.0", "");
+			});
+			return {};
+		});
 
 		const cloudBackend = await createTestOllamaBackend();
 		backends.push(cloudBackend);
@@ -68,7 +79,12 @@ describe("ollama local downloads", () => {
 	});
 
 	it("prompts to download a local model and refreshes the installed catalog", async () => {
-		execFileSyncMock.mockReturnValue("ollama version 0.8.0");
+		execFileMock.mockImplementation((_command, _args, _options, callback) => {
+			queueMicrotask(() => {
+				callback(null, "ollama version 0.8.0", "");
+			});
+			return {};
+		});
 
 		const cloudBackend = await createTestOllamaBackend();
 		backends.push(cloudBackend);
@@ -128,8 +144,11 @@ describe("ollama local downloads", () => {
 	});
 
 	it("warns on session start when the Ollama CLI is missing", async () => {
-		execFileSyncMock.mockImplementation(() => {
-			throw new Error("command not found");
+		execFileMock.mockImplementation((_command, _args, _options, callback) => {
+			queueMicrotask(() => {
+				callback(new Error("command not found"), "", "command not found");
+			});
+			return {};
 		});
 
 		const cloudBackend = await createTestOllamaBackend();
@@ -142,15 +161,16 @@ describe("ollama local downloads", () => {
 		const { default: ollamaProviderExtension } = await import("../index.js");
 		const harness = createExtensionHarness();
 		ollamaProviderExtension(harness.pi as never);
-		expect(execFileSyncMock).not.toHaveBeenCalled();
+		expect(execFileMock).not.toHaveBeenCalled();
 
 		const sessionStart = harness.emitAsync("session_start", { type: "session_start" }, harness.ctx);
-		expect(execFileSyncMock).not.toHaveBeenCalled();
+		expect(execFileMock).not.toHaveBeenCalled();
 		await sessionStart;
+		expect(execFileMock).not.toHaveBeenCalled();
 
 		await waitFor(() => harness.notifications.some((item) => item.msg.includes("Only ollama-cloud models are available right now")));
 
-		expect(execFileSyncMock).toHaveBeenCalled();
+		expect(execFileMock).toHaveBeenCalled();
 		expect(harness.notifications.some((item) => item.type === "warning")).toBe(true);
 		expect((harness.providers.get("ollama")?.models as Array<{ id: string }> | undefined) ?? []).toEqual([]);
 	});

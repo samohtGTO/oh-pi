@@ -82,6 +82,7 @@ const cloudEnvDiscoveryState: RuntimeDiscoveryState = {
 const activeLocalPulls = new Map<string, Promise<boolean>>();
 const PULL_STATUS_KEY = "ollama.pull";
 const OLLAMA_STARTUP_CLI_REFRESH_DELAY_MS = 250;
+const OLLAMA_STARTUP_CLOUD_REFRESH_DELAY_MS = 250;
 
 let ollamaCliStatus: OllamaCliStatus | null = null;
 let missingCliWarningShown = false;
@@ -235,9 +236,14 @@ function registerOllamaCommands(pi: ExtensionAPI): void {
 	});
 }
 
-function registerOllamaLifecycle(pi: ExtensionAPI): { scheduleLocalBootstrapRefresh: (ctx?: CommandContextLike) => void } {
+function registerOllamaLifecycle(pi: ExtensionAPI): {
+	scheduleCloudBootstrapRefresh: (ctx?: CommandContextLike) => void;
+	scheduleLocalBootstrapRefresh: (ctx?: CommandContextLike) => void;
+} {
 	let startupCliRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+	let startupCloudRefreshTimer: ReturnType<typeof setTimeout> | null = null;
 	let pendingLocalBootstrapRefresh: Promise<void> | null = null;
+	let pendingCloudBootstrapRefresh: Promise<void> | null = null;
 	let pendingStartupContext: CommandContextLike | null = null;
 
 	const notifyMissingCli = (ctx: CommandContextLike | null) => {
@@ -252,10 +258,21 @@ function registerOllamaLifecycle(pi: ExtensionAPI): { scheduleLocalBootstrapRefr
 		);
 	};
 
-	const scheduleLocalBootstrapRefresh = (ctx?: CommandContextLike) => {
+	const updatePendingStartupContext = (ctx?: CommandContextLike) => {
 		if (ctx) {
 			pendingStartupContext = ctx;
 		}
+	};
+
+	const clearPendingStartupContext = () => {
+		if (startupCliRefreshTimer || startupCloudRefreshTimer || pendingLocalBootstrapRefresh || pendingCloudBootstrapRefresh) {
+			return;
+		}
+		pendingStartupContext = null;
+	};
+
+	const scheduleLocalBootstrapRefresh = (ctx?: CommandContextLike) => {
+		updatePendingStartupContext(ctx);
 		if (pendingLocalBootstrapRefresh || startupCliRefreshTimer) {
 			return;
 		}
@@ -269,29 +286,57 @@ function registerOllamaLifecycle(pi: ExtensionAPI): { scheduleLocalBootstrapRefr
 				})
 				.finally(() => {
 					pendingLocalBootstrapRefresh = null;
-					pendingStartupContext = null;
+					clearPendingStartupContext();
 				});
 		}, OLLAMA_STARTUP_CLI_REFRESH_DELAY_MS);
+		startupCliRefreshTimer.unref?.();
 	};
 
-	pi.on("session_start", async (_event, ctx) => {
+	const scheduleCloudBootstrapRefresh = (ctx?: CommandContextLike) => {
+		updatePendingStartupContext(ctx);
+		if (pendingCloudBootstrapRefresh || startupCloudRefreshTimer) {
+			return;
+		}
+
+		startupCloudRefreshTimer = setTimeout(() => {
+			startupCloudRefreshTimer = null;
+			pendingCloudBootstrapRefresh = (async () => {
+				const startupCtx = pendingStartupContext;
+				if (!startupCtx) {
+					await refreshRegisteredCloudEnvModels(pi);
+					return;
+				}
+
+				const credential = getStoredCloudCredentialFromContext(startupCtx);
+				await refreshCloudModels(pi, startupCtx, credential);
+				startupCtx.modelRegistry.refresh?.();
+			})()
+				.catch(() => {
+					// Auth storage can be unavailable during early startup depending on initialization order.
+					// Keep boot resilient and rely on manual /ollama refresh-models as fallback.
+				})
+				.finally(() => {
+					pendingCloudBootstrapRefresh = null;
+					clearPendingStartupContext();
+				});
+		}, OLLAMA_STARTUP_CLOUD_REFRESH_DELAY_MS);
+		startupCloudRefreshTimer.unref?.();
+	};
+
+	pi.on("session_start", (_event, ctx) => {
+		scheduleCloudBootstrapRefresh(ctx);
 		scheduleLocalBootstrapRefresh(ctx);
 		notifyMissingCli(ctx);
-
-		try {
-			const credential = getStoredCloudCredentialFromContext(ctx);
-			await refreshCloudModels(pi, ctx, credential);
-			ctx.modelRegistry.refresh?.();
-		} catch {
-			// Auth storage can be unavailable during early startup depending on initialization order.
-			// Keep boot resilient and rely on manual /ollama refresh-models as fallback.
-		}
 	});
 
 	pi.on("session_shutdown", () => {
 		if (startupCliRefreshTimer) {
 			clearTimeout(startupCliRefreshTimer);
 			startupCliRefreshTimer = null;
+		}
+		if (startupCloudRefreshTimer) {
+			clearTimeout(startupCloudRefreshTimer);
+			startupCloudRefreshTimer = null;
 		}
 		pendingStartupContext = null;
 	});
@@ -342,7 +387,7 @@ function registerOllamaLifecycle(pi: ExtensionAPI): { scheduleLocalBootstrapRefr
 		await pullLocalModel(pi, ctx, event.model.id);
 	});
 
-	return { scheduleLocalBootstrapRefresh };
+	return { scheduleCloudBootstrapRefresh, scheduleLocalBootstrapRefresh };
 }
 
 async function refreshCloudModels(pi: ExtensionAPI, ctx: CommandContextLike, credential: OllamaCloudCredentials | null): Promise<OllamaProviderModel[]> {
@@ -730,11 +775,14 @@ function createOllamaProcessEnv(): NodeJS.ProcessEnv {
 	return env;
 }
 
-function bootstrapOllamaProviders(pi: ExtensionAPI, scheduleLocalRefresh: () => void): void {
+function bootstrapOllamaProviders(
+	pi: ExtensionAPI,
+	scheduleRefreshes: { scheduleCloudBootstrapRefresh: () => void; scheduleLocalBootstrapRefresh: () => void },
+): void {
 	registerOllamaCloudProvider(pi);
 	registerOllamaLocalProvider(pi);
-	void refreshRegisteredCloudEnvModels(pi);
-	scheduleLocalRefresh();
+	scheduleRefreshes.scheduleCloudBootstrapRefresh();
+	scheduleRefreshes.scheduleLocalBootstrapRefresh();
 }
 
 export {
@@ -750,6 +798,6 @@ export { toOllamaModel, toOllamaCloudModel, type OllamaCloudCredentials, type Ol
 
 export default function ollamaProviderExtension(pi: ExtensionAPI): void {
 	const registerLifecycle = registerOllamaLifecycle(pi);
-	bootstrapOllamaProviders(pi, registerLifecycle.scheduleLocalBootstrapRefresh);
+	bootstrapOllamaProviders(pi, registerLifecycle);
 	registerOllamaCommands(pi);
 }

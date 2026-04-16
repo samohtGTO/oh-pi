@@ -6,8 +6,11 @@ import ollamaProviderExtension from "../index.js";
 import { createTestOllamaBackend } from "./test-backend.js";
 
 const envSnapshot = { ...process.env };
+const harnesses: ReturnType<typeof createExtensionHarness>[] = [];
 
-async function createDelayedCloudBootstrapBackend(): Promise<{ apiUrl: string; origin: string; close: () => Promise<void> }> {
+async function createDelayedCloudBootstrapBackend(
+	delayMs = 50,
+): Promise<{ apiUrl: string; origin: string; close: () => Promise<void> }> {
 	const server = http.createServer((req, res) => {
 		const reply = () => {
 			if (req.url === "/v1/models" && req.method === "GET") {
@@ -43,7 +46,7 @@ async function createDelayedCloudBootstrapBackend(): Promise<{ apiUrl: string; o
 			res.end("not found");
 		};
 
-		setTimeout(reply, 50);
+		setTimeout(reply, delayMs);
 	});
 
 	await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -58,7 +61,11 @@ async function createDelayedCloudBootstrapBackend(): Promise<{ apiUrl: string; o
 	};
 }
 
-afterEach(() => {
+afterEach(async () => {
+	for (const harness of harnesses.splice(0)) {
+		await harness.emitAsync("session_shutdown", { type: "session_shutdown" }, harness.ctx);
+	}
+
 	for (const key of Object.keys(process.env)) {
 		if (!(key in envSnapshot)) {
 			delete process.env[key];
@@ -70,6 +77,7 @@ afterEach(() => {
 describe("ollama provider smoke tests", () => {
 	it("registers local + cloud ollama providers and commands without crashing", () => {
 		const harness = createExtensionHarness();
+		harnesses.push(harness);
 		ollamaProviderExtension(harness.pi as never);
 
 		expect(harness.commands.has("ollama")).toBe(true);
@@ -88,6 +96,7 @@ describe("ollama provider smoke tests", () => {
 		delete process.env.OLLAMA_API_KEY;
 
 		const harness = createExtensionHarness();
+		harnesses.push(harness);
 		(harness.ctx as any).modelRegistry = {
 			...(harness.ctx.modelRegistry as object),
 			authStorage: {
@@ -103,6 +112,24 @@ describe("ollama provider smoke tests", () => {
 		await backend.close();
 	});
 
+	it("returns from session_start before delayed cloud discovery finishes", async () => {
+		const backend = await createDelayedCloudBootstrapBackend(250);
+		process.env.PI_OLLAMA_CLOUD_API_URL = backend.apiUrl;
+		process.env.PI_OLLAMA_CLOUD_MODELS_URL = `${backend.apiUrl}/models`;
+		process.env.PI_OLLAMA_CLOUD_SHOW_URL = `${backend.origin}/api/show`;
+		delete process.env.OLLAMA_API_KEY;
+
+		const harness = createExtensionHarness();
+		harnesses.push(harness);
+		ollamaProviderExtension(harness.pi as never);
+
+		const startedAt = Date.now();
+		await expect(harness.emitAsync("session_start", { type: "session_start" }, harness.ctx)).resolves.toBeDefined();
+		expect(Date.now() - startedAt).toBeLessThan(150);
+
+		await backend.close();
+	});
+
 	it("exposes a cloud glm model immediately on startup", async () => {
 		const backend = await createDelayedCloudBootstrapBackend();
 		process.env.PI_OLLAMA_CLOUD_API_URL = backend.apiUrl;
@@ -111,6 +138,7 @@ describe("ollama provider smoke tests", () => {
 		delete process.env.OLLAMA_API_KEY;
 
 		const harness = createExtensionHarness();
+		harnesses.push(harness);
 		ollamaProviderExtension(harness.pi as never);
 
 		const initialModels = harness.providers.get("ollama-cloud")?.models as Array<{ id: string }> | undefined;
@@ -131,9 +159,10 @@ describe("ollama provider smoke tests", () => {
 		delete process.env.OLLAMA_API_KEY;
 
 		const harness = createExtensionHarness();
+		harnesses.push(harness);
 		ollamaProviderExtension(harness.pi as never);
 
-		for (let attempt = 0; attempt < 40; attempt += 1) {
+		for (let attempt = 0; attempt < 80; attempt += 1) {
 			const models = harness.providers.get("ollama-cloud")?.models as Array<{ id: string }> | undefined;
 			if (models?.length === 2) {
 				break;
