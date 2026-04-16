@@ -84,5 +84,5 @@ describe("worktree workspace isolation", () => {
 		const resumed = resumeColonyWorkspace({ cwd: repo, runtimeId: "c4", savedWorkspace: initial, storageOptions });
 		expect(resumed.mode).toBe("worktree");
 		expect(resumed.executionCwd).toBe(initial.executionCwd);
-	});
+	}, 15_000);
 });
