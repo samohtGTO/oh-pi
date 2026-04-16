@@ -74,7 +74,7 @@ const localDiscoveryState: RuntimeDiscoveryState = {
 };
 
 const cloudEnvDiscoveryState: RuntimeDiscoveryState = {
-	models: [],
+	models: getFallbackOllamaCloudModels(),
 	lastRefresh: null,
 	lastError: null,
 };
