@@ -1,4 +1,4 @@
-import { type ChildProcessByStdio, execFileSync, spawn } from "node:child_process";
+import { type ChildProcessByStdio, execFile, spawn } from "node:child_process";
 import process from "node:process";
 import type { Readable } from "node:stream";
 
@@ -24,7 +24,7 @@ export async function getOllamaCliStatus(options: { force?: boolean } = {}): Pro
 		return pendingCliStatus;
 	}
 
-	pendingCliStatus = Promise.resolve(detectOllamaCli()).finally(() => {
+	pendingCliStatus = detectOllamaCli().finally(() => {
 		pendingCliStatus = null;
 	});
 	cachedCliStatus = await pendingCliStatus;
@@ -93,23 +93,35 @@ export function clearOllamaCliStatusCache(): void {
 	cachedCliStatus = null;
 }
 
-function detectOllamaCli(): OllamaCliStatus {
+function execFileText(command: string, args: string[]): Promise<{ text: string | null; error: string | null }> {
+	return new Promise((resolve) => {
+		execFile(command, args, { encoding: "utf-8", shell: IS_WINDOWS }, (error, stdout, stderr) => {
+			if (error) {
+				resolve({
+					text: null,
+					error: stderr.trim() || error.message || `Failed to execute ${command} ${args.join(" ")}`,
+				});
+				return;
+			}
+
+			const text = stdout.trim();
+			resolve({ text: text || null, error: null });
+		});
+	});
+}
+
+async function detectOllamaCli(): Promise<OllamaCliStatus> {
 	let lastError = "Ollama CLI not found.";
 	for (const command of OLLAMA_COMMAND_CANDIDATES) {
-		try {
-			const output = execFileSync(command, ["--version"], {
-				encoding: "utf-8",
-				stdio: ["ignore", "pipe", "pipe"],
-				shell: IS_WINDOWS,
-			}).trim();
+		const result = await execFileText(command, ["--version"]);
+		if (result.text) {
 			return {
 				available: true,
 				command,
-				version: output || undefined,
+				version: result.text,
 			};
-		} catch (error) {
-			lastError = error instanceof Error ? error.message : String(error);
 		}
+		lastError = result.error ?? `Failed to execute ${command} --version.`;
 	}
 
 	return {
