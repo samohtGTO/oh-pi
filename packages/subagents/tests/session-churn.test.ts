@@ -9,6 +9,7 @@ const {
 	mockCleanupAllArtifactDirs,
 	mockCleanupOldArtifacts,
 	mockCleanupOldChainDirs,
+	mockLoadSubagentConfig,
 } = vi.hoisted(() => ({
 	mockRenderWidget: vi.fn(),
 	mockReadStatus: vi.fn(() => null),
@@ -18,6 +19,7 @@ const {
 	mockCleanupAllArtifactDirs: vi.fn(),
 	mockCleanupOldArtifacts: vi.fn(),
 	mockCleanupOldChainDirs: vi.fn(),
+	mockLoadSubagentConfig: vi.fn(() => ({})),
 }));
 
 vi.mock("node:fs", () => ({
@@ -129,12 +131,19 @@ vi.mock("../run-history.js", () => ({
 vi.mock("../agent-management.js", () => ({
 	handleManagementAction: vi.fn(),
 }));
+vi.mock("../bootstrap.js", () => ({
+	ensureAccessibleDir: vi.fn(),
+	expandTildePath: vi.fn((value: string) => value),
+	getSubagentSessionRoot: vi.fn(() => "/tmp/subagent-session-root"),
+	loadSubagentConfig: mockLoadSubagentConfig,
+}));
 
 import registerSubagentExtension from "../index.js";
 
 function createMockPi() {
 	const handlers = new Map<string, ((...args: any[]) => any)[]>();
 	const eventHandlers = new Map<string, ((data: unknown) => void)[]>();
+	const tools = new Map<string, any>();
 
 	return {
 		on(event: string, handler: (...args: any[]) => any) {
@@ -143,7 +152,9 @@ function createMockPi() {
 			}
 			handlers.get(event)?.push(handler);
 		},
-		registerTool: vi.fn(),
+		registerTool: vi.fn((tool: any) => {
+			tools.set(tool.name, tool);
+		}),
 		registerCommand: vi.fn(),
 		registerShortcut: vi.fn(),
 		sendUserMessage: vi.fn(),
@@ -170,6 +181,7 @@ function createMockPi() {
 				handler(data);
 			}
 		},
+		_tools: tools,
 	};
 }
 
@@ -201,6 +213,8 @@ beforeEach(() => {
 	mockCleanupAllArtifactDirs.mockReset();
 	mockCleanupOldArtifacts.mockReset();
 	mockCleanupOldChainDirs.mockReset();
+	mockLoadSubagentConfig.mockReset();
+	mockLoadSubagentConfig.mockReturnValue({});
 });
 
 afterEach(() => {
@@ -209,6 +223,29 @@ afterEach(() => {
 });
 
 describe("subagent session churn", () => {
+	it("does not load subagent config during extension registration", () => {
+		const pi = createMockPi();
+
+		registerSubagentExtension(pi as any);
+
+		expect(mockLoadSubagentConfig).not.toHaveBeenCalled();
+	});
+
+	it("loads subagent config lazily on tool execution", async () => {
+		const pi = createMockPi();
+		const ctx = createCtx();
+		mockLoadSubagentConfig.mockReturnValue({ asyncByDefault: true, defaultSessionDir: "/tmp/custom-session-root" });
+
+		registerSubagentExtension(pi as any);
+		const tool = pi._tools.get("subagent");
+		expect(tool).toBeDefined();
+
+		await tool.execute("tool-1", { action: "list" }, undefined, undefined, ctx);
+		await tool.execute("tool-2", { action: "list" }, undefined, undefined, ctx);
+
+		expect(mockLoadSubagentConfig).toHaveBeenCalledTimes(1);
+	});
+
 	it("does not run global cleanup during extension registration", () => {
 		const pi = createMockPi();
 

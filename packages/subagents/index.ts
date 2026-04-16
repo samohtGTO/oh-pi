@@ -69,8 +69,11 @@ export default function registerSubagentExtension(pi: ExtensionAPI): void {
 	ensureAccessibleDir(RESULTS_DIR);
 	ensureAccessibleDir(ASYNC_DIR);
 
-	const config = loadSubagentConfig();
-	const asyncByDefault = config.asyncByDefault === true;
+	let config: ExtensionConfig | null = null;
+	const getConfig = (): ExtensionConfig => {
+		config ??= loadSubagentConfig();
+		return config;
+	};
 
 	const tempArtifactsDir = getArtifactsDir(null);
 	let baseCwd = process.cwd();
@@ -122,6 +125,8 @@ MANAGEMENT (use action field — omit agent/task/chain/tasks):
 
 		async execute(_id, params, signal, onUpdate, ctx) {
 			baseCwd = ctx.cwd;
+			const config = getConfig();
+			const asyncByDefault = config.asyncByDefault === true;
 			if (params.action) {
 				const validActions = ["list", "get", "create", "update", "delete"];
 				if (!validActions.includes(params.action)) {
