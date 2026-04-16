@@ -38,8 +38,10 @@ async function main(): Promise<void> {
 
 	// Try to start tunnel
 	let tunnelUrl: string | undefined;
+
 	if (!noTunnel) {
 		const provider = detectTunnelProvider();
+
 		if (provider) {
 			try {
 				const tunnel = await startTunnel(resolvedPort, provider);
@@ -95,8 +97,10 @@ function parseFlags(args: string[]): Record<string, string> {
 	const flags: Record<string, string> = {};
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
+
 		if (arg.startsWith("--")) {
 			const key = arg.slice(2);
+
 			if (key === "no-tunnel") {
 				flags[key] = "true";
 			} else if (i + 1 < args.length && !args[i + 1].startsWith("--")) {

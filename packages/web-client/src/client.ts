@@ -101,12 +101,15 @@ export class PiWebClient {
 				// Handle RPC responses (correlated by id)
 				if (data.type === "response") {
 					const response = data as unknown as RpcResponse;
+
 					if (response.id && this._pendingRequests.has(response.id)) {
 						const pending = this._pendingRequests.get(response.id);
 						this._pendingRequests.delete(response.id);
+
 						if (!pending) {
 							return;
 						}
+
 						if (response.success) {
 							pending.resolve(response.data);
 						} else {
@@ -257,6 +260,7 @@ export class PiWebClient {
 
 	private _emit(event: string, data: unknown): void {
 		const handlers = this._listeners.get(event);
+
 		if (handlers) {
 			for (const handler of handlers) {
 				try {

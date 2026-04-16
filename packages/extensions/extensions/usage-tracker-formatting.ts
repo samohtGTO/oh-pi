@@ -4,9 +4,11 @@ export function fmtTokens(n: number): string {
 	if (n >= 1_000_000) {
 		return `${(n / 1_000_000).toFixed(1)}M`;
 	}
+
 	if (n >= 1_000) {
 		return `${(n / 1_000).toFixed(1)}k`;
 	}
+
 	return `${n}`;
 }
 
@@ -14,9 +16,11 @@ export function fmtCost(n: number): string {
 	if (n >= 1) {
 		return `$${n.toFixed(2)}`;
 	}
+
 	if (n >= 0.01) {
 		return `$${n.toFixed(3)}`;
 	}
+
 	return `$${n.toFixed(4)}`;
 }
 
@@ -46,9 +50,11 @@ export function pctColor(pct: number): string {
 	if (pct < 10) {
 		return "error";
 	}
+
 	if (pct < 25) {
 		return "warning";
 	}
+
 	return "success";
 }
 
@@ -180,9 +186,11 @@ export function formatPaceLeft(pace: WindowPace): string {
 	if (delta <= 2) {
 		return "On pace";
 	}
+
 	if (pace.deltaPercent > 0) {
 		return `${delta}% in deficit`;
 	}
+
 	return `${delta}% in reserve`;
 }
 
@@ -190,12 +198,15 @@ export function formatPaceRight(pace: WindowPace): string {
 	if (pace.willLastToReset) {
 		return "Lasts until reset";
 	}
+
 	if (pace.etaToExhaustionMs === null) {
 		return "";
 	}
+
 	if (pace.etaToExhaustionMs <= 0) {
 		return "Runs out now";
 	}
+
 	return `Runs out in ${fmtDuration(pace.etaToExhaustionMs)}`;
 }
 

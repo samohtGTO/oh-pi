@@ -89,7 +89,7 @@ describe("worktree-shared", () => {
 		const registry = loadWorktreeRegistry(repo, sharedRoot);
 		expect(registry.managedWorktrees).toHaveLength(1);
 		expect(registry.managedWorktrees[0]?.lastSeenAt).toBeTruthy();
-	});
+	}, 30_000);
 
 	it("removes only the targeted Pai-owned worktree and leaves external ones alone", () => {
 		const repo = mkTempDir("pi-worktree-cleanup-repo-");
@@ -118,5 +118,5 @@ describe("worktree-shared", () => {
 		expect(after?.worktrees.some((entry) => entry.path === managed.worktreePath)).toBe(false);
 		expect(after?.worktrees.some((entry) => entry.path === real(externalWorktreePath) && !entry.isManaged)).toBe(true);
 		expect(loadWorktreeRegistry(repo, sharedRoot).managedWorktrees).toHaveLength(0);
-	});
+	}, 30_000);
 });

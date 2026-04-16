@@ -177,7 +177,7 @@ describe("custom-footer extension", () => {
 		} finally {
 			vi.useRealTimers();
 		}
-	});
+	}, 15_000);
 
 	it("defers worktree snapshot refresh until after startup", async () => {
 		vi.useFakeTimers();

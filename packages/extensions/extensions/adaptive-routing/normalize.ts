@@ -49,12 +49,15 @@ export function deriveCandidateTier(model: Model<Api>): RouteTier {
 	if (id.includes("gpt-5.4") || id.includes("opus-4.6") || id.includes("opus-4-6") || name.includes("ultra")) {
 		return "peak";
 	}
+
 	if (id.includes("opus") || id.includes("sonnet") || id.includes("pro") || id.includes("gpt-5")) {
 		return "premium";
 	}
+
 	if (id.includes("flash") || id.includes("mini")) {
 		return "cheap";
 	}
+
 	return "balanced";
 }
 
@@ -67,28 +70,36 @@ export function deriveCandidateTags(model: Model<Api>): string[] {
 
 	tags.add(provider);
 	tags.add(tier);
+
 	if (model.reasoning) {
 		tags.add("reasoning");
 	}
+
 	if (model.input.includes("image")) {
 		tags.add("multimodal");
 	}
+
 	if (tier === "premium" || tier === "peak") {
 		tags.add("premium");
 	}
+
 	if (tier === "cheap") {
 		tags.add("cheap");
 	}
+
 	if (provider === "anthropic" || name.includes("claude")) {
 		tags.add("design");
 	}
+
 	if (provider === "openai" || id.includes("gpt-5")) {
 		tags.add("architecture");
 	}
+
 	if (provider === "cursor-agent") {
 		tags.add("architecture");
 		tags.add("premium");
 	}
+
 	return Array.from(tags);
 }
 
@@ -99,15 +110,19 @@ export function deriveCandidateFamily(model: Model<Api>): string | undefined {
 	if (provider === "anthropic") {
 		return `anthropic-${tier}`;
 	}
+
 	if (provider === "openai") {
 		return `openai-${tier}`;
 	}
+
 	if (provider === "cursor-agent") {
 		return `cursor-${tier}`;
 	}
+
 	if (provider === "google") {
 		return `google-${tier}`;
 	}
+
 	return undefined;
 }
 
@@ -120,18 +135,22 @@ export function deriveFallbackGroups(model: Model<Api>): string[] {
 	if (tier === "cheap") {
 		groups.add("cheap-router");
 	}
+
 	if (
 		(provider === "anthropic" && (id.includes("opus") || id.includes("sonnet"))) ||
 		(provider === "openai" && id.includes("gpt-5.4"))
 	) {
 		groups.add("design-premium");
 	}
+
 	if ((provider === "anthropic" && id.includes("opus")) || (provider === "openai" && id.includes("gpt-5.4"))) {
 		groups.add("peak-reasoning");
 	}
+
 	if (provider === "cursor-agent") {
 		groups.add("peak-reasoning");
 	}
+
 	return Array.from(groups);
 }
 

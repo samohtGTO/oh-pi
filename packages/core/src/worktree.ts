@@ -442,6 +442,7 @@ export function createManagedWorktree(options: CreateManagedWorktreeOptions): Cr
 	if (!branch) {
 		throw new Error("Branch name is required.");
 	}
+
 	if (!purpose) {
 		throw new Error("Purpose is required.");
 	}
@@ -527,6 +528,7 @@ export function removeManagedWorktree(
 		if (fs.existsSync(worktreePath)) {
 			throw new Error(`Failed to remove worktree at ${worktreePath}.`);
 		}
+
 		note = "Worktree directory was already missing; removed stale pi registry entry.";
 	}
 
@@ -564,6 +566,7 @@ export function formatWorktreeKind(entry: Pick<GitWorktreeEntry, "isMain" | "isM
 	if (entry.isMain) {
 		return "main";
 	}
+
 	return entry.isManaged ? "pi-owned" : "external";
 }
 

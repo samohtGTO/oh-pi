@@ -6,6 +6,7 @@ Platform-agnostic TypeScript client for remote pi sessions.
 
 `@ifi/pi-web-client` is a lightweight client library for connecting to pi remote session servers.
 It is designed to work in:
+
 - browsers
 - Node.js
 - React Native

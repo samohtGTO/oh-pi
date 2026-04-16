@@ -5,6 +5,7 @@ Color themes for pi.
 ## Included themes
 
 This package contains first-party themes such as:
+
 - Catppuccin Mocha
 - Cyberpunk
 - Gruvbox Dark

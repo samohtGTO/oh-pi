@@ -22,21 +22,27 @@ function normalizeCaste(v: unknown): AntCaste {
 	const raw = String(v ?? "worker")
 		.trim()
 		.toLowerCase();
+
 	if (VALID_CASTES.has(raw)) {
 		return raw as AntCaste;
 	}
+
 	if (raw.includes("scout")) {
 		return "scout";
 	}
+
 	if (raw.includes("worker")) {
 		return "worker";
 	}
+
 	if (raw.includes("review") || raw.includes("soldier")) {
 		return "soldier";
 	}
+
 	if (raw.includes("drone") || raw.includes("bash") || raw.includes("shell")) {
 		return "drone";
 	}
+
 	return "worker";
 }
 
@@ -66,12 +72,15 @@ function extractJsonTaskCandidates(parsed: unknown): Array<Record<string, unknow
 	if (Array.isArray(parsed)) {
 		return parsed.filter(isJsonTaskLike);
 	}
+
 	if (isRecord(parsed) && Array.isArray(parsed.tasks)) {
 		return parsed.tasks.filter(isJsonTaskLike);
 	}
+
 	if (isJsonTaskLike(parsed)) {
 		return [parsed];
 	}
+
 	return [];
 }
 
@@ -247,6 +256,7 @@ export function extractPheromones(
 			});
 		}
 	}
+
 	if (failed && files.length > 0) {
 		pheromones.push({
 			id: makePheromoneId(),

@@ -13,9 +13,11 @@ function toText(content: MessageLike["content"]): string {
 	if (!content) {
 		return "";
 	}
+
 	if (typeof content === "string") {
 		return content;
 	}
+
 	return content
 		.filter((block) => block?.type === "text" && typeof block.text === "string")
 		.map((block) => block.text?.trim() ?? "")
@@ -64,9 +66,11 @@ function isFocusShift(firstUserText: string, latestUserText: string): boolean {
 	if (!(firstUserText && latestUserText)) {
 		return false;
 	}
+
 	if (latestUserText.length < 12) {
 		return false;
 	}
+
 	return overlapRatio(firstUserText, latestUserText) < FOCUS_SHIFT_THRESHOLD;
 }
 

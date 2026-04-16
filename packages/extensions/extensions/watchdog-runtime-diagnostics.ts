@@ -190,14 +190,17 @@ export function recordRuntimeSample(
 ): void {
 	const profile = ensureProfile(extensionId, source);
 	const sample: RuntimeSample = { name, durationMs: Math.max(0, durationMs), timestamp };
+
 	if (channel === "event") {
 		pushBounded(profile.eventSamples, sample);
 		return;
 	}
+
 	if (channel === "tool") {
 		pushBounded(profile.toolSamples, sample);
 		return;
 	}
+
 	pushBounded(profile.commandSamples, sample);
 }
 
@@ -257,21 +260,27 @@ export function getExtensionDiagnostics(now = Date.now()): ExtensionDiagnostic[]
 		if (recentHandlerMs > 0) {
 			reasons.push(`${Math.round(recentHandlerMs)}ms recent handler time`);
 		}
+
 		if (recentStatusUpdates > 0) {
 			reasons.push(`${recentStatusUpdates} status updates`);
 		}
+
 		if (recentNotifications > 0) {
 			reasons.push(`${recentNotifications} notifications`);
 		}
+
 		if (recentOverlays > 0) {
 			reasons.push(`${recentOverlays} overlays`);
 		}
+
 		if (pendingTasks > 0) {
 			reasons.push(`${pendingTasks} queued tasks`);
 		}
+
 		if (dueTasks > 0) {
 			reasons.push(`${dueTasks} due tasks`);
 		}
+
 		if (profile.metric.note) {
 			reasons.push(profile.metric.note);
 		}
@@ -303,6 +312,7 @@ function wrapContext<T>(ctx: T, extensionId: string, source: string): T {
 	if (!ctx || typeof ctx !== "object") {
 		return ctx;
 	}
+
 	const candidate = ctx as { ui?: Record<string, (...args: unknown[]) => unknown> };
 	if (!candidate.ui || typeof candidate.ui !== "object") {
 		return ctx;
@@ -436,10 +446,12 @@ export function installRuntimeDiagnostics(pi: ExtensionAPI): void {
 		if (!payload || typeof payload !== "object") {
 			return;
 		}
+
 		const extensionId = (payload as RuntimeDiagnosticsMetric).extensionId;
 		if (typeof extensionId !== "string" || extensionId.length === 0) {
 			return;
 		}
+
 		recordRuntimeMetric(payload as RuntimeDiagnosticsMetric);
 	});
 }

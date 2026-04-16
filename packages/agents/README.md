@@ -3,6 +3,7 @@
 AGENTS.md templates for pi.
 
 This package contains reusable agent profile templates such as:
+
 - `general-developer`
 - `fullstack-developer`
 - `security-researcher`

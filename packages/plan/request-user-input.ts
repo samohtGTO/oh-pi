@@ -55,6 +55,7 @@ export function buildRequestUserInputAnswer(
 		if (trimmed.length === 0) {
 			return { answers: [] };
 		}
+
 		return { answers: [`user_note: ${trimmed}`] };
 	}
 
@@ -62,6 +63,7 @@ export function buildRequestUserInputAnswer(
 		if (trimmed.length === 0) {
 			return { answers: [] };
 		}
+
 		return { answers: ["Other", `user_note: ${trimmed}`] };
 	}
 
@@ -69,6 +71,7 @@ export function buildRequestUserInputAnswer(
 	if (!label) {
 		return { answers: [] };
 	}
+
 	return { answers: [label] };
 }
 

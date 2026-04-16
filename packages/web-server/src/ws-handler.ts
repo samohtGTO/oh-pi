@@ -67,6 +67,7 @@ export function handleWebSocketConnection(ws: WebSocket, options: WsHandlerOptio
 
 					// Subscribe to agent events and relay to this client
 					const agentSession = options.getSession();
+
 					if (agentSession) {
 						unsubscribeEvents = agentSession.subscribe((event: unknown) => {
 							send(event);
@@ -99,6 +100,7 @@ export function handleWebSocketConnection(ws: WebSocket, options: WsHandlerOptio
 
 		// Authenticated — dispatch RPC commands
 		const agentSession = options.getSession();
+
 		if (!agentSession) {
 			send({ type: "response", command: msg.type, success: false, error: "No session attached", id: msg.id });
 			return;
@@ -143,6 +145,7 @@ async function dispatchCommand(
 		case "prompt": {
 			const message = msg.message as string;
 			const streamingBehavior = msg.streamingBehavior as "steer" | "followUp" | undefined;
+
 			if (agentSession.isStreaming && streamingBehavior) {
 				await agentSession.prompt(message, { streamingBehavior });
 			} else {

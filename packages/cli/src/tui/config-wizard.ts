@@ -100,17 +100,20 @@ export async function runConfigWizard(env: EnvInfo, initial: WizardBaseConfig): 
 			nextStep = "appearance";
 			continue;
 		}
+
 		if (step === "appearance") {
 			state.theme = await selectTheme(state.theme);
 			state.keybindings = await selectKeybindings(state.keybindings);
 			nextStep = "features";
 			continue;
 		}
+
 		if (step === "features") {
 			state.extensions = await selectExtensions(state.extensions);
 			nextStep = "agents";
 			continue;
 		}
+
 		if (step === "agents") {
 			state.agents = await selectAgents(state.agents);
 			nextStep = "finish";
@@ -140,16 +143,20 @@ export function summarizeProviders(setup: ProviderSetupResult | null): string {
 	if (!setup) {
 		return t("custom.providersUnset");
 	}
+
 	if (setup.providerStrategy === "keep") {
 		return t("confirm.providerStrategyKeep");
 	}
+
 	if (setup.providerStrategy === "add") {
 		return setup.providers.length > 0
 			? t("custom.providersAdd", { list: setup.providers.map((p) => p.name).join(", ") })
 			: t("confirm.providerStrategyAdd");
 	}
+
 	if (setup.providers.length === 0) {
 		return t("confirm.providerStrategyReplace");
 	}
+
 	return t("custom.providersReplace", { list: setup.providers.map((p) => p.name).join(", ") });
 }

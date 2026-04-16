@@ -8,6 +8,7 @@ Embeddable HTTP + WebSocket server for remote pi session management.
 and WebSocket transports.
 
 It includes support for:
+
 - token-based access
 - LAN/tunnel-aware connection flows
 - remote session transport primitives
