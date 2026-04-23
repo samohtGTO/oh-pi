@@ -1007,8 +1007,9 @@ describe("SchedulerRuntime", () => {
 			const task = runtime.addRecurringIntervalTask("check", 5 * ONE_MINUTE);
 			expect(runtime.taskCount).toBe(1);
 
-			// Advance past the default recurring expiry window.
-			vi.advanceTimersByTime(DEFAULT_RECURRING_EXPIRY_MS + 1000);
+			// Advance past the default recurring expiry window without triggering
+			// the 1 s heartbeat interval 86 k times.
+			vi.setSystemTime(Date.now() + DEFAULT_RECURRING_EXPIRY_MS + 1000);
 			await runtime.tickScheduler();
 
 			expect(runtime.taskCount).toBe(0);
@@ -1211,10 +1212,40 @@ describe("SchedulerRuntime", () => {
 	});
 
 	describe("scheduler lifecycle", () => {
-		it("startScheduler is idempotent", () => {
+		it("does not start the heartbeat while no tasks exist", () => {
+			const setIntervalSpy = vi.spyOn(globalThis, "setInterval");
+
 			runtime.startScheduler();
-			runtime.startScheduler(); // Should not create second timer
+
+			expect(setIntervalSpy).not.toHaveBeenCalled();
+		});
+
+		it("startScheduler is idempotent once tasks exist", () => {
+			const setIntervalSpy = vi.spyOn(globalThis, "setInterval");
+
+			runtime.addOneShotTask("check ci", ONE_MINUTE);
+			runtime.startScheduler();
+			runtime.startScheduler();
+
+			expect(setIntervalSpy).toHaveBeenCalledTimes(1);
 			runtime.stopScheduler();
+		});
+
+		it("starts the heartbeat when the first task is added", () => {
+			const setIntervalSpy = vi.spyOn(globalThis, "setInterval");
+
+			runtime.addOneShotTask("check ci", ONE_MINUTE);
+
+			expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+			runtime.stopScheduler();
+		});
+
+		it("stops the heartbeat after the last task is removed", () => {
+			const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
+			const task = runtime.addOneShotTask("check ci", ONE_MINUTE);
+
+			expect(runtime.deleteTask(task.id)).toBe(true);
+			expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
 		});
 
 		it("stopScheduler is safe when not started", () => {
