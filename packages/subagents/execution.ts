@@ -15,6 +15,7 @@ import {
 	type RunSyncOptions,
 	type SingleResult,
 	DEFAULT_MAX_OUTPUT,
+	DEFAULT_IDLE_TIMEOUT_MS,
 	truncateOutput,
 	getSubagentDepthEnv,
 } from "./types.js";
@@ -49,7 +50,7 @@ export async function runSync(
 	task: string,
 	options: RunSyncOptions,
 ): Promise<SingleResult> {
-	const { cwd, signal, onUpdate, maxOutput, artifactsDir, artifactConfig, runId, index, modelOverride } = options;
+	const { cwd, signal, onUpdate, maxOutput, artifactsDir, artifactConfig, runId, index, modelOverride, idleTimeoutMs } = options;
 	const agent = agents.find((a) => a.name === agentName);
 	if (!agent) {
 		return {
@@ -81,14 +82,22 @@ export async function runSync(
 	// automatically via resolveModelScope. See: #8
 	if (modelArg) args.push("--models", modelArg);
 	const toolExtensionPaths: string[] = [];
+	// Only pi's 7 builtin tools can be passed via --tools.
+	// Extension-registered tools (e.g. read_full) are not in allTools
+	// and get silently dropped when passed as --tools because the
+	// whitelist is applied before extensions load.
+	const BUILTIN_TOOL_NAMES = new Set(["read", "bash", "edit", "write", "grep", "find", "ls"]);
+
 	if (agent.tools?.length) {
 		const builtinTools: string[] = [];
 		for (const tool of agent.tools) {
 			if (tool.includes("/") || tool.endsWith(".ts") || tool.endsWith(".js")) {
 				toolExtensionPaths.push(tool);
-			} else {
+			} else if (BUILTIN_TOOL_NAMES.has(tool)) {
 				builtinTools.push(tool);
 			}
+			// else: extension-registered tool (e.g. read_full) — let the
+			// extension register it naturally; don't pass via --tools.
 		}
 		if (builtinTools.length > 0) {
 			args.push("--tools", builtinTools.join(","));
@@ -211,6 +220,27 @@ export async function runSync(
 		let processClosed = false;
 		const UPDATE_THROTTLE_MS = 50; // Reduced from 75ms for faster responsiveness
 
+		// Idle-timeout watchdog — kills the process if no activity for N ms.
+		// Default 15 min; 0 disables. Agent frontmatter can override: `idleTimeoutMs: 1800000`
+		const idleTimeout = idleTimeoutMs ?? DEFAULT_IDLE_TIMEOUT_MS;
+		let idleTimer: ReturnType<typeof setTimeout> | null = null;
+		let idleKilled = false;
+		const resetIdleTimer = () => {
+			if (idleTimeout <= 0 || processClosed) return;
+			if (idleTimer) clearTimeout(idleTimer);
+			idleTimer = setTimeout(() => {
+				if (processClosed) return;
+				idleKilled = true;
+				result.error = `Idle timeout: no activity for ${Math.round(idleTimeout / 60000)} min`;
+				progress.error = result.error;
+				progress.status = "failed";
+				proc.kill("SIGTERM");
+				setTimeout(() => !proc.killed && proc.kill("SIGKILL"), 3000);
+			}, idleTimeout);
+		};
+		// Start the initial idle timer (first activity will reset it)
+		resetIdleTimer();
+
 		const scheduleUpdate = () => {
 			if (!onUpdate || processClosed) return;
 			const now = Date.now();
@@ -262,6 +292,7 @@ export async function runSync(
 					progress.currentToolArgs = extractToolArgsPreview((evt.args || {}) as Record<string, unknown>);
 					// Tool start is important - update immediately by forcing throttle reset
 					lastUpdateTime = 0;
+					resetIdleTimer();
 					scheduleUpdate();
 				}
 
@@ -278,6 +309,7 @@ export async function runSync(
 					}
 					progress.currentTool = undefined;
 					progress.currentToolArgs = undefined;
+					resetIdleTimer();
 					scheduleUpdate();
 				}
 
@@ -310,6 +342,7 @@ export async function runSync(
 							}
 						}
 					}
+					resetIdleTimer();
 					scheduleUpdate();
 				}
 				if (evt.type === "tool_result_end" && evt.message) {
@@ -327,6 +360,7 @@ export async function runSync(
 							progress.recentOutput.splice(0, progress.recentOutput.length - 50);
 						}
 					}
+					resetIdleTimer();
 					scheduleUpdate();
 				}
 			} catch {
@@ -344,6 +378,7 @@ export async function runSync(
 			lines.forEach(processLine);
 
 			// Also schedule an update on data received (handles streaming output)
+			resetIdleTimer();
 			scheduleUpdate();
 		});
 		proc.stderr.on("data", (d) => {
@@ -354,6 +389,10 @@ export async function runSync(
 			if (pendingTimer) {
 				clearTimeout(pendingTimer);
 				pendingTimer = null;
+			}
+			if (idleTimer) {
+				clearTimeout(idleTimer);
+				idleTimer = null;
 			}
 			if (buf.trim()) processLine(buf);
 			if (code !== 0 && stderrBuf.trim() && !result.error) {
