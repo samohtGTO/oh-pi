@@ -88,7 +88,11 @@ type RuntimeOptions = {
 	signal?: AbortSignal;
 };
 
-export const streamSimpleCursor = (model: Model<string>, context: Context, options?: SimpleStreamOptions): AssistantMessageEventStream => {
+export const streamSimpleCursor = (
+	model: Model<string>,
+	context: Context,
+	options?: SimpleStreamOptions,
+): AssistantMessageEventStream => {
 	const apiKey = options?.apiKey || getEnvApiKey(model.provider);
 	if (!apiKey) {
 		throw new Error(`No API key for provider: ${model.provider}`);
@@ -130,7 +134,11 @@ export const streamSimpleCursor = (model: Model<string>, context: Context, optio
 				conversationState: stateRecord,
 			});
 			options?.onPayload?.({ model: model.id, conversationId, toolCount: payload.mcpTools.length });
-			const connection = new CursorStreamingConnection({ accessToken: apiKey, rpcPath: CURSOR_RUN_PATH, url: model.baseUrl });
+			const connection = new CursorStreamingConnection({
+				accessToken: apiKey,
+				rpcPath: CURSOR_RUN_PATH,
+				url: model.baseUrl,
+			});
 			connection.startHeartbeat(makeHeartbeatFrame);
 			connection.write(toFrame(payload.requestBytes));
 
@@ -185,7 +193,10 @@ async function resumeActiveRun(
 		const result = toolResult
 			? toolResult.isError
 				? create(McpResultSchema, {
-						result: { case: "error", value: create(McpErrorSchema, { error: toolResult.content || "Tool execution failed" }) },
+						result: {
+							case: "error",
+							value: create(McpErrorSchema, { error: toolResult.content || "Tool execution failed" }),
+						},
 					})
 				: create(McpResultSchema, {
 						result: {
@@ -201,9 +212,11 @@ async function resumeActiveRun(
 						},
 					})
 			: create(McpResultSchema, {
-						result: { case: "error", value: create(McpErrorSchema, { error: "Tool result not provided" }) },
-					});
-		sendExecResult(pendingExec.execId, pendingExec.execMsgId, "mcpResult", result, (data) => activeRun.connection.write(data));
+					result: { case: "error", value: create(McpErrorSchema, { error: "Tool result not provided" }) },
+				});
+		sendExecResult(pendingExec.execId, pendingExec.execMsgId, "mcpResult", result, (data) =>
+			activeRun.connection.write(data),
+		);
 	}
 	activeRun.pendingExecs.length = 0;
 	await streamConnection(runtime, activeRun);
@@ -339,7 +352,9 @@ function handleServerMessage(options: {
 		return;
 	}
 	if (messageCase === "kvServerMessage") {
-		sendKvBlobResponse(serverMessage.message.value, options.run.blobStore, (data) => options.run.connection.write(data));
+		sendKvBlobResponse(serverMessage.message.value, options.run.blobStore, (data) =>
+			options.run.connection.write(data),
+		);
 		return;
 	}
 	if (messageCase === "execServerMessage") {
@@ -360,7 +375,12 @@ function handleServerMessage(options: {
 	}
 }
 
-function handleExecServerMessage(execMessage: any, run: ActiveCursorRun, onToolExec: (pendingExec: PendingExec) => void): void {
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
+function handleExecServerMessage(
+	execMessage: any,
+	run: ActiveCursorRun,
+	onToolExec: (pendingExec: PendingExec) => void,
+): void {
 	const execCase = execMessage.message.case;
 	if (execCase === "requestContextArgs") {
 		sendRequestContextResult(execMessage.execId, execMessage.id, run.mcpTools, (data) => run.connection.write(data));
@@ -383,7 +403,10 @@ function handleExecServerMessage(execMessage: any, run: ActiveCursorRun, onToolE
 			execMessage.id,
 			"readResult",
 			create(ReadResultSchema, {
-				result: { case: "rejected", value: create(ReadRejectedSchema, { path: execMessage.message.value.path, reason: REJECT_REASON }) },
+				result: {
+					case: "rejected",
+					value: create(ReadRejectedSchema, { path: execMessage.message.value.path, reason: REJECT_REASON }),
+				},
 			}),
 			(data) => run.connection.write(data),
 		);
@@ -395,7 +418,10 @@ function handleExecServerMessage(execMessage: any, run: ActiveCursorRun, onToolE
 			execMessage.id,
 			"writeResult",
 			create(WriteResultSchema, {
-				result: { case: "rejected", value: create(WriteRejectedSchema, { path: execMessage.message.value.path, reason: REJECT_REASON }) },
+				result: {
+					case: "rejected",
+					value: create(WriteRejectedSchema, { path: execMessage.message.value.path, reason: REJECT_REASON }),
+				},
 			}),
 			(data) => run.connection.write(data),
 		);
@@ -407,7 +433,10 @@ function handleExecServerMessage(execMessage: any, run: ActiveCursorRun, onToolE
 			execMessage.id,
 			"deleteResult",
 			create(DeleteResultSchema, {
-				result: { case: "rejected", value: create(DeleteRejectedSchema, { path: execMessage.message.value.path, reason: REJECT_REASON }) },
+				result: {
+					case: "rejected",
+					value: create(DeleteRejectedSchema, { path: execMessage.message.value.path, reason: REJECT_REASON }),
+				},
 			}),
 			(data) => run.connection.write(data),
 		);
@@ -429,7 +458,10 @@ function handleExecServerMessage(execMessage: any, run: ActiveCursorRun, onToolE
 			execMessage.id,
 			"fetchResult",
 			create(FetchResultSchema, {
-				result: { case: "error", value: create(FetchErrorSchema, { url: execMessage.message.value.url ?? "", error: REJECT_REASON }) },
+				result: {
+					case: "error",
+					value: create(FetchErrorSchema, { url: execMessage.message.value.url ?? "", error: REJECT_REASON }),
+				},
 			}),
 			(data) => run.connection.write(data),
 		);
@@ -488,8 +520,12 @@ function handleExecServerMessage(execMessage: any, run: ActiveCursorRun, onToolE
 		return;
 	}
 	if (execCase === "diagnosticsArgs") {
-		sendExecResult(execMessage.execId, execMessage.id, "diagnosticsResult", create(DiagnosticsResultSchema, {}), (data) =>
-			run.connection.write(data),
+		sendExecResult(
+			execMessage.execId,
+			execMessage.id,
+			"diagnosticsResult",
+			create(DiagnosticsResultSchema, {}),
+			(data) => run.connection.write(data),
 		);
 	}
 }
@@ -556,7 +592,12 @@ class CursorOutputEmitter {
 			return;
 		}
 		block.thinking += thinking;
-		this.stream.push({ type: "thinking_delta", contentIndex: this.thinkingIndex, delta: thinking, partial: this.output });
+		this.stream.push({
+			type: "thinking_delta",
+			contentIndex: this.thinkingIndex,
+			delta: thinking,
+			partial: this.output,
+		});
 	}
 
 	emitToolCall(toolCall: ToolCall, rawArguments: string): void {
@@ -602,7 +643,12 @@ class CursorOutputEmitter {
 		}
 		const block = this.output.content[this.thinkingIndex];
 		if (block?.type === "thinking") {
-			this.stream.push({ type: "thinking_end", contentIndex: this.thinkingIndex, content: block.thinking, partial: this.output });
+			this.stream.push({
+				type: "thinking_end",
+				contentIndex: this.thinkingIndex,
+				content: block.thinking,
+				partial: this.output,
+			});
 		}
 		this.thinkingIndex = undefined;
 	}
@@ -637,7 +683,11 @@ function createThinkingTagFilter(): {
 			}
 			const rest = input.slice(lastIndex);
 			const tagStart = rest.lastIndexOf("<");
-			if (tagStart >= 0 && rest.length - tagStart < MAX_THINKING_TAG_LEN && /^<\/?[a-z_]*$/i.test(rest.slice(tagStart))) {
+			if (
+				tagStart >= 0 &&
+				rest.length - tagStart < MAX_THINKING_TAG_LEN &&
+				/^<\/?[a-z_]*$/i.test(rest.slice(tagStart))
+			) {
 				buffer = rest.slice(tagStart);
 				const visible = rest.slice(0, tagStart);
 				if (inThinking) {

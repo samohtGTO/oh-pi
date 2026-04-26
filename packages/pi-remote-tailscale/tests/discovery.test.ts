@@ -2,11 +2,7 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-	createDiscoveryService,
-	renderDiscoveryHtml,
-	startDiscoveryHttpServer,
-} from "../src/discovery.js";
+import { createDiscoveryService, renderDiscoveryHtml, startDiscoveryHttpServer } from "../src/discovery.js";
 
 async function createTempDir(): Promise<string> {
 	return mkdtemp(join(tmpdir(), "pi-remote-tailscale-discovery-"));

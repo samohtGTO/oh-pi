@@ -85,7 +85,9 @@ function makeAgentCompletions(getBaseCwd: () => string, multiAgent: boolean) {
 			if (prefix.includes(" ")) {
 				return null;
 			}
-			return agents.filter((agent) => agent.name.startsWith(prefix)).map((agent) => ({ value: agent.name, label: agent.name }));
+			return agents
+				.filter((agent) => agent.name.startsWith(prefix))
+				.map((agent) => ({ value: agent.name, label: agent.name }));
 		}
 
 		const lastArrow = prefix.lastIndexOf(" -> ");
@@ -176,7 +178,7 @@ function parseAgentArgs(
 		}
 	}
 	if (command === "chain" && !steps[0]?.task && (perStep || !sharedTask)) {
-		ctx.ui.notify("First step must have a task: /chain agent \"task\" -> agent2", "error");
+		ctx.ui.notify('First step must have a task: /chain agent "task" -> agent2', "error");
 		return null;
 	}
 	if (command === "parallel" && !steps.some((step) => step.task) && !sharedTask) {

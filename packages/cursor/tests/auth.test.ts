@@ -43,7 +43,17 @@ describe("cursor auth", () => {
 			refresh: "valid-refresh",
 			access: "expired-access",
 			expires: Date.now() - 1000,
-			models: [{ id: "composer-2", name: "Composer 2", reasoning: true, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 200000, maxTokens: 64000 }],
+			models: [
+				{
+					id: "composer-2",
+					name: "Composer 2",
+					reasoning: true,
+					input: ["text"],
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+					contextWindow: 200000,
+					maxTokens: 64000,
+				},
+			],
 		} as never);
 
 		expect(refreshed.access).not.toBe("expired-access");
@@ -55,13 +65,34 @@ describe("cursor auth", () => {
 		const provider = createCursorOAuthProvider();
 		const modified = provider.modifyModels?.(
 			[
-				{ id: "placeholder", name: "Placeholder", api: "cursor-agent", provider: "cursor", baseUrl: "https://example.com", reasoning: false, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 1, maxTokens: 1 },
+				{
+					id: "placeholder",
+					name: "Placeholder",
+					api: "cursor-agent",
+					provider: "cursor",
+					baseUrl: "https://example.com",
+					reasoning: false,
+					input: ["text"],
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+					contextWindow: 1,
+					maxTokens: 1,
+				},
 			],
 			{
 				refresh: "r",
 				access: "a",
 				expires: Date.now() + 1000,
-				models: [{ id: "composer-2", name: "Composer 2", reasoning: true, input: ["text"], cost: { input: 0.5, output: 2.5, cacheRead: 0.2, cacheWrite: 0 }, contextWindow: 200000, maxTokens: 64000 }],
+				models: [
+					{
+						id: "composer-2",
+						name: "Composer 2",
+						reasoning: true,
+						input: ["text"],
+						cost: { input: 0.5, output: 2.5, cacheRead: 0.2, cacheWrite: 0 },
+						contextWindow: 200000,
+						maxTokens: 64000,
+					},
+				],
 			} as never,
 		);
 

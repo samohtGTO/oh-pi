@@ -73,8 +73,6 @@ describe("background tasks extension", () => {
 		vi.useRealTimers();
 	});
 
-
-
 	it("spawns tasks, tails logs, reacts to output, and reports completion", async () => {
 		const child = createMockChild();
 		spawnMock.mockReturnValueOnce(child);

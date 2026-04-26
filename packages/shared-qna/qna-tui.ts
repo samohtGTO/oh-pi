@@ -20,7 +20,10 @@ type EditorTheme = {
 
 function getPiTui() {
 	return requirePiTuiModule() as {
-		Editor: new (tui: TUI, theme: EditorTheme) => {
+		Editor: new (
+			tui: TUI,
+			theme: EditorTheme,
+		) => {
 			disableSubmit?: boolean;
 			onChange?: () => void;
 			setText: (text: string) => void;
@@ -162,12 +165,13 @@ export function normalizeResponseForQuestion(
 
 	let committed = response?.committed ?? false;
 	if (response?.committed === undefined && inferCommittedFromContent) {
-		committed = formatResponseAnswer(question, {
-			selectedOptionIndex: normalizedIndex,
-			customText: normalizedCustomText,
-			selectionTouched,
-			committed: false,
-		}).trim().length > 0;
+		committed =
+			formatResponseAnswer(question, {
+				selectedOptionIndex: normalizedIndex,
+				customText: normalizedCustomText,
+				selectionTouched,
+				committed: false,
+			}).trim().length > 0;
 	}
 
 	return {
@@ -185,12 +189,7 @@ export function normalizeResponses(
 	inferCommittedFromContent: boolean,
 ): QnAResponse[] {
 	return questions.map((question, index) =>
-		normalizeResponseForQuestion(
-			question,
-			responses?.[index],
-			fallbackAnswers?.[index],
-			inferCommittedFromContent,
-		),
+		normalizeResponseForQuestion(question, responses?.[index], fallbackAnswers?.[index], inferCommittedFromContent),
 	);
 }
 
@@ -269,11 +268,7 @@ export class QnATuiComponent<TQuestion extends QnAQuestion> implements Component
 	private templateIndex = 0;
 	private onResponsesChange?: (responses: QnAResponse[]) => void;
 	private title: string;
-	private resolveNumericShortcut: (
-		input: string,
-		maxOptionIndex: number,
-		usingCustomEditor: boolean,
-	) => number | null;
+	private resolveNumericShortcut: (input: string, maxOptionIndex: number, usingCustomEditor: boolean) => number | null;
 	private applyTemplate: (template: string, data: QnATemplateData) => string;
 	private questionSummaryLabel: (question: TQuestion, index: number) => string;
 
@@ -299,11 +294,7 @@ export class QnATuiComponent<TQuestion extends QnAQuestion> implements Component
 			fallbackAnswers?: string[];
 			inferCommittedFromContent?: boolean;
 			onResponsesChange?: (responses: QnAResponse[]) => void;
-			resolveNumericShortcut?: (
-				input: string,
-				maxOptionIndex: number,
-				usingCustomEditor: boolean,
-			) => number | null;
+			resolveNumericShortcut?: (input: string, maxOptionIndex: number, usingCustomEditor: boolean) => number | null;
 			applyTemplate?: (template: string, data: QnATemplateData) => string;
 			questionSummaryLabel?: (question: TQuestion, index: number) => string;
 			accentColor?: (text: string) => string;
@@ -752,72 +743,72 @@ export class QnATuiComponent<TQuestion extends QnAQuestion> implements Component
 				}
 				lines.push(padToWidth(emptyBoxLine()));
 
-			const wrappedQuestion = wrapTextWithAnsi(`${this.bold("Q:")} ${this.bold(question.question)}`, contentWidth);
-			for (const line of wrappedQuestion) {
-				lines.push(padToWidth(boxLine(line)));
-			}
-
-			if (question.context) {
-				lines.push(padToWidth(emptyBoxLine()));
-				for (const line of wrapTextWithAnsi(this.gray(`> ${question.context}`), contentWidth - 2)) {
+				const wrappedQuestion = wrapTextWithAnsi(`${this.bold("Q:")} ${this.bold(question.question)}`, contentWidth);
+				for (const line of wrappedQuestion) {
 					lines.push(padToWidth(boxLine(line)));
 				}
-			}
 
-			if (options.length > 0) {
-				lines.push(padToWidth(emptyBoxLine()));
-				for (let i = 0; i <= options.length; i++) {
-					const isOther = i === options.length;
-					const rawLabel = isOther ? "Other" : options[i].label;
-					const isRecommended = !isOther && options[i].recommended;
-					const optionLabel = isRecommended ? `${rawLabel} (recommended)` : rawLabel;
-					const description = isOther ? "Type your own answer" : options[i].description;
-					const selected = response.selectedOptionIndex === i;
-					const marker = selected ? "▶" : " ";
-					const optionPrefix = `${marker} ${i + 1}. `;
-					const line = `${optionPrefix}${optionLabel}`;
-					let styledLine: string;
-					if (selected) {
-						styledLine = response.selectionTouched ? this.green(line) : this.cyan(line);
-					} else if (isRecommended) {
-						styledLine = this.bold(line);
-					} else {
-						styledLine = line;
+				if (question.context) {
+					lines.push(padToWidth(emptyBoxLine()));
+					for (const line of wrapTextWithAnsi(this.gray(`> ${question.context}`), contentWidth - 2)) {
+						lines.push(padToWidth(boxLine(line)));
 					}
-					lines.push(padToWidth(boxLine(truncateToWidth(styledLine, contentWidth))));
+				}
 
-					if (selected && description && description.trim().length > 0) {
-						const descriptionIndent = " ".repeat(visibleWidth(optionPrefix));
-						const wrappedDescription = wrapTextWithAnsi(
-							description,
-							Math.max(10, contentWidth - visibleWidth(descriptionIndent)),
-						);
-						for (const wrapped of wrappedDescription) {
-							lines.push(padToWidth(boxLine(`${descriptionIndent}${this.gray(wrapped)}`)));
+				if (options.length > 0) {
+					lines.push(padToWidth(emptyBoxLine()));
+					for (let i = 0; i <= options.length; i++) {
+						const isOther = i === options.length;
+						const rawLabel = isOther ? "Other" : options[i].label;
+						const isRecommended = !isOther && options[i].recommended;
+						const optionLabel = isRecommended ? `${rawLabel} (recommended)` : rawLabel;
+						const description = isOther ? "Type your own answer" : options[i].description;
+						const selected = response.selectedOptionIndex === i;
+						const marker = selected ? "▶" : " ";
+						const optionPrefix = `${marker} ${i + 1}. `;
+						const line = `${optionPrefix}${optionLabel}`;
+						let styledLine: string;
+						if (selected) {
+							styledLine = response.selectionTouched ? this.green(line) : this.cyan(line);
+						} else if (isRecommended) {
+							styledLine = this.bold(line);
+						} else {
+							styledLine = line;
+						}
+						lines.push(padToWidth(boxLine(truncateToWidth(styledLine, contentWidth))));
+
+						if (selected && description && description.trim().length > 0) {
+							const descriptionIndent = " ".repeat(visibleWidth(optionPrefix));
+							const wrappedDescription = wrapTextWithAnsi(
+								description,
+								Math.max(10, contentWidth - visibleWidth(descriptionIndent)),
+							);
+							for (const wrapped of wrappedDescription) {
+								lines.push(padToWidth(boxLine(`${descriptionIndent}${this.gray(wrapped)}`)));
+							}
 						}
 					}
 				}
-			}
 
-			lines.push(padToWidth(emptyBoxLine()));
-			if (usesEditor) {
-				const answerPrefix = this.bold("A: ");
-				const editorWidth = Math.max(20, contentWidth - 7);
-				const editorLines = this.editor.render(editorWidth);
-				for (let i = 1; i < editorLines.length - 1; i++) {
-					if (i === 1) {
-						lines.push(padToWidth(boxLine(answerPrefix + editorLines[i])));
-					} else {
-						lines.push(padToWidth(boxLine("   " + editorLines[i])));
+				lines.push(padToWidth(emptyBoxLine()));
+				if (usesEditor) {
+					const answerPrefix = this.bold("A: ");
+					const editorWidth = Math.max(20, contentWidth - 7);
+					const editorLines = this.editor.render(editorWidth);
+					for (let i = 1; i < editorLines.length - 1; i++) {
+						if (i === 1) {
+							lines.push(padToWidth(boxLine(answerPrefix + editorLines[i])));
+						} else {
+							lines.push(padToWidth(boxLine("   " + editorLines[i])));
+						}
 					}
+				} else {
+					const selectedLabel = response.selectionTouched
+						? (options[response.selectedOptionIndex]?.label ?? "")
+						: this.dim("(select an option)");
+					lines.push(padToWidth(boxLine(`${this.bold("A:")} ${selectedLabel}`)));
 				}
-			} else {
-				const selectedLabel = response.selectionTouched
-					? options[response.selectedOptionIndex]?.label ?? ""
-					: this.dim("(select an option)");
-				lines.push(padToWidth(boxLine(`${this.bold("A:")} ${selectedLabel}`)));
-			}
-			lines.push(padToWidth(emptyBoxLine()));
+				lines.push(padToWidth(emptyBoxLine()));
 			}
 		}
 
@@ -828,9 +819,7 @@ export class QnATuiComponent<TQuestion extends QnAQuestion> implements Component
 				const summaryLabel = this.questionSummaryLabel(this.questions[i], i);
 				const answerText = this.getAnswerText(i);
 				const hasAnswer = answerText.trim().length > 0;
-				const answerPreview = hasAnswer
-					? this.green(summarizeAnswer(answerText))
-					: this.yellow("(no answer)");
+				const answerPreview = hasAnswer ? this.green(summarizeAnswer(answerText)) : this.yellow("(no answer)");
 				const questionLine = `${this.bold(`${i + 1}.`)} ${this.cyan(summaryLabel)}`;
 				const answerLine = `   ${this.dim("Answer:")} ${answerPreview}`;
 				lines.push(padToWidth(boxLine(truncateToWidth(questionLine, contentWidth))));

@@ -5,9 +5,7 @@ vi.mock("@ff-labs/fff-node", async (importOriginal) => {
 	return {
 		CursorStore: vi.fn().mockImplementation(() => ({
 			init: vi.fn().mockResolvedValue(undefined),
-			grep: vi.fn().mockResolvedValue([
-				{ file: "src/index.ts", line: 10, text: "function foo()" },
-			]),
+			grep: vi.fn().mockResolvedValue([{ file: "src/index.ts", line: 10, text: "function foo()" }]),
 			stats: vi.fn().mockReturnValue({ fileCount: 5 }),
 		})),
 		Cursor: vi.fn(),

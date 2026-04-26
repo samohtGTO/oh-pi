@@ -137,7 +137,11 @@ describe("startRemoteSessionServer", () => {
 			resolveSession: () => session as never,
 		});
 
-		expect(webServerModule.createPiWebServer).toHaveBeenCalledWith({ host: "0.0.0.0", port: undefined, token: undefined });
+		expect(webServerModule.createPiWebServer).toHaveBeenCalledWith({
+			host: "0.0.0.0",
+			port: undefined,
+			token: undefined,
+		});
 		expect(server.attachSession).toHaveBeenCalledWith(session);
 		expect(tailscaleModule.startTailscaleServe).toHaveBeenCalledWith({ instanceId: "instance-42", port: 3100 });
 		expect(server.setTunnel).toHaveBeenCalledWith(
@@ -150,8 +154,7 @@ describe("startRemoteSessionServer", () => {
 		);
 		expect(discovery.register).toHaveBeenCalledWith(
 			expect.objectContaining({
-				connectUrl:
-					"https://pi-remote.dev/?host=https%3A%2F%2Fpi.tailnet.ts.net%2Fpi%2Finstance-42%2F&t=test-token",
+				connectUrl: "https://pi-remote.dev/?host=https%3A%2F%2Fpi.tailnet.ts.net%2Fpi%2Finstance-42%2F&t=test-token",
 				instanceId: "instance-42",
 				lanUrl: "http://192.168.1.20:3100/?t=test-token",
 				localUrl: "http://localhost:3100/?t=test-token",
@@ -173,7 +176,9 @@ describe("startRemoteSessionServer", () => {
 		expect(lanHandle.connectUrl).toBe("http://192.168.1.20:3100/?t=test-token");
 		expect(tailscaleFailureServer.setTunnel).not.toHaveBeenCalled();
 
-		const noTunnelServer = createMockServer({ start: vi.fn(async () => ({ instanceId: "instance-2", token: "local-token", url: "http://localhost:4100" })) });
+		const noTunnelServer = createMockServer({
+			start: vi.fn(async () => ({ instanceId: "instance-2", token: "local-token", url: "http://localhost:4100" })),
+		});
 		webServerModule.createPiWebServer.mockReturnValueOnce(noTunnelServer);
 		webServerModule.getLanIp.mockReturnValueOnce(undefined);
 

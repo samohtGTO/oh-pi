@@ -13,7 +13,7 @@ let cachedPiTui:
 			truncateToWidth: (text: string, width: number) => string;
 			visibleWidth: (text: string) => number;
 			wrapTextWithAnsi: (text: string, width: number) => string[];
-		}
+	  }
 	| undefined;
 
 function getPiTui() {
@@ -63,7 +63,12 @@ export interface ScrollSelectConfig<T> {
 
 type ScrollSelectUi = {
 	custom?: <T>(
-		factory: (tui: { requestRender: () => void }, theme: ScrollSelectTheme, keybindings: unknown, done: (value: T) => void) => {
+		factory: (
+			tui: { requestRender: () => void },
+			theme: ScrollSelectTheme,
+			keybindings: unknown,
+			done: (value: T) => void,
+		) => {
 			render: (width: number) => string[];
 			handleInput: (data: string) => void;
 			dispose?: () => void;

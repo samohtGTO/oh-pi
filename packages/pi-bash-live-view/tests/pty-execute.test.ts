@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-	executePtyCommand,
-	ptyExecuteInternals,
-	toAgentToolResult,
-	toUserBashResult,
-} from "../src/pty-execute.js";
+import { executePtyCommand, ptyExecuteInternals, toAgentToolResult, toUserBashResult } from "../src/pty-execute.js";
 import { resetHeadlessModuleLoader, setHeadlessModuleLoader } from "../src/terminal-emulator.js";
 import {
 	PtySessionManager,
@@ -86,7 +81,7 @@ describe("PTY execution", () => {
 				emulatorWrites.push(data);
 			}),
 			resize: vi.fn(),
-			toAnsiLines: vi.fn(() => emulatorWrites.length === 0 ? [] : [emulatorWrites.join("")]),
+			toAnsiLines: vi.fn(() => (emulatorWrites.length === 0 ? [] : [emulatorWrites.join("")])),
 			getPlainText: vi.fn(() => emulatorWrites.join("")),
 			dispose: vi.fn(),
 		};
@@ -303,17 +298,20 @@ describe("PTY execution", () => {
 			cwd: "/tmp",
 			createEmulator: async () => undefined as never,
 			sessionManager: {
-				createSession: vi.fn(async () => ({
-					...defaultSession,
-					id: "session-none",
-					whenExited: Promise.resolve({ exitCode: 1 }),
-					getOutput: () => "plain output",
-				}) as never),
+				createSession: vi.fn(
+					async () =>
+						({
+							...defaultSession,
+							id: "session-none",
+							whenExited: Promise.resolve({ exitCode: 1 }),
+							getOutput: () => "plain output",
+						}) as never,
+				),
 				closeSession: vi.fn(),
 				dispose: vi.fn(),
 			} as never,
 			ctx: { hasUI: true },
-			createWidget: () => ({ update: vi.fn(), dispose: vi.fn() } as never),
+			createWidget: () => ({ update: vi.fn(), dispose: vi.fn() }) as never,
 		});
 		expect(missingEmulatorResult.status).toBe("failed");
 
@@ -352,13 +350,19 @@ describe("PTY execution", () => {
 		manager.closeSession("missing");
 		manager.dispose();
 
-		expect(resolveShellLaunch("pwd", "linux", { SHELL: "/usr/bin/zsh" })).toEqual({ file: "/usr/bin/zsh", args: ["-lc", "pwd"] });
+		expect(resolveShellLaunch("pwd", "linux", { SHELL: "/usr/bin/zsh" })).toEqual({
+			file: "/usr/bin/zsh",
+			args: ["-lc", "pwd"],
+		});
 		expect(resolveShellLaunch("pwd", "linux", {})).toEqual({ file: "/bin/bash", args: ["-lc", "pwd"] });
 		expect(resolveShellLaunch("dir", "win32", { SHELL: "C:/Program Files/Git/bin/bash.exe" })).toEqual({
 			file: "C:/Program Files/Git/bin/bash.exe",
 			args: ["-lc", "dir"],
 		});
-		expect(resolveShellLaunch("dir", "win32", { ComSpec: "cmd.exe" })).toEqual({ file: "cmd.exe", args: ["/d", "/s", "/c", "dir"] });
+		expect(resolveShellLaunch("dir", "win32", { ComSpec: "cmd.exe" })).toEqual({
+			file: "cmd.exe",
+			args: ["/d", "/s", "/c", "dir"],
+		});
 
 		expect(ptySessionInternals.sanitizeEnv({ FOO: "bar", BAZ: undefined })).toMatchObject({
 			FOO: "bar",
@@ -399,15 +403,17 @@ describe("PTY execution", () => {
 		expect(appendExitSummary("body", 0)).toContain("body");
 		expect(appendExitSummary("", 0)).toContain("[Exit code: 0]");
 		expect(truncateInternals.normalizeNewlines("a\r\nb\r")).toBe("a\nb\n");
-		expect(truncateInternals.buildTruncationNotice({
-			truncated: true,
-			totalLines: 3,
-			totalBytes: 9,
-			keptLines: 2,
-			keptBytes: 6,
-			maxLines: 2,
-			maxBytes: 100,
-		})).toContain("kept 2/3 lines");
+		expect(
+			truncateInternals.buildTruncationNotice({
+				truncated: true,
+				totalLines: 3,
+				totalBytes: 9,
+				keptLines: 2,
+				keptBytes: 6,
+				maxLines: 2,
+				maxBytes: 100,
+			}),
+		).toContain("kept 2/3 lines");
 	});
 
 	it("ensures the node-pty spawn-helper is executable when present", async () => {
@@ -427,12 +433,24 @@ describe("PTY execution", () => {
 		const candidates = getSpawnHelperCandidates("/tmp/chmod-me");
 		expect(candidates[0]).toBe("/tmp/chmod-me");
 		expect(spawnHelperInternals.uniquePaths(["a", "a", "b"])).toEqual(["a", "b"]);
-		expect(await ensureSpawnHelperExecutable({ explicitPath: "/tmp/chmod-me", accessFn: accessFn as never, chmodFn: chmodFn as never })).toBe("/tmp/chmod-me");
+		expect(
+			await ensureSpawnHelperExecutable({
+				explicitPath: "/tmp/chmod-me",
+				accessFn: accessFn as never,
+				chmodFn: chmodFn as never,
+			}),
+		).toBe("/tmp/chmod-me");
 		expect(chmodFn).toHaveBeenCalledWith("/tmp/chmod-me", 0o755);
 		const missingAccess = vi.fn(async () => {
 			throw new Error("missing");
 		});
-		expect(await ensureSpawnHelperExecutable({ explicitPath: "/tmp/missing", accessFn: missingAccess as never, chmodFn: chmodFn as never })).toBeNull();
+		expect(
+			await ensureSpawnHelperExecutable({
+				explicitPath: "/tmp/missing",
+				accessFn: missingAccess as never,
+				chmodFn: chmodFn as never,
+			}),
+		).toBeNull();
 		expect(await spawnHelperInternals.isExecutable("/tmp/chmod-me", missingAccess as never)).toBe(false);
 		await ensureSpawnHelperExecutable();
 	});

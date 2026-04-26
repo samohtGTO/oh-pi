@@ -4,7 +4,10 @@ import { createExtensionHarness } from "../../../test-utils/extension-runtime-ha
 const mocks = vi.hoisted(() => {
 	const delegatedExecute = vi.fn();
 	const executePtyCommand = vi.fn();
-	const toAgentToolResult = vi.fn((result) => ({ content: [{ type: "text", text: `tool:${result.sessionId}` }], details: { ok: true } }));
+	const toAgentToolResult = vi.fn((result) => ({
+		content: [{ type: "text", text: `tool:${result.sessionId}` }],
+		details: { ok: true },
+	}));
 	const toUserBashResult = vi.fn((result) => ({
 		output: `user:${result.sessionId}`,
 		exitCode: 0,
@@ -146,12 +149,16 @@ describe("@ifi/pi-bash-live-view index", () => {
 		bashLiveViewExtension(harness.pi as never);
 		mocks.executePtyCommand.mockRejectedValueOnce(new Error("boom"));
 
-		const result = await harness.tools.get(BASH_LIVE_VIEW_TOOL)?.execute("tool-3", { command: "broken", usePTY: true }, undefined, undefined, harness.ctx);
+		const result = await harness.tools
+			.get(BASH_LIVE_VIEW_TOOL)
+			?.execute("tool-3", { command: "broken", usePTY: true }, undefined, undefined, harness.ctx);
 		expect(result).toMatchObject({
 			content: [{ text: "PTY execution failed: boom" }],
 			details: { error: true, pty: true },
 		});
-		expect(bashLiveViewInternals.toErrorToolResult(new Error("x"))).toMatchObject({ content: [{ text: "PTY execution failed: x" }] });
+		expect(bashLiveViewInternals.toErrorToolResult(new Error("x"))).toMatchObject({
+			content: [{ text: "PTY execution failed: x" }],
+		});
 	});
 
 	it("runs the /bash-pty command and reports empty or failed commands via the UI", async () => {

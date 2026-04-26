@@ -93,10 +93,7 @@ describe("tailscale helpers", () => {
 		expect(runner.mock.calls).toEqual([
 			["which", ["tailscale"]],
 			["tailscale", ["status", "--json"]],
-			[
-				"tailscale",
-				["serve", "--bg", "--https", "443", "--set-path", "/pi/session-42/", "http://127.0.0.1:3100"],
-			],
+			["tailscale", ["serve", "--bg", "--https", "443", "--set-path", "/pi/session-42/", "http://127.0.0.1:3100"]],
 			["tailscale", ["serve", "--https", "443", "--set-path", "/pi/session-42/", "off"]],
 		]);
 	});

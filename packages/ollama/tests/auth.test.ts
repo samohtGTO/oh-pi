@@ -16,7 +16,9 @@ afterEach(() => {
 describe("ollama cloud auth", () => {
 	it("opens the keys page and exchanges a pasted API key for a static credential with discovered models", async () => {
 		const backend = await createTestOllamaBackend();
-		backend.setModels([{ id: "gpt-oss:120b", capabilities: ["completion", "tools", "thinking"], contextWindow: 131072 }]);
+		backend.setModels([
+			{ id: "gpt-oss:120b", capabilities: ["completion", "tools", "thinking"], contextWindow: 131072 },
+		]);
 		process.env.PI_OLLAMA_CLOUD_API_URL = backend.apiUrl;
 		process.env.PI_OLLAMA_CLOUD_MODELS_URL = `${backend.apiUrl}/models`;
 		process.env.PI_OLLAMA_CLOUD_SHOW_URL = `${backend.origin}/api/show`;
@@ -47,7 +49,18 @@ describe("ollama cloud auth", () => {
 			refresh: "test-key",
 			access: "test-key",
 			expires: Date.now() - 1000,
-			models: [{ id: "qwen3-next:80b", name: "Qwen3 Next 80B", reasoning: true, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 262144, maxTokens: 32768, source: "cloud" }],
+			models: [
+				{
+					id: "qwen3-next:80b",
+					name: "Qwen3 Next 80B",
+					reasoning: true,
+					input: ["text"],
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+					contextWindow: 262144,
+					maxTokens: 32768,
+					source: "cloud",
+				},
+			],
 		} as never);
 
 		expect(refreshed.models?.[0]?.id).toBe("qwen3-next:80b");
@@ -56,18 +69,49 @@ describe("ollama cloud auth", () => {
 
 	it("modifies provider models using runtime cloud models when available", () => {
 		const runtimeModels = [
-			{ id: "kimi-k2.6", name: "Kimi K2.6", reasoning: true, input: ["text", "image"] as const, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 262144, maxTokens: 32768, source: "cloud" as const },
+			{
+				id: "kimi-k2.6",
+				name: "Kimi K2.6",
+				reasoning: true,
+				input: ["text", "image"] as const,
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 262144,
+				maxTokens: 32768,
+				source: "cloud" as const,
+			},
 		];
 		const provider = createOllamaCloudOAuthProvider(() => runtimeModels as never);
 		const modified = provider.modifyModels?.(
 			[
-				{ id: "placeholder", name: "Placeholder", api: "openai-completions", provider: "ollama-cloud", baseUrl: "https://example.com/v1", reasoning: false, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 1, maxTokens: 1 },
+				{
+					id: "placeholder",
+					name: "Placeholder",
+					api: "openai-completions",
+					provider: "ollama-cloud",
+					baseUrl: "https://example.com/v1",
+					reasoning: false,
+					input: ["text"],
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+					contextWindow: 1,
+					maxTokens: 1,
+				},
 			],
 			{
 				refresh: "r",
 				access: "a",
 				expires: Date.now() + 1000,
-				models: [{ id: "gpt-oss:120b", name: "GPT OSS 120B", reasoning: true, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 131072, maxTokens: 16384, source: "cloud" }],
+				models: [
+					{
+						id: "gpt-oss:120b",
+						name: "GPT OSS 120B",
+						reasoning: true,
+						input: ["text"],
+						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+						contextWindow: 131072,
+						maxTokens: 16384,
+						source: "cloud",
+					},
+				],
 			} as never,
 		);
 
@@ -78,13 +122,35 @@ describe("ollama cloud auth", () => {
 		const provider = createOllamaCloudOAuthProvider(() => []);
 		const modified = provider.modifyModels?.(
 			[
-				{ id: "placeholder", name: "Placeholder", api: "openai-completions", provider: "ollama-cloud", baseUrl: "https://example.com/v1", reasoning: false, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 1, maxTokens: 1 },
+				{
+					id: "placeholder",
+					name: "Placeholder",
+					api: "openai-completions",
+					provider: "ollama-cloud",
+					baseUrl: "https://example.com/v1",
+					reasoning: false,
+					input: ["text"],
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+					contextWindow: 1,
+					maxTokens: 1,
+				},
 			],
 			{
 				refresh: "r",
 				access: "a",
 				expires: Date.now() + 1000,
-				models: [{ id: "gpt-oss:120b", name: "GPT OSS 120B", reasoning: true, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 131072, maxTokens: 16384, source: "cloud" }],
+				models: [
+					{
+						id: "gpt-oss:120b",
+						name: "GPT OSS 120B",
+						reasoning: true,
+						input: ["text"],
+						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+						contextWindow: 131072,
+						maxTokens: 16384,
+						source: "cloud",
+					},
+				],
 			} as never,
 		);
 

@@ -72,7 +72,10 @@ describe("diagnostics extension", () => {
 		it("classifies stop reasons and prompt state entries", () => {
 			expect(diagnosticsInternals.classifyStopReason("aborted")).toMatchObject({ status: "aborted", color: "warning" });
 			expect(diagnosticsInternals.classifyStopReason("error")).toMatchObject({ status: "error", color: "error" });
-			expect(diagnosticsInternals.classifyStopReason("length")).toMatchObject({ status: "completed", color: "success" });
+			expect(diagnosticsInternals.classifyStopReason("length")).toMatchObject({
+				status: "completed",
+				color: "success",
+			});
 			expect(diagnosticsInternals.classifyStopReason("toolUse")).toMatchObject({ status: "unknown", color: "muted" });
 			expect(diagnosticsInternals.isPromptCompletionDiagnostics(makeCompletion())).toBe(true);
 			expect(diagnosticsInternals.isPromptCompletionDiagnostics({ completedAt: "later" })).toBe(false);
@@ -114,9 +117,9 @@ describe("diagnostics extension", () => {
 			expect(diagnosticsInternals.countToolResults([{}, {}])).toBe(2);
 			expect(diagnosticsInternals.countToolResults(undefined)).toBe(0);
 
-			expect(
-				diagnosticsInternals.summarizeResponsePreview([{ type: "text", text: "Visible response" }], 0, null),
-			).toBe("Visible response");
+			expect(diagnosticsInternals.summarizeResponsePreview([{ type: "text", text: "Visible response" }], 0, null)).toBe(
+				"Visible response",
+			);
 			expect(diagnosticsInternals.summarizeResponsePreview([], 2, null)).toBe("Used 2 tools");
 			expect(diagnosticsInternals.summarizeResponsePreview([], 0, "aborted")).toBe("stop reason: aborted");
 			expect(diagnosticsInternals.summarizeResponsePreview([], 0, null)).toBe("(no visible response text)");
@@ -136,7 +139,9 @@ describe("diagnostics extension", () => {
 					{ role: "user", content: [{ type: "text", text: "User prompt" }] },
 				]),
 			).toBe("User prompt");
-			expect(diagnosticsInternals.findPromptPreviewFromMessages([{ role: "assistant", content: "ignore" }])).toBe("(empty prompt)");
+			expect(diagnosticsInternals.findPromptPreviewFromMessages([{ role: "assistant", content: "ignore" }])).toBe(
+				"(empty prompt)",
+			);
 			expect(diagnosticsInternals.findPromptPreviewFromMessages(undefined)).toBe("(empty prompt)");
 		});
 
@@ -155,7 +160,11 @@ describe("diagnostics extension", () => {
 				],
 				Date.UTC(2026, 3, 16, 11, 0, 7),
 			);
-			const fallbackCompletion = diagnosticsInternals.buildPromptCompletion(run, undefined, Date.UTC(2026, 3, 16, 11, 0, 8));
+			const fallbackCompletion = diagnosticsInternals.buildPromptCompletion(
+				run,
+				undefined,
+				Date.UTC(2026, 3, 16, 11, 0, 8),
+			);
 
 			expect(completion).toMatchObject({
 				status: "error",
@@ -166,7 +175,9 @@ describe("diagnostics extension", () => {
 			});
 			expect(diagnosticsInternals.buildPromptSummaryText(completion)).toContain("Prompt errored");
 			expect(fallbackCompletion.stopReason).toBeNull();
-			expect(diagnosticsInternals.getBranchEntries({ sessionManager: { getBranch: () => "invalid" } } as never)).toEqual([]);
+			expect(
+				diagnosticsInternals.getBranchEntries({ sessionManager: { getBranch: () => "invalid" } } as never),
+			).toEqual([]);
 			expect(
 				diagnosticsInternals.restoreEnabledState([
 					{ type: "custom", customType: "pi-diagnostics:state", data: { enabled: false } },
@@ -191,7 +202,11 @@ describe("diagnostics extension", () => {
 		});
 
 		it("renders fallback, collapsed, and expanded completion messages", () => {
-			const fallback = diagnosticsInternals.renderPromptCompletionMessage({ content: "Prompt diagnostics" }, false, theme as never);
+			const fallback = diagnosticsInternals.renderPromptCompletionMessage(
+				{ content: "Prompt diagnostics" },
+				false,
+				theme as never,
+			);
 			expect(renderText(fallback)).toContain("Prompt diagnostics");
 
 			const collapsed = diagnosticsInternals.renderPromptCompletionMessage(
@@ -227,9 +242,11 @@ describe("diagnostics extension", () => {
 		expect(harness.commands.has("diagnostics")).toBe(true);
 		expect(harness.shortcuts.has("ctrl+shift+d")).toBe(true);
 		expect(harness.messageRenderers.has("pi-diagnostics:prompt")).toBe(true);
-		const rendered = harness.messageRenderers
-			.get("pi-diagnostics:prompt")
-			?.({ details: makeCompletion() }, { expanded: false }, theme);
+		const rendered = harness.messageRenderers.get("pi-diagnostics:prompt")?.(
+			{ details: makeCompletion() },
+			{ expanded: false },
+			theme,
+		);
 		expect(rendered ? renderText(rendered) : "").toContain("Prompt");
 	});
 
@@ -343,10 +360,10 @@ describe("diagnostics extension", () => {
 		const setWidget = vi.fn();
 		harness.ctx.ui.setWidget = setWidget;
 		harness.ctx.sessionManager.getBranch = () =>
-			([
+			[
 				{ type: "custom", customType: "pi-diagnostics:state", data: { enabled: true } },
 				{ type: "custom_message", customType: "pi-diagnostics:prompt", details: makeCompletion() },
-			] as any);
+			] as any;
 		harness.pi.appendEntry = vi.fn();
 		diagnosticsExtension(harness.pi as never);
 
@@ -357,10 +374,7 @@ describe("diagnostics extension", () => {
 
 		const command = harness.commands.get("diagnostics");
 		expect(command.getArgumentCompletions("o")).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({ value: "on" }),
-				expect.objectContaining({ value: "off" }),
-			]),
+			expect.arrayContaining([expect.objectContaining({ value: "on" }), expect.objectContaining({ value: "off" })]),
 		);
 		expect(command.getArgumentCompletions("zzz")).toBeNull();
 
@@ -432,11 +446,7 @@ describe("diagnostics extension", () => {
 		diagnosticsExtension(harness.pi as never);
 		harness.emit("session_start", { type: "session_start" }, harness.ctx);
 
-		harness.emit(
-			"before_agent_start",
-			{ type: "before_agent_start", prompt: undefined, images: ["img"] },
-			harness.ctx,
-		);
+		harness.emit("before_agent_start", { type: "before_agent_start", prompt: undefined, images: ["img"] }, harness.ctx);
 		await harness.commands.get("diagnostics")?.handler("status", harness.ctx);
 		expect(harness.notifications.at(-1)?.msg).toContain("Running: 1 image prompt");
 		harness.emit(

@@ -2,11 +2,7 @@ import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import { ValueSchema } from "@bufbuild/protobuf/wkt";
 import { describe, expect, it } from "vitest";
 import type { Context, ToolCall, ToolResultMessage } from "@mariozechner/pi-ai";
-import {
-	buildCursorRequestPayload,
-	decodeMcpArgsMap,
-	parseCursorConversation,
-} from "../messages.js";
+import { buildCursorRequestPayload, decodeMcpArgsMap, parseCursorConversation } from "../messages.js";
 import { AgentClientMessageSchema } from "../proto/agent_pb.js";
 import { deriveBridgeKey, deriveConversationKey } from "../runtime.js";
 
@@ -31,7 +27,14 @@ describe("cursor provider request shaping", () => {
 					api: "cursor-agent",
 					provider: "cursor",
 					model: "composer-2",
-					usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+					usage: {
+						input: 0,
+						output: 0,
+						cacheRead: 0,
+						cacheWrite: 0,
+						totalTokens: 0,
+						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+					},
 					stopReason: "stop",
 					timestamp: Date.now() - 90,
 				},
@@ -42,7 +45,14 @@ describe("cursor provider request shaping", () => {
 					api: "cursor-agent",
 					provider: "cursor",
 					model: "composer-2",
-					usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+					usage: {
+						input: 0,
+						output: 0,
+						cacheRead: 0,
+						cacheWrite: 0,
+						totalTokens: 0,
+						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+					},
 					stopReason: "toolUse",
 					timestamp: Date.now() - 70,
 				},
@@ -64,13 +74,25 @@ describe("cursor provider request shaping", () => {
 		const parsed = parseCursorConversation({
 			systemPrompt: "You are helpful.",
 			messages: [{ role: "user", content: "Plan this task", timestamp: Date.now() }],
-			tools: [{ name: "echo", description: "Echo text", parameters: { type: "object", properties: { text: { type: "string" } } } as never }],
+			tools: [
+				{
+					name: "echo",
+					description: "Echo text",
+					parameters: { type: "object", properties: { text: { type: "string" } } } as never,
+				},
+			],
 		});
 		const payload = buildCursorRequestPayload({
 			modelId: "composer-2",
 			conversationId: "conv-123",
 			parsed,
-			tools: [{ name: "echo", description: "Echo text", parameters: { type: "object", properties: { text: { type: "string" } } } as never }],
+			tools: [
+				{
+					name: "echo",
+					description: "Echo text",
+					parameters: { type: "object", properties: { text: { type: "string" } } } as never,
+				},
+			],
 		});
 		const clientMessage = fromBinary(AgentClientMessageSchema, payload.requestBytes);
 

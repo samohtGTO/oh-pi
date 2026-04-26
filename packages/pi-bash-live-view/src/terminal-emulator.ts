@@ -117,7 +117,11 @@ const DEFAULT_HEADLESS_MODULE_LOADER = async (): Promise<HeadlessModuleLike> => 
 
 let headlessModuleLoader: () => Promise<HeadlessModuleLike> = DEFAULT_HEADLESS_MODULE_LOADER;
 
-function getBoolean(source: TerminalCellLike | undefined, methodName: keyof TerminalCellLike, propName: keyof TerminalCellLike): boolean {
+function getBoolean(
+	source: TerminalCellLike | undefined,
+	methodName: keyof TerminalCellLike,
+	propName: keyof TerminalCellLike,
+): boolean {
 	const method = source?.[methodName] as ((this: TerminalCellLike | undefined) => unknown) | undefined;
 	if (typeof method === "function") {
 		return Boolean(method.call(source));
@@ -126,7 +130,11 @@ function getBoolean(source: TerminalCellLike | undefined, methodName: keyof Term
 	return Boolean(source?.[propName]);
 }
 
-function getNumber(source: TerminalCellLike | undefined, methodName: keyof TerminalCellLike, propName: keyof TerminalCellLike): number | undefined {
+function getNumber(
+	source: TerminalCellLike | undefined,
+	methodName: keyof TerminalCellLike,
+	propName: keyof TerminalCellLike,
+): number | undefined {
 	const method = source?.[methodName] as ((this: TerminalCellLike | undefined) => unknown) | undefined;
 	if (typeof method === "function") {
 		const value = method.call(source);

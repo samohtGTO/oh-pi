@@ -37,7 +37,8 @@ function readTmuxClientTerm(): string | null {
 			timeout: 200,
 		}).trim();
 		TMUX_CLIENT_TERM_CACHE = term ? normalizeTerminalName(term) : null;
-	} catch { // patch-coverage-ignore
+	} catch {
+		// patch-coverage-ignore
 		TMUX_CLIENT_TERM_CACHE = null;
 	}
 	return TMUX_CLIENT_TERM_CACHE;
@@ -47,7 +48,8 @@ export function getOuterTerminal(): string {
 	if (process.env.LC_TERMINAL === "iTerm2") return "iTerm.app";
 	if (process.env.GHOSTTY_RESOURCES_DIR) return "ghostty";
 	if (process.env.KITTY_WINDOW_ID || process.env.KITTY_PID) return "kitty";
-	if (process.env.WEZTERM_EXECUTABLE || process.env.WEZTERM_CONFIG_DIR || process.env.WEZTERM_CONFIG_FILE) return "WezTerm";
+	if (process.env.WEZTERM_EXECUTABLE || process.env.WEZTERM_CONFIG_DIR || process.env.WEZTERM_CONFIG_FILE)
+		return "WezTerm";
 	const termProgram = process.env.TERM_PROGRAM ?? "";
 	if (termProgram && termProgram !== "tmux" && termProgram !== "screen") return normalizeTerminalName(termProgram);
 	const tmuxClientTerm = readTmuxClientTerm();
@@ -77,9 +79,12 @@ export function tmuxAllowsPassthrough(): boolean | null {
 			encoding: "utf8",
 			stdio: ["ignore", "pipe", "ignore"],
 			timeout: 200,
-		}).trim().toLowerCase();
+		})
+			.trim()
+			.toLowerCase();
 		TMUX_ALLOW_PASSTHROUGH_CACHE = value === "on" || value === "all";
-	} catch { // patch-coverage-ignore
+	} catch {
+		// patch-coverage-ignore
 		TMUX_ALLOW_PASSTHROUGH_CACHE = null;
 	}
 	return TMUX_ALLOW_PASSTHROUGH_CACHE;
@@ -128,15 +133,15 @@ export const __imageInternals = {
 	tmuxAllowsPassthrough,
 	getTmuxPassthroughWarning,
 	setTmuxClientTermOverrideForTests: (value: string | null | undefined) => {
-		(globalThis as any).TMUX_CLIENT_TERM_OVERRIDE = value;
+		(globalThis as unknown as Record<string, unknown>).TMUX_CLIENT_TERM_OVERRIDE = value;
 	},
 	setTmuxAllowPassthroughOverrideForTests: (value: boolean | null | undefined) => {
-		(globalThis as any).TMUX_ALLOW_PASSTHROUGH_OVERRIDE = value;
+		(globalThis as unknown as Record<string, unknown>).TMUX_ALLOW_PASSTHROUGH_OVERRIDE = value;
 	},
 	resetCachesForTests: () => {
 		TMUX_CLIENT_TERM_CACHE = undefined;
 		TMUX_ALLOW_PASSTHROUGH_CACHE = undefined;
-		(globalThis as any).TMUX_CLIENT_TERM_OVERRIDE = undefined;
-		(globalThis as any).TMUX_ALLOW_PASSTHROUGH_OVERRIDE = undefined;
+		(globalThis as unknown as Record<string, unknown>).TMUX_CLIENT_TERM_OVERRIDE = undefined;
+		(globalThis as unknown as Record<string, unknown>).TMUX_ALLOW_PASSTHROUGH_OVERRIDE = undefined;
 	},
 };

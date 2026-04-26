@@ -34,7 +34,13 @@ describe("enhanceBashTool", () => {
 		enhanceBashTool(mockExtensionAPI as any);
 		const toolConfig = mockRegisterTool.mock.calls[0][0];
 
-		const result = await toolConfig.execute("tc1", { command: "echo ok", timeout: 5, usePTY: false }, new AbortController().signal, vi.fn(), {});
+		const result = await toolConfig.execute(
+			"tc1",
+			{ command: "echo ok", timeout: 5, usePTY: false },
+			new AbortController().signal,
+			vi.fn(),
+			{},
+		);
 
 		expect(result.content[0].text).toContain("✓");
 		expect(result.content[0].text).toContain("exit 0");

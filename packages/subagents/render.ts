@@ -3,7 +3,8 @@
  */
 
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
-import { getMarkdownTheme, type ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { getMarkdownTheme } from "@mariozechner/pi-coding-agent";
+import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
 import {
 	Container,
 	Markdown,
@@ -12,11 +13,12 @@ import {
 	truncateToWidth,
 	visibleWidth,
 	wrapTextWithAnsi,
-	type Widget,
 } from "@mariozechner/pi-tui";
-import { type AsyncJobState, type Details, MAX_WIDGET_JOBS, WIDGET_KEY } from "./types.js";
-import { formatTokens, formatUsage, formatDuration, formatToolCall, shortenPath } from "./formatters.js";
-import { getFinalOutput, getDisplayItems, getOutputTail, getLastActivity } from "./utils.js";
+import type { Widget } from "@mariozechner/pi-tui";
+import { MAX_WIDGET_JOBS, WIDGET_KEY } from "./types.js";
+import type { AsyncJobState, Details } from "./types.js";
+import { formatDuration, formatTokens, formatToolCall, formatUsage, shortenPath } from "./formatters.js";
+import { getDisplayItems, getFinalOutput, getLastActivity, getOutputTail } from "./utils.js";
 
 type Theme = ExtensionContext["ui"]["theme"];
 
@@ -37,7 +39,9 @@ const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
  * Uses Intl.Segmenter for proper Unicode/emoji handling (not char-by-char).
  */
 function truncLine(text: string, maxWidth: number): string {
-	if (visibleWidth(text) <= maxWidth) return text;
+	if (visibleWidth(text) <= maxWidth) {
+		return text;
+	}
 
 	const targetWidth = maxWidth - 1; // Room for single ellipsis character
 	let result = "";
@@ -47,12 +51,12 @@ function truncLine(text: string, maxWidth: number): string {
 
 	while (i < text.length) {
 		// Check for ANSI escape code
-		const ansiMatch = text.slice(i).match(/^\x1b\[[0-9;]*m/);
+		const ansiMatch = text.slice(i).match(/^\x1B\[[0-9;]*m/);
 		if (ansiMatch) {
 			const code = ansiMatch[0];
 			result += code;
 
-			if (code === "\x1b[0m" || code === "\x1b[m") {
+			if (code === "\x1B[0m" || code === "\u001b[m") {
 				activeStyles = []; // Reset clears all styles
 			} else {
 				activeStyles.push(code); // Stack styles (bold + color, etc.)
@@ -63,7 +67,7 @@ function truncLine(text: string, maxWidth: number): string {
 
 		// Find end of non-ANSI text segment
 		let end = i;
-		while (end < text.length && !text.slice(end).match(/^\x1b\[[0-9;]*m/)) {
+		while (end < text.length && !/^\x1b\[[0-9;]*m/.test(text.slice(end))) {
 			end++;
 		}
 
@@ -75,7 +79,7 @@ function truncLine(text: string, maxWidth: number): string {
 
 			if (currentWidth + graphemeWidth > targetWidth) {
 				// Re-apply all active styles before ellipsis to preserve background/colors
-				return result + activeStyles.join("") + "…";
+				return `${result + activeStyles.join("")}…`;
 			}
 
 			result += grapheme;
@@ -85,7 +89,7 @@ function truncLine(text: string, maxWidth: number): string {
 	}
 
 	// Reached end without exceeding width (shouldn't happen given initial check)
-	return result + activeStyles.join("") + "…";
+	return `${result + activeStyles.join("")}…`;
 }
 
 // Track last rendered widget state to avoid no-op re-renders
@@ -103,24 +107,38 @@ function computeWidgetHash(jobs: AsyncJobState[]): string {
 
 function extractOutputTarget(task: string): string | undefined {
 	const writeToMatch = task.match(/\[Write to:\s*([^\]\n]+)\]/i);
-	if (writeToMatch?.[1]?.trim()) return writeToMatch[1].trim();
+	if (writeToMatch?.[1]?.trim()) {
+		return writeToMatch[1].trim();
+	}
 	const findingsMatch = task.match(/Write your findings to:\s*(\S+)/i);
-	if (findingsMatch?.[1]?.trim()) return findingsMatch[1].trim();
+	if (findingsMatch?.[1]?.trim()) {
+		return findingsMatch[1].trim();
+	}
 	const outputMatch = task.match(/[Oo]utput(?:\s+to)?\s*:\s*(\S+)/i);
-	if (outputMatch?.[1]?.trim()) return outputMatch[1].trim();
+	if (outputMatch?.[1]?.trim()) {
+		return outputMatch[1].trim();
+	}
 	return undefined;
 }
 
 function hasEmptyTextOutputWithoutOutputTarget(task: string, output: string): boolean {
-	if (output.trim()) return false;
+	if (output.trim()) {
+		return false;
+	}
 	return !extractOutputTarget(task);
 }
 
 /**
  * Render the async jobs widget
  */
-export function renderWidget(ctx: ExtensionContext, jobs: AsyncJobState[], options: { suppressed?: boolean } = {}): void {
-	if (!ctx.hasUI) return;
+export function renderWidget(
+	ctx: ExtensionContext,
+	jobs: AsyncJobState[],
+	options: { suppressed?: boolean } = {},
+): void {
+	if (!ctx.hasUI) {
+		return;
+	}
 	if (options.suppressed || jobs.length === 0) {
 		if (lastWidgetHash !== "") {
 			lastWidgetHash = "";
@@ -139,7 +157,7 @@ export function renderWidget(ctx: ExtensionContext, jobs: AsyncJobState[], optio
 	}
 	lastWidgetHash = newHash;
 
-	const theme = ctx.ui.theme;
+	const { theme } = ctx.ui;
 	const w = getTermWidth();
 	const lines: string[] = [];
 	lines.push(theme.fg("accent", "Async subagents"));
@@ -192,7 +210,7 @@ export function renderSubagentResult(
 	theme: Theme,
 ): Widget {
 	const d = result.details;
-	if (!d || !d.results.length) {
+	if (!d || d.results.length === 0) {
 		const t = result.content[0];
 		const text = t?.type === "text" ? t.text : "(no output)";
 		return new Text(truncLine(text, getTermWidth() - 4), 0, 0);
@@ -228,12 +246,17 @@ export function renderSubagentResult(
 
 		const items = getDisplayItems(r.messages);
 		for (const item of items) {
-			if (item.type === "tool")
+			if (item.type === "tool") {
 				c.addChild(new Text(truncLine(theme.fg("muted", formatToolCall(item.name, item.args)), w), 0, 0));
+			}
 		}
-		if (items.length) c.addChild(new Spacer(1));
+		if (items.length > 0) {
+			c.addChild(new Spacer(1));
+		}
 
-		if (output) c.addChild(new Markdown(output, 0, 0, mdTheme));
+		if (output) {
+			c.addChild(new Markdown(output, 0, 0, mdTheme));
+		}
 		c.addChild(new Spacer(1));
 		if (r.skills?.length) {
 			c.addChild(new Text(truncLine(theme.fg("dim", `Skills: ${r.skills.join(", ")}`), w), 0, 0));
@@ -287,7 +310,7 @@ export function renderSubagentResult(
 				}
 				return acc;
 			},
-			{ toolCount: 0, tokens: 0, durationMs: 0 },
+			{ durationMs: 0, tokens: 0, toolCount: 0 },
 		);
 
 	const summaryStr =
@@ -306,7 +329,7 @@ export function renderSubagentResult(
 	// Build chain visualization: "scout → planner" with status icons
 	// Note: Only works correctly for sequential chains. Chains with parallel steps
 	// (indicated by "[agent1+agent2]" format) have multiple results per step,
-	// breaking the 1:1 mapping between chainAgents and results.
+	// Breaking the 1:1 mapping between chainAgents and results.
 	const chainVis =
 		d.chainAgents?.length && !hasParallelInChain
 			? d.chainAgents

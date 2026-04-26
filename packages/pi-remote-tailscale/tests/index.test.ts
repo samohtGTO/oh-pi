@@ -65,12 +65,13 @@ async function loadExtension() {
 
 beforeEach(() => {
 	vi.useFakeTimers();
-	(globalThis as typeof globalThis & { __PI_REMOTE_TAILSCALE_QR_LOADER__?: () => Promise<any> }).__PI_REMOTE_TAILSCALE_QR_LOADER__ =
-		(vi.fn(async () => ({
-			generate: (_url: string, _options?: { small?: boolean }, callback?: (output: string) => void) => {
-				callback?.("██\n██");
-			},
-		})) as unknown) as () => Promise<any>;
+	(
+		globalThis as typeof globalThis & { __PI_REMOTE_TAILSCALE_QR_LOADER__?: () => Promise<any> }
+	).__PI_REMOTE_TAILSCALE_QR_LOADER__ = vi.fn(async () => ({
+		generate: (_url: string, _options?: { small?: boolean }, callback?: (output: string) => void) => {
+			callback?.("██\n██");
+		},
+	})) as unknown as () => Promise<any>;
 });
 
 afterEach(async () => {
@@ -92,10 +93,12 @@ describe("pi-remote-tailscale extension", () => {
 		};
 
 		let resolvedSession: unknown;
-		serverModule.startRemoteSessionServer.mockImplementationOnce(async (options: { resolveSession?: () => unknown }) => {
-			resolvedSession = options.resolveSession?.();
-			return handle;
-		});
+		serverModule.startRemoteSessionServer.mockImplementationOnce(
+			async (options: { resolveSession?: () => unknown }) => {
+				resolvedSession = options.resolveSession?.();
+				return handle;
+			},
+		);
 
 		const extension = await loadExtension();
 		extension(harness.pi as never);
@@ -278,7 +281,7 @@ describe("qr helpers", () => {
 				callback?.("AA\nBB");
 			}),
 		};
-		const loadCallbackModule = (vi.fn(async () => callbackModule) as unknown) as () => Promise<any>;
+		const loadCallbackModule = vi.fn(async () => callbackModule) as unknown as () => Promise<any>;
 		const renderer = createQrRenderer({ loadModule: loadCallbackModule, maxCacheEntries: 2 });
 
 		expect(appendTokenQuery("http://localhost:3100", "secret")).toBe("http://localhost:3100/?t=secret");
@@ -354,10 +357,11 @@ describe("pty helpers", () => {
 		expect(pty.kill).toHaveBeenCalledWith("SIGTERM");
 		expect(pty.off).toHaveBeenCalledTimes(2);
 
-		(globalThis as typeof globalThis & { __PI_REMOTE_TAILSCALE_PTY_LOADER__?: () => Promise<any> }).__PI_REMOTE_TAILSCALE_PTY_LOADER__ =
-			async () => ({
-				spawn: vi.fn(() => pty),
-			});
+		(
+			globalThis as typeof globalThis & { __PI_REMOTE_TAILSCALE_PTY_LOADER__?: () => Promise<any> }
+		).__PI_REMOTE_TAILSCALE_PTY_LOADER__ = async () => ({
+			spawn: vi.fn(() => pty),
+		});
 		await createPtyProcess({ command: "pi" });
 		delete (globalThis as typeof globalThis & { __PI_REMOTE_TAILSCALE_PTY_LOADER__?: () => Promise<any> })
 			.__PI_REMOTE_TAILSCALE_PTY_LOADER__;
@@ -366,16 +370,22 @@ describe("pty helpers", () => {
 
 describe("cli helpers", () => {
 	it("parses CLI arguments and exercises help, env, success, and error paths", async () => {
-		expect(parseArgs(["node", "cli.js", "--cwd", "/tmp/demo", "--command", "pi-dev", "--", "--session", "123"]))
-			.toEqual({
-				args: ["--", "--session", "123"],
-				command: "pi-dev",
-				cwd: "/tmp/demo",
-				help: false,
-				printEnv: false,
-			});
-		expect(parseArgs(["node", "cli.js", "--command"]))
-			.toEqual({ args: [], command: "pi", cwd: undefined, help: false, printEnv: false });
+		expect(
+			parseArgs(["node", "cli.js", "--cwd", "/tmp/demo", "--command", "pi-dev", "--", "--session", "123"]),
+		).toEqual({
+			args: ["--", "--session", "123"],
+			command: "pi-dev",
+			cwd: "/tmp/demo",
+			help: false,
+			printEnv: false,
+		});
+		expect(parseArgs(["node", "cli.js", "--command"])).toEqual({
+			args: [],
+			command: "pi",
+			cwd: undefined,
+			help: false,
+			printEnv: false,
+		});
 
 		const log = vi.fn();
 		const error = vi.fn();
@@ -384,7 +394,7 @@ describe("cli helpers", () => {
 		const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
 		const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 		try {
-			expect(await main(["node", "cli.js", "--help"])) .toBe(0);
+			expect(await main(["node", "cli.js", "--help"])).toBe(0);
 			expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining("PTY launcher helper"));
 		} finally {
 			consoleLog.mockRestore();
@@ -401,7 +411,11 @@ describe("cli helpers", () => {
 		log.mockClear();
 		expect(await main(["node", "cli.js", "--cwd", "/tmp/demo"], { error, log, startPty })).toBe(0);
 		expect(startPty).toHaveBeenCalledWith(
-			expect.objectContaining({ command: "pi", cwd: "/tmp/demo", env: expect.objectContaining({ PI_REMOTE_TAILSCALE_MODE: "remote" }) }),
+			expect.objectContaining({
+				command: "pi",
+				cwd: "/tmp/demo",
+				env: expect.objectContaining({ PI_REMOTE_TAILSCALE_MODE: "remote" }),
+			}),
 		);
 
 		startPty.mockRejectedValueOnce(new Error("spawn failed"));

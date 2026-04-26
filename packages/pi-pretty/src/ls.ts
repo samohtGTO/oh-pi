@@ -46,13 +46,18 @@ export function enhanceLsTool(pi: ExtensionAPI): void {
 	pi.registerTool({
 		...original,
 		async execute(toolCallId, params, signal, onUpdate): Promise<AgentToolResult<unknown>> {
-			const result = await original.execute(toolCallId, params as any, signal, onUpdate);
+			const result = await original.execute(
+				toolCallId,
+				params as Parameters<typeof original.execute>[1],
+				signal,
+				onUpdate,
+			);
 			const text = result.content.find((c): c is { type: "text"; text: string } => c.type === "text")?.text ?? "";
 			let entries: FileEntry[] = [];
 			if (text.startsWith("[") || text.startsWith("{")) {
 				try {
 					const parsed = JSON.parse(text);
-					entries = Array.isArray(parsed) ? parsed : parsed.files ?? [];
+					entries = Array.isArray(parsed) ? parsed : (parsed.files ?? []);
 				} catch {
 					// Fallback to plain text
 				}

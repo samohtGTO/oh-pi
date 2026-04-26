@@ -209,11 +209,7 @@ describe("check-patch-coverage", () => {
 		const lcovPath = path.join(dir, "lcov.info");
 		const ignoredFile = path.join(dir, "ignored.ts");
 		fs.writeFileSync(ignoredFile, "/* c8 ignore file */\nexport const ignored = true;\n", "utf8");
-		fs.writeFileSync(
-			lcovPath,
-			`TN:\nSF:${normalizeCoveragePath(ignoredFile)}\nDA:2,0\nend_of_record\n`,
-			"utf8",
-		);
+		fs.writeFileSync(lcovPath, `TN:\nSF:${normalizeCoveragePath(ignoredFile)}\nDA:2,0\nend_of_record\n`, "utf8");
 		childProcessMocks.execFileSync.mockReturnValueOnce(
 			`diff --git a/${normalizeCoveragePath(ignoredFile)} b/${normalizeCoveragePath(ignoredFile)}\n+++ b/${normalizeCoveragePath(ignoredFile)}\n@@ -1,0 +1,2 @@\n+/* c8 ignore file */\n+export const ignored = true;\n`,
 		);
@@ -275,7 +271,9 @@ describe("check-patch-coverage", () => {
 		const summary = runPatchCoverageCheck({ base: "base", head: "head", lcovPath, threshold: 100 });
 
 		expect(summary).toMatchObject({ covered: 1, total: 1, pct: 100 });
-		expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Patch coverage: 100.00% (1/1 changed executable lines covered)"));
+		expect(logSpy).toHaveBeenCalledWith(
+			expect.stringContaining("Patch coverage: 100.00% (1/1 changed executable lines covered)"),
+		);
 		expect(main(["--base", "base", "--head", "head", "--threshold", "100", "--lcov", lcovPath])).toMatchObject({
 			covered: 1,
 			total: 1,

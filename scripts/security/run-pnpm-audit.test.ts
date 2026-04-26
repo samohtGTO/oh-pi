@@ -76,7 +76,6 @@ console.error("audit found 1 high severity vulnerability");
 process.exit(7);
 `);
 
-		expect(() => runAudit(fakePnpmPath, ["-D"]))
-			.toThrowError(/audit found 1 high severity vulnerability/);
+		expect(() => runAudit(fakePnpmPath, ["-D"])).toThrowError(/audit found 1 high severity vulnerability/);
 	}, 15_000);
 });

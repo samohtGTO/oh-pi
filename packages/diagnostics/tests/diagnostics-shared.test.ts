@@ -42,10 +42,13 @@ describe("diagnostics shared helpers", () => {
 
 	it("summarizes structured content via text extraction", () => {
 		expect(
-			summarizeContent([
-				{ type: "text", text: "First line" },
-				{ type: "text", text: "Second line" },
-			], 20),
+			summarizeContent(
+				[
+					{ type: "text", text: "First line" },
+					{ type: "text", text: "Second line" },
+				],
+				20,
+			),
 		).toBe("First line Second l…");
 		expect(summarizeContent([{ type: "image", url: "file://image.png" }])).toBe("");
 	});

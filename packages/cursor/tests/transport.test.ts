@@ -98,10 +98,12 @@ describe("cursor transport helpers", () => {
 	});
 
 	it("parses Connect end streams and incremental frame chunks", () => {
-		expect(parseConnectEndStream(new TextEncoder().encode('{"error":{"code":"denied","message":"Nope"}}'))?.message).toBe(
-			"Connect error denied: Nope",
+		expect(
+			parseConnectEndStream(new TextEncoder().encode('{"error":{"code":"denied","message":"Nope"}}'))?.message,
+		).toBe("Connect error denied: Nope");
+		expect(parseConnectEndStream(new TextEncoder().encode("not-json"))?.message).toBe(
+			"Failed to parse Connect end stream",
 		);
-		expect(parseConnectEndStream(new TextEncoder().encode("not-json"))?.message).toBe("Failed to parse Connect end stream");
 
 		const messages: Uint8Array[] = [];
 		const ends: Uint8Array[] = [];
@@ -161,7 +163,11 @@ describe("cursor transport helpers", () => {
 	});
 
 	it("streams data, connect frames, heartbeats, and close events", async () => {
-		const connection = new CursorStreamingConnection({ accessToken: "token", rpcPath: "/stream", url: "https://cursor.test" });
+		const connection = new CursorStreamingConnection({
+			accessToken: "token",
+			rpcPath: "/stream",
+			url: "https://cursor.test",
+		});
 		const session = http2Mocks.sessions.at(-1);
 		const stream = session.requestInstance;
 		const chunks: Buffer[] = [];

@@ -199,7 +199,10 @@ describe("delegated runtime helpers", () => {
 
 		expect(inspection.selection?.selectedModel).toBe("google/gemini-2.5-flash");
 		expect(inspection.selection?.ranked[0]?.reasons).toEqual(
-			expect.arrayContaining([expect.stringContaining("preferred-provider:1"), expect.stringContaining("measured-latency")]),
+			expect.arrayContaining([
+				expect.stringContaining("preferred-provider:1"),
+				expect.stringContaining("measured-latency"),
+			]),
 		);
 	});
 });

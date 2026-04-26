@@ -58,15 +58,21 @@ const providerMocks = vi.hoisted(() => {
 			userText: "Do the thing",
 			trailingToolResults: [],
 		})),
-		sendExecResult: vi.fn((_execId: string, _msgId: string, _kind: string, _result: unknown, write: (data: unknown) => void) => {
-			write({ ack: _kind, execId: _execId });
-		}),
-		sendKvBlobResponse: vi.fn((_message: unknown, _blobStore: Map<string, Uint8Array>, write: (data: unknown) => void) => {
-			write({ ack: "kv" });
-		}),
-		sendRequestContextResult: vi.fn((_execId: string, _msgId: string, _tools: unknown[], write: (data: unknown) => void) => {
-			write({ ack: "requestContext" });
-		}),
+		sendExecResult: vi.fn(
+			(_execId: string, _msgId: string, _kind: string, _result: unknown, write: (data: unknown) => void) => {
+				write({ ack: _kind, execId: _execId });
+			},
+		),
+		sendKvBlobResponse: vi.fn(
+			(_message: unknown, _blobStore: Map<string, Uint8Array>, write: (data: unknown) => void) => {
+				write({ ack: "kv" });
+			},
+		),
+		sendRequestContextResult: vi.fn(
+			(_execId: string, _msgId: string, _tools: unknown[], write: (data: unknown) => void) => {
+				write({ ack: "requestContext" });
+			},
+		),
 		cleanupCursorRuntimeState: vi.fn(),
 		deleteActiveRun: vi.fn(),
 		deriveBridgeKey: vi.fn((conversationKey: string, modelId: string) => `${conversationKey}:${modelId}`),
@@ -189,7 +195,11 @@ beforeEach(() => {
 		mcpTools: [{ name: "echo" }],
 	} as never);
 	providerMocks.decodeMcpArgsMap.mockImplementation((args: Record<string, unknown>) => args);
-	providerMocks.parseCursorConversation.mockReturnValue({ seed: "seed-text", userText: "Do the thing", trailingToolResults: [] });
+	providerMocks.parseCursorConversation.mockReturnValue({
+		seed: "seed-text",
+		userText: "Do the thing",
+		trailingToolResults: [],
+	});
 	providerMocks.sendExecResult.mockImplementation(
 		(_execId: string, _msgId: string, kind: string, _result: unknown, write: (data: unknown) => void) => {
 			write({ ack: kind, execId: _execId });
@@ -205,7 +215,9 @@ beforeEach(() => {
 			write({ ack: "requestContext" });
 		},
 	);
-	providerMocks.deriveBridgeKey.mockImplementation((conversationKey: string, modelId: string) => `${conversationKey}:${modelId}`);
+	providerMocks.deriveBridgeKey.mockImplementation(
+		(conversationKey: string, modelId: string) => `${conversationKey}:${modelId}`,
+	);
 	providerMocks.deriveConversationKey.mockImplementation((sessionId: string | undefined, seed: string) =>
 		sessionId ? `session:${sessionId}` : `seed:${seed}`,
 	);
@@ -245,7 +257,11 @@ describe("streamSimpleCursor", () => {
 			trailingToolResults: [],
 		});
 
-		const stream = streamSimpleCursor(createModel() as never, createContext() as never, { sessionId: "session-1" } as never) as any;
+		const stream = streamSimpleCursor(
+			createModel() as never,
+			createContext() as never,
+			{ sessionId: "session-1" } as never,
+		) as any;
 		await flushMicrotasks();
 
 		expect(providerMocks.cleanupCursorRuntimeState).toHaveBeenCalledTimes(1);
@@ -253,7 +269,9 @@ describe("streamSimpleCursor", () => {
 		expect(stream.events.at(-1)).toMatchObject({
 			type: "error",
 			reason: "error",
-			error: expect.objectContaining({ errorMessage: "Cursor provider requires a user prompt or resumable tool results." }),
+			error: expect.objectContaining({
+				errorMessage: "Cursor provider requires a user prompt or resumable tool results.",
+			}),
 		});
 		expect(stream.end).toHaveBeenCalledTimes(1);
 	});
@@ -277,7 +295,11 @@ describe("streamSimpleCursor", () => {
 		} as never);
 		providerMocks.getActiveRun.mockReturnValueOnce(activeRun as never);
 
-		const stream = streamSimpleCursor(createModel() as never, createContext() as never, { sessionId: "session-1" } as never) as any;
+		const stream = streamSimpleCursor(
+			createModel() as never,
+			createContext() as never,
+			{ sessionId: "session-1" } as never,
+		) as any;
 		await flushMicrotasks();
 
 		expect(providerMocks.sendExecResult).toHaveBeenCalledTimes(2);
@@ -304,14 +326,22 @@ describe("streamSimpleCursor", () => {
 			lastAccessMs: 0,
 		} as never);
 
-		const stream = streamSimpleCursor(createModel() as never, createContext() as never, {
-			sessionId: "session-1",
-			onPayload,
-		} as never) as any;
+		const stream = streamSimpleCursor(
+			createModel() as never,
+			createContext() as never,
+			{
+				sessionId: "session-1",
+				onPayload,
+			} as never,
+		) as any;
 		await flushMicrotasks();
 
 		const connection = providerMocks.connections[0];
-		expect(connection.options).toMatchObject({ accessToken: "cursor-token", rpcPath: expect.anything(), url: "https://cursor.test" });
+		expect(connection.options).toMatchObject({
+			accessToken: "cursor-token",
+			rpcPath: expect.anything(),
+			url: "https://cursor.test",
+		});
 		expect(connection.startHeartbeat).toHaveBeenCalledWith(providerMocks.makeHeartbeatFrame);
 		expect(connection.write).toHaveBeenCalledWith({ framed: new Uint8Array([1, 2, 3]) });
 		expect(onPayload).toHaveBeenCalledWith({ model: "composer-2", conversationId: "saved-conv", toolCount: 1 });
@@ -319,19 +349,28 @@ describe("streamSimpleCursor", () => {
 		connection.handlers.onData?.({
 			kind: "message",
 			value: {
-				message: { case: "interactionUpdate", value: { message: { case: "textDelta", value: { text: "Hello <think>secret" } } } },
+				message: {
+					case: "interactionUpdate",
+					value: { message: { case: "textDelta", value: { text: "Hello <think>secret" } } },
+				},
 			},
 		});
 		connection.handlers.onData?.({
 			kind: "message",
 			value: {
-				message: { case: "interactionUpdate", value: { message: { case: "textDelta", value: { text: " plan</think> world" } } } },
+				message: {
+					case: "interactionUpdate",
+					value: { message: { case: "textDelta", value: { text: " plan</think> world" } } },
+				},
 			},
 		});
 		connection.handlers.onData?.({
 			kind: "message",
 			value: {
-				message: { case: "interactionUpdate", value: { message: { case: "thinkingDelta", value: { text: "deep thought" } } } },
+				message: {
+					case: "interactionUpdate",
+					value: { message: { case: "thinkingDelta", value: { text: "deep thought" } } },
+				},
 			},
 		});
 		connection.handlers.onData?.({
@@ -340,17 +379,26 @@ describe("streamSimpleCursor", () => {
 				message: { case: "interactionUpdate", value: { message: { case: "tokenDelta", value: { tokens: 7 } } } },
 			},
 		});
-		connection.handlers.onData?.({ kind: "message", value: { message: { case: "kvServerMessage", value: { blobId: "blob-1" } } } });
+		connection.handlers.onData?.({
+			kind: "message",
+			value: { message: { case: "kvServerMessage", value: { blobId: "blob-1" } } },
+		});
 		connection.handlers.onData?.({
 			kind: "message",
 			value: {
-				message: { case: "conversationCheckpointUpdate", value: { tokenDetails: { usedTokens: 25 }, checkpoint: true } },
+				message: {
+					case: "conversationCheckpointUpdate",
+					value: { tokenDetails: { usedTokens: 25 }, checkpoint: true },
+				},
 			},
 		});
 		connection.handlers.onData?.({
 			kind: "message",
 			value: {
-				message: { case: "execServerMessage", value: { execId: "1", id: "a", message: { case: "requestContextArgs", value: {} } } },
+				message: {
+					case: "execServerMessage",
+					value: { execId: "1", id: "a", message: { case: "requestContextArgs", value: {} } },
+				},
 			},
 		});
 		for (const execCase of [
@@ -367,7 +415,14 @@ describe("streamSimpleCursor", () => {
 			connection.handlers.onData?.({
 				kind: "message",
 				value: {
-					message: { case: "execServerMessage", value: { execId: `${execCase[0]}`, id: `msg-${execCase[0]}`, message: { case: execCase[0], value: execCase[1] } } },
+					message: {
+						case: "execServerMessage",
+						value: {
+							execId: `${execCase[0]}`,
+							id: `msg-${execCase[0]}`,
+							message: { case: execCase[0], value: execCase[1] },
+						},
+					},
 				},
 			});
 		}
@@ -395,7 +450,9 @@ describe("streamSimpleCursor", () => {
 		expect(providerMocks.upsertConversationState).toHaveBeenCalledTimes(1);
 		expect(providerMocks.setActiveRun).toHaveBeenCalledWith(
 			"session:session-1:composer-2",
-			expect.objectContaining({ pendingExecs: expect.arrayContaining([expect.objectContaining({ toolCallId: "tool-1" })]) }),
+			expect.objectContaining({
+				pendingExecs: expect.arrayContaining([expect.objectContaining({ toolCallId: "tool-1" })]),
+			}),
 		);
 		expect(connection.clearHandlers).toHaveBeenCalledTimes(1);
 		expect(stream.events).toEqual(
@@ -410,8 +467,15 @@ describe("streamSimpleCursor", () => {
 				expect.objectContaining({ type: "thinking_delta", delta: "deep thought" }),
 				expect.objectContaining({ type: "toolcall_start" }),
 				expect.objectContaining({ type: "toolcall_delta", delta: '{"text":"ping"}' }),
-				expect.objectContaining({ type: "toolcall_end", toolCall: expect.objectContaining({ id: "tool-1", name: "echo" }) }),
-				expect.objectContaining({ type: "done", reason: "toolUse", message: expect.objectContaining({ stopReason: "toolUse" }) }),
+				expect.objectContaining({
+					type: "toolcall_end",
+					toolCall: expect.objectContaining({ id: "tool-1", name: "echo" }),
+				}),
+				expect.objectContaining({
+					type: "done",
+					reason: "toolUse",
+					message: expect.objectContaining({ stopReason: "toolUse" }),
+				}),
 			]),
 		);
 		expect(stream.end).toHaveBeenCalledTimes(1);
@@ -419,9 +483,13 @@ describe("streamSimpleCursor", () => {
 
 	it("emits an aborted error when the caller signal aborts an in-flight run", async () => {
 		const controller = new AbortController();
-		const stream = streamSimpleCursor(createModel() as never, createContext() as never, {
-			signal: controller.signal,
-		} as never) as any;
+		const stream = streamSimpleCursor(
+			createModel() as never,
+			createContext() as never,
+			{
+				signal: controller.signal,
+			} as never,
+		) as any;
 		await flushMicrotasks();
 
 		const connection = providerMocks.connections[0];

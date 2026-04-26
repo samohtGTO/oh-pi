@@ -25,7 +25,7 @@ export interface WidgetTuiLike {
 export interface WidgetContextLike {
 	hasUI?: boolean;
 	ui?: {
-		setWidget: (...args: any[]) => void;
+		setWidget: <TArgs extends unknown[]>(...args: TArgs) => void;
 	};
 }
 
@@ -111,7 +111,10 @@ export class PtyLiveWidgetController {
 		this.key = options.key ?? `${DEFAULT_WIDGET_KEY_PREFIX}:${Math.random().toString(36).slice(2, 8)}`;
 		this.maxLines = options.maxLines ?? DEFAULT_WIDGET_MAX_LINES;
 		this.placement = options.placement ?? "belowEditor";
-		this.renderDebounceMs = Math.max(DEFAULT_RENDER_DEBOUNCE_MS, options.renderDebounceMs ?? DEFAULT_RENDER_DEBOUNCE_MS);
+		this.renderDebounceMs = Math.max(
+			DEFAULT_RENDER_DEBOUNCE_MS,
+			options.renderDebounceMs ?? DEFAULT_RENDER_DEBOUNCE_MS,
+		);
 	}
 
 	private mount(): void {

@@ -11,7 +11,14 @@ vi.mock("node:child_process", () => ({
 	execFileSync: execFileSyncMock,
 }));
 
-import { CURRENT_VERSION, MIN_VERSION, SMOKE_TESTS, WORKSPACE_INSTALL_ARGS, main, parseArgs } from "./verify-pi-compat.mjs";
+import {
+	CURRENT_VERSION,
+	MIN_VERSION,
+	SMOKE_TESTS,
+	WORKSPACE_INSTALL_ARGS,
+	main,
+	parseArgs,
+} from "./verify-pi-compat.mjs";
 
 const tempDirs: string[] = [];
 const originalCwd = process.cwd();

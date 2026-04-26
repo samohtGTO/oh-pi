@@ -54,9 +54,11 @@ function writeWorkspacePackage(
 	return packageDir;
 }
 
-function createWorkspaceRepo(options: {
-	manifests?: Partial<Record<string, Record<string, string[]>>>;
-} = {}): Map<string, string> {
+function createWorkspaceRepo(
+	options: {
+		manifests?: Partial<Record<string, Record<string, string[]>>>;
+	} = {},
+): Map<string, string> {
 	const repoDir = createTempDir("oh-pi-switcher-workspace-");
 	const packageDirs = new Map<string, string>();
 
@@ -383,7 +385,10 @@ describe("pi source switcher helpers", () => {
 			settingsPath,
 			JSON.stringify(
 				{
-					packages: [{ source: "npm:@ifi/oh-pi-extensions@0.4.3", extensions: ["extensions/custom-footer.ts"] }, "npm:chalk@5.0.0"],
+					packages: [
+						{ source: "npm:@ifi/oh-pi-extensions@0.4.3", extensions: ["extensions/custom-footer.ts"] },
+						"npm:chalk@5.0.0",
+					],
 				},
 				null,
 				2,
@@ -408,7 +413,9 @@ describe("pi source switcher helpers", () => {
 		expect(result.stdout).toContain("✅ Done. Fully restart pi to reload the switched packages.");
 
 		const savedSettings = JSON.parse(readFileSync(settingsPath, "utf8")) as { packages: unknown[] };
-		const savedSources = savedSettings.packages.map(getPackageSource).filter((value): value is string => Boolean(value));
+		const savedSources = savedSettings.packages
+			.map(getPackageSource)
+			.filter((value): value is string => Boolean(value));
 		const managedSources = savedSources.filter((value) => value.startsWith("npm:@ifi/"));
 		const extensionEntry = savedSettings.packages.find(
 			(entry) => getPackageSource(entry) === "npm:@ifi/oh-pi-extensions@0.4.4",
@@ -448,7 +455,9 @@ describe("pi source switcher helpers", () => {
 		});
 
 		const savedSettings = JSON.parse(readFileSync(settingsPath, "utf8")) as { packages: unknown[] };
-		const savedSources = savedSettings.packages.map(getPackageSource).filter((value): value is string => Boolean(value));
+		const savedSources = savedSettings.packages
+			.map(getPackageSource)
+			.filter((value): value is string => Boolean(value));
 
 		expect(result.status).toBe(0);
 		expect(result.stdout).toContain("run `pnpm install --frozen-lockfile` before restarting pi");

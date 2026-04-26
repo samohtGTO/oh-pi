@@ -68,7 +68,9 @@ describe("ollama local downloads", () => {
 		const harness = createExtensionHarness();
 		ollamaProviderExtension(harness.pi as never);
 
-		await waitFor(() => ((harness.providers.get("ollama")?.models as Array<{ id: string }> | undefined)?.length ?? 0) === 2);
+		await waitFor(
+			() => ((harness.providers.get("ollama")?.models as Array<{ id: string }> | undefined)?.length ?? 0) === 2,
+		);
 
 		const models = harness.providers.get("ollama")?.models as
 			| Array<{ id: string; contextWindow: number; localAvailability?: string }>
@@ -88,7 +90,9 @@ describe("ollama local downloads", () => {
 
 		const cloudBackend = await createTestOllamaBackend();
 		backends.push(cloudBackend);
-		cloudBackend.setModels([{ id: "glm-5.1", capabilities: ["completion", "tools", "thinking"], contextWindow: 202752 }]);
+		cloudBackend.setModels([
+			{ id: "glm-5.1", capabilities: ["completion", "tools", "thinking"], contextWindow: 202752 },
+		]);
 
 		const localBackend = await createTestOllamaBackend();
 		backends.push(localBackend);
@@ -104,7 +108,9 @@ describe("ollama local downloads", () => {
 			child.stderr = new PassThrough();
 			child.kill = vi.fn();
 			queueMicrotask(() => {
-				localBackend.setModels([{ id: "glm-5.1", capabilities: ["completion", "tools", "thinking"], contextWindow: 202752 }]);
+				localBackend.setModels([
+					{ id: "glm-5.1", capabilities: ["completion", "tools", "thinking"], contextWindow: 202752 },
+				]);
 				child.stdout.write("pulling glm-5.1\n");
 				child.stdout.end();
 				child.stderr.end();
@@ -124,17 +130,25 @@ describe("ollama local downloads", () => {
 		(harness.ctx.modelRegistry as { refresh?: ReturnType<typeof vi.fn> }).refresh = vi.fn();
 		ollamaProviderExtension(harness.pi as never);
 
-		await waitFor(() => ((harness.providers.get("ollama")?.models as Array<{ id: string }> | undefined)?.length ?? 0) === 1);
+		await waitFor(
+			() => ((harness.providers.get("ollama")?.models as Array<{ id: string }> | undefined)?.length ?? 0) === 1,
+		);
 
-		await harness.emitAsync("model_select", {
-			type: "model_select",
-			model: { provider: "ollama", id: "glm-5.1" },
-			previousModel: undefined,
-			source: "set",
-		}, harness.ctx);
+		await harness.emitAsync(
+			"model_select",
+			{
+				type: "model_select",
+				model: { provider: "ollama", id: "glm-5.1" },
+				previousModel: undefined,
+				source: "set",
+			},
+			harness.ctx,
+		);
 
 		await waitFor(() => {
-			const models = harness.providers.get("ollama")?.models as Array<{ id: string; localAvailability?: string }> | undefined;
+			const models = harness.providers.get("ollama")?.models as
+				| Array<{ id: string; localAvailability?: string }>
+				| undefined;
 			return models?.[0]?.localAvailability === "installed";
 		});
 
@@ -153,7 +167,9 @@ describe("ollama local downloads", () => {
 
 		const cloudBackend = await createTestOllamaBackend();
 		backends.push(cloudBackend);
-		cloudBackend.setModels([{ id: "kimi-k2.5", capabilities: ["completion", "tools", "thinking", "vision"], contextWindow: 262144 }]);
+		cloudBackend.setModels([
+			{ id: "kimi-k2.5", capabilities: ["completion", "tools", "thinking", "vision"], contextWindow: 262144 },
+		]);
 		process.env.PI_OLLAMA_CLOUD_API_URL = cloudBackend.apiUrl;
 		process.env.PI_OLLAMA_CLOUD_MODELS_URL = `${cloudBackend.apiUrl}/models`;
 		process.env.PI_OLLAMA_CLOUD_SHOW_URL = `${cloudBackend.origin}/api/show`;
@@ -168,7 +184,9 @@ describe("ollama local downloads", () => {
 		await sessionStart;
 		expect(execFileMock).not.toHaveBeenCalled();
 
-		await waitFor(() => harness.notifications.some((item) => item.msg.includes("Only ollama-cloud models are available right now")));
+		await waitFor(() =>
+			harness.notifications.some((item) => item.msg.includes("Only ollama-cloud models are available right now")),
+		);
 
 		expect(execFileMock).toHaveBeenCalled();
 		expect(harness.notifications.some((item) => item.type === "warning")).toBe(true);

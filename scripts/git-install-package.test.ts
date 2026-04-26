@@ -71,12 +71,7 @@ describe("git-install package manifest", () => {
 				.filter((entry) => entry.isDirectory())
 				.map((entry) => path.posix.join("packages", entry.name, "package.json")),
 		];
-		const dependencyKeys = [
-			"dependencies",
-			"devDependencies",
-			"peerDependencies",
-			"optionalDependencies",
-		] as const;
+		const dependencyKeys = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"] as const;
 
 		for (const manifestPath of manifestPaths) {
 			const manifest = readPackageJson(manifestPath);

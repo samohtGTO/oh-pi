@@ -122,7 +122,7 @@ function printHelp(): void {
 	console.log("  -h, --help            Show this help");
 }
 
-main().catch((err) => {
-	console.error("Fatal:", err.message ?? err);
+main().catch((error) => {
+	console.error("Fatal:", error.message ?? error);
 	process.exit(1);
 });

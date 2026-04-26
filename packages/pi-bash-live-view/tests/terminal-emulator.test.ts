@@ -36,7 +36,9 @@ describe("terminal emulator", () => {
 	it("sanitizes ANSI payloads and strips escape sequences", () => {
 		expect(sanitizeAnsiOutput("")).toBe("");
 		expect(stripAnsiSequences("")).toBe("");
-		const sanitized = sanitizeAnsiOutput("hello\u0007\u001B]0;title\u0007\u001B[1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17mworld\u0001");
+		const sanitized = sanitizeAnsiOutput(
+			"hello\u0007\u001B]0;title\u0007\u001B[1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17mworld\u0001",
+		);
 		expect(sanitized).not.toContain("\u0007");
 		expect(sanitized).not.toContain("]0;title");
 		expect(sanitized).toContain("\u001B[1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16m");
@@ -89,17 +91,19 @@ describe("terminal emulator", () => {
 		expect(renderLineToAnsi({ translateToString: () => "plain" }, 10)).toBe("plain");
 		expect(renderLineToAnsi({} as never, 10)).toBe("");
 		expect(renderLineToAnsi(undefined, 10)).toBe("");
-		expect(styleToSgr({
-			bold: false,
-			dim: false,
-			italic: false,
-			underline: false,
-			inverse: false,
-			hidden: false,
-			strikethrough: false,
-			foreground: null,
-			background: null,
-		})).toBe("\u001B[0m");
+		expect(
+			styleToSgr({
+				bold: false,
+				dim: false,
+				italic: false,
+				underline: false,
+				inverse: false,
+				hidden: false,
+				strikethrough: false,
+				foreground: null,
+				background: null,
+			}),
+		).toBe("\u001B[0m");
 	});
 
 	it("uses the injected headless terminal loader when available", async () => {

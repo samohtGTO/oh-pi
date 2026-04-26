@@ -16,7 +16,7 @@ export interface RemoteWidgetState {
 export interface RemoteUiTarget {
 	ui: {
 		setStatus: (key: string, value: string | undefined) => void;
-		setWidget: (...args: any[]) => void;
+		setWidget: <TArgs extends unknown[]>(...args: TArgs) => void;
 	};
 }
 
@@ -51,11 +51,13 @@ export function formatWidgetLines(state: RemoteWidgetState): string[] {
 	return lines;
 }
 
-export function createRemoteWidgetController(options: {
-	key?: string;
-	statusKey?: string;
-	debounceMs?: number;
-} = {}) {
+export function createRemoteWidgetController(
+	options: {
+		key?: string;
+		statusKey?: string;
+		debounceMs?: number;
+	} = {},
+) {
 	const key = options.key ?? REMOTE_WIDGET_KEY;
 	const statusKey = options.statusKey ?? REMOTE_STATUS_KEY;
 	const debounceMs = options.debounceMs ?? DEFAULT_WIDGET_DEBOUNCE_MS;

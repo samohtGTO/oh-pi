@@ -14,7 +14,7 @@ export function enhanceBashTool(pi: ExtensionAPI): void {
 			resolveBaseBackground(null);
 			const result = await original.execute(toolCallId, params, signal, onUpdate);
 
-			const exitCode = (result as any).exitCode ?? 0;
+			const exitCode = (result as { exitCode?: number }).exitCode ?? 0;
 			const ok = exitCode === 0;
 			const output = result.content.find((c): c is { type: "text"; text: string } => c.type === "text")?.text ?? "";
 
@@ -24,7 +24,8 @@ export function enhanceBashTool(pi: ExtensionAPI): void {
 
 			const lines = output.split("\n");
 			const previewLines = lines.slice(0, 20).join("\n");
-			const truncated = lines.length > 20 ? `${previewLines}\n\n${FG_YELLOW}… ${lines.length - 20} more lines\x1b[0m` : previewLines;
+			const truncated =
+				lines.length > 20 ? `${previewLines}\n\n${FG_YELLOW}… ${lines.length - 20} more lines\x1b[0m` : previewLines;
 
 			const body = fillToolBackground(`\n${truncated}\n\n${summary}`);
 

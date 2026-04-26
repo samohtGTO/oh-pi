@@ -17,7 +17,14 @@ async function createDelayedCloudBootstrapBackend(
 		const reply = () => {
 			if (req.url === "/v1/models" && req.method === "GET") {
 				res.writeHead(200, { "Content-Type": "application/json" });
-				res.end(JSON.stringify({ data: [{ id: "glm-5.1", object: "model" }, { id: "kimi-k2.5", object: "model" }] }));
+				res.end(
+					JSON.stringify({
+						data: [
+							{ id: "glm-5.1", object: "model" },
+							{ id: "kimi-k2.5", object: "model" },
+						],
+					}),
+				);
 				return;
 			}
 
@@ -29,9 +36,10 @@ async function createDelayedCloudBootstrapBackend(
 				req.on("end", () => {
 					const parsed = JSON.parse(body || "{}") as { model?: string };
 					const contextWindow = parsed.model === "kimi-k2.5" ? 262144 : 202752;
-					const capabilities = parsed.model === "kimi-k2.5"
-						? ["completion", "tools", "thinking", "vision"]
-						: ["completion", "tools", "thinking"];
+					const capabilities =
+						parsed.model === "kimi-k2.5"
+							? ["completion", "tools", "thinking", "vision"]
+							: ["completion", "tools", "thinking"];
 					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(
 						JSON.stringify({
@@ -173,10 +181,9 @@ describe("ollama provider smoke tests", () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));
 		}
 
-		expect((harness.providers.get("ollama-cloud")?.models as Array<{ id: string }> | undefined)?.map((model) => model.id)).toEqual([
-			"glm-5.1",
-			"kimi-k2.5",
-		]);
+		expect(
+			(harness.providers.get("ollama-cloud")?.models as Array<{ id: string }> | undefined)?.map((model) => model.id),
+		).toEqual(["glm-5.1", "kimi-k2.5"]);
 		expect(backend.getAuthHeaders()).toEqual(["", "", ""]);
 		await backend.close();
 	});
@@ -222,10 +229,7 @@ describe("ollama provider smoke tests", () => {
 		const provider = harness.providers.get("ollama");
 		expect(provider).toBeDefined();
 		expect(() =>
-			provider?.streamSimple?.(
-				{ provider: "ollama", id: "missing-model" } as never,
-				{} as never,
-			),
+			provider?.streamSimple?.({ provider: "ollama", id: "missing-model" } as never, {} as never),
 		).toThrowError(/\/ollama:pull missing-model/);
 	});
 });

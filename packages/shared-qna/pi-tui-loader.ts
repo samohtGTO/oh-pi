@@ -38,9 +38,7 @@ export function getPiTuiFallbackPaths(options: Omit<PiTuiLoaderOptions, "require
 		roots.add(options.bunInstallDir);
 	}
 	roots.add(path.join(homeDir, ".bun"));
-	return [...roots].map((root) =>
-		path.join(root, "install", "global", "node_modules", "@mariozechner", "pi-tui"),
-	);
+	return [...roots].map((root) => path.join(root, "install", "global", "node_modules", "@mariozechner", "pi-tui"));
 }
 
 /**

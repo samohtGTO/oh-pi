@@ -1,6 +1,12 @@
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import { registerApiProvider, resetApiProviders, streamSimple, streamSimpleOpenAICompletions, type Model } from "@mariozechner/pi-ai";
+import {
+	registerApiProvider,
+	resetApiProviders,
+	streamSimple,
+	streamSimpleOpenAICompletions,
+	type Model,
+} from "@mariozechner/pi-ai";
 import { afterEach, describe, expect, it } from "vitest";
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import ollamaProviderExtension from "../index.js";
@@ -106,7 +112,10 @@ function createCloudGlmModel(baseUrl: string): Model<"openai-completions"> {
 }
 
 function extractText(blocks: Array<{ type: string; text?: string }>): string {
-	return blocks.filter((block) => block.type === "text").map((block) => block.text ?? "").join("");
+	return blocks
+		.filter((block) => block.type === "text")
+		.map((block) => block.text ?? "")
+		.join("");
 }
 
 afterEach(() => {

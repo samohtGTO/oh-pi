@@ -22,9 +22,13 @@ describe("diagnostics installer", () => {
 
 	it("detects whether the pi binary is available", () => {
 		expect(findPi(vi.fn())).toBe("pi");
-		expect(findPi(vi.fn(() => {
-			throw new Error("missing");
-		}))).toBeNull();
+		expect(
+			findPi(
+				vi.fn(() => {
+					throw new Error("missing");
+				}),
+			),
+		).toBeNull();
 	});
 
 	it("normalizes install and removal command outcomes", () => {

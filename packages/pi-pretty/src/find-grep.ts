@@ -52,14 +52,20 @@ export function enhanceFindTool(pi: ExtensionAPI): void {
 	pi.registerTool({
 		...original,
 		async execute(toolCallId, params, signal, onUpdate): Promise<AgentToolResult<unknown>> {
-			const result = await original.execute(toolCallId, params as any, signal, onUpdate);
+			const result = await original.execute(
+				toolCallId,
+				params as Parameters<typeof original.execute>[1],
+				signal,
+				onUpdate,
+			);
 			const text = result.content.find((c): c is { type: "text"; text: string } => c.type === "text")?.text ?? "";
 			let files: string[] = [];
 			if (text.startsWith("[") || text.startsWith("{")) {
 				try {
 					const parsed = JSON.parse(text);
-					files = Array.isArray(parsed) ? parsed : parsed.files ?? [];
-				} catch { // patch-coverage-ignore
+					files = Array.isArray(parsed) ? parsed : (parsed.files ?? []);
+				} catch {
+					// patch-coverage-ignore
 					files = text.split("\n").filter(Boolean);
 				}
 			} else {
@@ -82,7 +88,12 @@ export function enhanceGrepTool(pi: ExtensionAPI): void {
 	pi.registerTool({
 		...original,
 		async execute(toolCallId, params, signal, onUpdate): Promise<AgentToolResult<unknown>> {
-			const result = await original.execute(toolCallId, params as any, signal, onUpdate);
+			const result = await original.execute(
+				toolCallId,
+				params as Parameters<typeof original.execute>[1],
+				signal,
+				onUpdate,
+			);
 			const text = result.content.find((c): c is { type: "text"; text: string } => c.type === "text")?.text ?? "";
 			if (text.startsWith("[")) {
 				try {
@@ -93,7 +104,8 @@ export function enhanceGrepTool(pi: ExtensionAPI): void {
 							content: [{ type: "text" as const, text: renderGrepResults(parsed) }],
 						};
 					}
-				} catch { // patch-coverage-ignore
+				} catch {
+					// patch-coverage-ignore
 					// Fallback
 				}
 			}
@@ -115,7 +127,11 @@ export function enhanceMultiGrepTool(pi: ExtensionAPI): void {
 		description: "OR-search across multiple string patterns in one pass",
 		parameters: multiGrepParams,
 		async execute(_toolCallId, params, _signal, _onUpdate): Promise<AgentToolResult<unknown>> {
-			const { patterns, path: basePath = ".", glob = "*" } = params as { patterns: string[]; path?: string; glob?: string };
+			const {
+				patterns,
+				path: basePath = ".",
+				glob = "*",
+			} = params as { patterns: string[]; path?: string; glob?: string };
 			const result = execMultiGrep(patterns, glob, basePath);
 			return {
 				content: [{ type: "text" as const, text: result.message }],
@@ -138,10 +154,10 @@ function execMultiGrep(patterns: string[], glob: string, basePath: string): Mult
 	let totalMatches = 0;
 	for (const pattern of patterns) {
 		try {
-			const output = execSync(
-				`grep -rn --include="${glob}" "${pattern.replace(/"/g, '\\"')}" "${basePath}"`,
-				{ encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] },
-			);
+			const output = execSync(`grep -rn --include="${glob}" "${pattern.replace(/"/g, '\\"')}" "${basePath}"`, {
+				encoding: "utf-8",
+				stdio: ["pipe", "pipe", "ignore"],
+			});
 			const lines = output.split("\n").filter(Boolean);
 			for (const line of lines) {
 				const [file, lineNum, ...textParts] = line.split(":"); // patch-coverage-ignore
@@ -149,14 +165,16 @@ function execMultiGrep(patterns: string[], glob: string, basePath: string): Mult
 				if (!file || !lineNum) continue; // patch-coverage-ignore
 				const num = Number(lineNum); // patch-coverage-ignore
 				const existing = results.find((r) => r.file === file); // patch-coverage-ignore
-				if (existing) { // patch-coverage-ignore
+				if (existing) {
+					// patch-coverage-ignore
 					existing.matches.push({ line: num, text, pattern }); // patch-coverage-ignore
 				} else {
 					results.push({ file, matches: [{ line: num, text, pattern }] }); // patch-coverage-ignore
 				}
 			}
 			totalMatches += lines.length;
-		} catch { // patch-coverage-ignore
+		} catch {
+			// patch-coverage-ignore
 			// grep returns exit 1 when no matches
 		}
 	}
@@ -182,7 +200,8 @@ async function multiGrep(patterns: string[], glob: string, basePath: string): Pr
 			const fffMatches = await store.grep(pattern, { glob });
 			for (const m of fffMatches) {
 				const existing = results.find((r) => r.file === m.file);
-				if (existing) { // patch-coverage-ignore
+				if (existing) {
+					// patch-coverage-ignore
 					existing.matches.push({ line: m.line, text: m.text, pattern }); // patch-coverage-ignore
 				} else {
 					results.push({ file: m.file, matches: [{ line: m.line, text: m.text, pattern }] });
@@ -196,7 +215,8 @@ async function multiGrep(patterns: string[], glob: string, basePath: string): Pr
 			matches: totalMatches,
 			results,
 		};
-	} catch { // patch-coverage-ignore
+	} catch {
+		// patch-coverage-ignore
 		return execMultiGrep(patterns, glob, basePath);
 	}
 }
