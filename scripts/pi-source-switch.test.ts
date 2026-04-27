@@ -107,6 +107,40 @@ function createFakePiExecutable(logPath: string): string {
 	return binDir;
 }
 
+function createFakePnpmExecutable(logPath: string): string {
+	const rootDir = createTempDir("oh-pi-switcher-pnpm-");
+	const binDir = path.join(rootDir, "bin");
+	mkdirSync(binDir, { recursive: true });
+
+	const executablePath = path.join(binDir, "pnpm");
+	writeFileSync(
+		executablePath,
+		[
+			"#!/usr/bin/env node",
+			"const fs = require('node:fs');",
+			"const path = require('node:path');",
+			"const logPath = process.env.PI_TEST_PNPM_LOG_PATH;",
+			"if (logPath) {",
+			"  fs.appendFileSync(logPath, process.argv.slice(2).join(' ') + '\\n');",
+			"}",
+			"const writeFile = process.env.PI_TEST_PNPM_WRITE_FILE;",
+			"if (writeFile) {",
+			"  fs.mkdirSync(path.dirname(writeFile), { recursive: true });",
+			"  fs.writeFileSync(writeFile, process.env.PI_TEST_PNPM_WRITE_CONTENT || '', 'utf8');",
+			"}",
+			"if (process.env.PI_TEST_PNPM_FAIL_ON && process.argv.includes(process.env.PI_TEST_PNPM_FAIL_ON)) {",
+			"  process.stderr.write(process.env.PI_TEST_PNPM_FAIL_MESSAGE || 'build failed');",
+			"  process.exit(1);",
+			"}",
+			"process.exit(0);",
+		].join("\n"),
+		"utf8",
+	);
+	chmodSync(executablePath, 0o755);
+
+	return executablePath;
+}
+
 function runSwitcher(
 	args: string[],
 	options: {
@@ -374,7 +408,9 @@ describe("pi source switcher helpers", () => {
 		expect(result.stdout).toContain(workspacePackages.get("@ifi/oh-pi-extensions") ?? "");
 		expect(result.stdout).toContain("Dry run only — settings were not written");
 		expect(result.stdout).toContain("run `pnpm install --frozen-lockfile` before restarting pi");
-		expect(result.stdout).toContain("stale node_modules can surface missing internal @ifi/* package errors");
+		expect(result.stdout).toContain(
+			"pnpm pi:local refreshes compiled runtime dependencies like @ifi/oh-pi-core before switching",
+		);
 		expect(readFileSync(settingsPath, "utf8")).toBe(`${originalSettings}\n`);
 	});
 
@@ -461,8 +497,129 @@ describe("pi source switcher helpers", () => {
 
 		expect(result.status).toBe(0);
 		expect(result.stdout).toContain("run `pnpm install --frozen-lockfile` before restarting pi");
-		expect(result.stdout).toContain("stale node_modules can surface missing internal @ifi/* package errors");
+		expect(result.stdout).toContain(
+			"pnpm pi:local refreshes compiled runtime dependencies like @ifi/oh-pi-core before switching",
+		);
 		expect(savedSources).toContain(workspacePackages.get("@ifi/oh-pi-extensions") ?? "");
+	}, 20_000);
+
+	it("rebuilds and refreshes compiled local runtime dependencies before switching to local mode", () => {
+		const agentDir = createTempDir("oh-pi-switcher-agent-");
+		const settingsPath = path.join(agentDir, "settings.json");
+		writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:@ifi/oh-pi-extensions@0.4.3"] }, null, 2));
+
+		const workspacePackages = createWorkspaceRepo();
+		const repoDir = path.dirname(path.dirname(workspacePackages.get("@ifi/oh-pi-extensions") ?? ""));
+		const repoNodeModulesCoreDir = path.join(repoDir, "node_modules", "@ifi", "oh-pi-core", "dist");
+		mkdirSync(repoNodeModulesCoreDir, { recursive: true });
+		writeFileSync(path.join(repoNodeModulesCoreDir, "index.js"), "export const marker = 'stale';\n", "utf8");
+
+		const coreDistDir = path.join(repoDir, "packages", "core", "dist");
+		mkdirSync(coreDistDir, { recursive: true });
+		writeFileSync(path.join(coreDistDir, "index.js"), "export const marker = 'before-build';\n", "utf8");
+
+		const piLogPath = path.join(agentDir, "pi.log");
+		const pnpmLogPath = path.join(agentDir, "pnpm.log");
+		const piBinDir = createFakePiExecutable(piLogPath);
+		const pnpmBinPath = createFakePnpmExecutable(pnpmLogPath);
+
+		const result = runSwitcher(["local", "--path", repoDir], {
+			env: {
+				PATH: [piBinDir, path.dirname(pnpmBinPath), path.dirname(process.execPath), process.env.PATH ?? ""].join(
+					path.delimiter,
+				),
+				OH_PI_PNPM_BIN: pnpmBinPath,
+				PI_CODING_AGENT_DIR: agentDir,
+				PI_CODING_AGENT_BIN: piBinDir,
+				PI_TEST_LOG_PATH: piLogPath,
+				PI_TEST_PNPM_LOG_PATH: pnpmLogPath,
+				PI_TEST_PNPM_WRITE_FILE: path.join(coreDistDir, "index.js"),
+				PI_TEST_PNPM_WRITE_CONTENT: "export const marker = 'fresh';\n",
+			},
+		});
+
+		expect(result.status).toBe(0);
+		expect(readFileSync(path.join(coreDistDir, "index.js"), "utf8")).toContain("fresh");
+		expect(readFileSync(path.join(repoNodeModulesCoreDir, "index.js"), "utf8")).toContain("fresh");
+		expect(readFileSync(pnpmLogPath, "utf8")).toContain(
+			`--dir ${repoDir} --filter @ifi/oh-pi-core exec tsdown --config packages/core/tsdown.config.ts`,
+		);
+	}, 20_000);
+
+	it("includes runtime build output without a false install hint when the repo is installed", () => {
+		const agentDir = createTempDir("oh-pi-switcher-agent-");
+		writeFileSync(
+			path.join(agentDir, "settings.json"),
+			JSON.stringify({ packages: ["npm:@ifi/oh-pi-extensions@0.4.3"] }, null, 2),
+		);
+
+		const workspacePackages = createWorkspaceRepo();
+		const repoDir = path.dirname(path.dirname(workspacePackages.get("@ifi/oh-pi-extensions") ?? ""));
+		mkdirSync(path.join(repoDir, "node_modules"), { recursive: true });
+		mkdirSync(path.join(repoDir, "packages", "core"), { recursive: true });
+
+		const piLogPath = path.join(agentDir, "pi.log");
+		const pnpmLogPath = path.join(agentDir, "pnpm.log");
+		const piBinDir = createFakePiExecutable(piLogPath);
+		const pnpmBinPath = createFakePnpmExecutable(pnpmLogPath);
+
+		const result = runSwitcher(["local", "--path", repoDir], {
+			env: {
+				PATH: [piBinDir, path.dirname(pnpmBinPath), path.dirname(process.execPath), process.env.PATH ?? ""].join(
+					path.delimiter,
+				),
+				OH_PI_PNPM_BIN: pnpmBinPath,
+				PI_CODING_AGENT_DIR: agentDir,
+				PI_CODING_AGENT_BIN: piBinDir,
+				PI_TEST_LOG_PATH: piLogPath,
+				PI_TEST_PNPM_LOG_PATH: pnpmLogPath,
+				PI_TEST_PNPM_FAIL_ON: "tsdown",
+				PI_TEST_PNPM_FAIL_MESSAGE:
+					"ERROR  Error: Build failed with 1 error:\npackages/core/src/index.ts:1:1: example failure\nWARN  Local package.json exists, but node_modules missing, did you mean to install?",
+			},
+		});
+
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain("Failed to rebuild local runtime package @ifi/oh-pi-core.");
+		expect(result.stderr).toContain("Command output:");
+		expect(result.stderr).toContain("packages/core/src/index.ts:1:1: example failure");
+		expect(result.stderr).not.toContain("This checkout looks uninstalled or incomplete.");
+	}, 20_000);
+
+	it("adds an install hint when the rebuild output indicates a missing install", () => {
+		const agentDir = createTempDir("oh-pi-switcher-agent-");
+		writeFileSync(
+			path.join(agentDir, "settings.json"),
+			JSON.stringify({ packages: ["npm:@ifi/oh-pi-extensions@0.4.3"] }, null, 2),
+		);
+
+		const workspacePackages = createWorkspaceRepo();
+		const repoDir = path.dirname(path.dirname(workspacePackages.get("@ifi/oh-pi-extensions") ?? ""));
+		mkdirSync(path.join(repoDir, "packages", "core"), { recursive: true });
+
+		const piLogPath = path.join(agentDir, "pi.log");
+		const pnpmLogPath = path.join(agentDir, "pnpm.log");
+		const piBinDir = createFakePiExecutable(piLogPath);
+		const pnpmBinPath = createFakePnpmExecutable(pnpmLogPath);
+
+		const result = runSwitcher(["local", "--path", repoDir], {
+			env: {
+				PATH: [piBinDir, path.dirname(pnpmBinPath), path.dirname(process.execPath), process.env.PATH ?? ""].join(
+					path.delimiter,
+				),
+				OH_PI_PNPM_BIN: pnpmBinPath,
+				PI_CODING_AGENT_DIR: agentDir,
+				PI_CODING_AGENT_BIN: piBinDir,
+				PI_TEST_LOG_PATH: piLogPath,
+				PI_TEST_PNPM_LOG_PATH: pnpmLogPath,
+				PI_TEST_PNPM_FAIL_ON: "tsdown",
+				PI_TEST_PNPM_FAIL_MESSAGE:
+					"ERROR  Error: Build failed with 1 error:\npackages/core/src/index.ts:1:1: example failure\nWARN  Local package.json exists, but node_modules missing, did you mean to install?",
+			},
+		});
+
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain(`Run \`pnpm install --frozen-lockfile\` in ${repoDir} and retry.`);
 	}, 20_000);
 
 	it("exits with an error when local mode cannot resolve the full managed workspace set", () => {

@@ -58,7 +58,7 @@ because it can keep previously loaded package modules alive.
 */
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -92,6 +92,13 @@ interface Change {
 type ManagedPackageManifest = Partial<Record<"extensions" | "prompts" | "skills" | "themes" | "agents", string[]>>;
 
 type PackageSyncAction = "install" | "update";
+
+interface LocalRuntimeSyncTarget {
+	buildArgs: string[];
+	packageDir: string;
+	packageName: string;
+	relativeOutputDir: string;
+}
 
 interface PackageSyncOperation {
 	packageName: string;
@@ -313,7 +320,10 @@ export function mergeManagedPackageManifest(
 	}
 
 	const nextEntry: Record<string, unknown> = { ...entry };
-	for (const [key, manifestEntries] of Object.entries(manifest) as [keyof ManagedPackageManifest, string[] | undefined][]) {
+	for (const [key, manifestEntries] of Object.entries(manifest) as [
+		keyof ManagedPackageManifest,
+		string[] | undefined,
+	][]) {
 		if (!(manifestEntries && manifestEntries.length > 0)) {
 			continue;
 		}
@@ -677,8 +687,100 @@ function printLocalInstallHint(repoPath: string) {
 		`Reminder: if you recently pulled, rebased, or switched branches in ${repoPath}, run \`pnpm install --frozen-lockfile\` before restarting pi.`,
 	);
 	console.log(
-		"Local source mode loads workspace files directly, so stale node_modules can surface missing internal @ifi/* package errors.",
+		"Local source mode loads workspace files directly, and pnpm pi:local refreshes compiled runtime dependencies like @ifi/oh-pi-core before switching.",
 	);
+}
+
+function getPnpmCommand(): string {
+	return process.env.OH_PI_PNPM_BIN?.trim() || "pnpm";
+}
+
+function getExecFailureOutput(error: unknown): string {
+	if (!(error instanceof Error)) {
+		return "";
+	}
+
+	const stdout = "stdout" in error ? String(error.stdout ?? "").trim() : "";
+	const stderr = "stderr" in error ? String(error.stderr ?? "").trim() : "";
+	const combined = [stderr, stdout].filter(Boolean).join("\n\n");
+
+	if (!combined) {
+		return "";
+	}
+
+	return `\n\nCommand output:\n${combined}`;
+}
+
+function getInstallMissingHint(repoPath: string, output: string): string {
+	if (
+		!output.includes("Local package.json exists, but node_modules missing") ||
+		existsSync(path.join(repoPath, "node_modules"))
+	) {
+		return "";
+	}
+
+	return `\n\nThis checkout looks uninstalled or incomplete. Run \`pnpm install --frozen-lockfile\` in ${repoPath} and retry.`;
+}
+
+function rebuildLocalRuntimeArtifacts(repoPath: string): void {
+	const pnpm = getPnpmCommand();
+
+	for (const target of getLocalRuntimeSyncTargets(repoPath)) {
+		if (!existsSync(target.packageDir)) {
+			continue;
+		}
+
+		try {
+			execFileSync(pnpm, target.buildArgs, {
+				shell: IS_WINDOWS,
+				stdio: "pipe",
+				timeout: 120_000,
+			});
+		} catch (error) {
+			const output = getExecFailureOutput(error);
+			const installHint = getInstallMissingHint(repoPath, output);
+			throw new Error(`Failed to rebuild local runtime package ${target.packageName}.${output}${installHint}`, {
+				cause: error,
+			});
+		}
+	}
+}
+
+function getLocalRuntimeSyncTargets(repoPath: string): LocalRuntimeSyncTarget[] {
+	return [
+		{
+			buildArgs: [
+				"--dir",
+				repoPath,
+				"--filter",
+				"@ifi/oh-pi-core",
+				"exec",
+				"tsdown",
+				"--config",
+				path.join("packages", "core", "tsdown.config.ts"),
+			],
+			packageDir: path.join(repoPath, "packages", "core"),
+			packageName: "@ifi/oh-pi-core",
+			relativeOutputDir: "dist",
+		},
+	];
+}
+
+function syncLocalRuntimeArtifacts(repoPath: string): void {
+	rebuildLocalRuntimeArtifacts(repoPath);
+
+	for (const target of getLocalRuntimeSyncTargets(repoPath)) {
+		const sourceDir = path.join(target.packageDir, target.relativeOutputDir);
+		const installedPackageDir = path.join(repoPath, "node_modules", ...target.packageName.split("/"));
+		const installedOutputDir = path.join(installedPackageDir, target.relativeOutputDir);
+
+		if (!existsSync(sourceDir) || !existsSync(installedPackageDir)) {
+			continue;
+		}
+
+		rmSync(installedOutputDir, { force: true, recursive: true });
+		cpSync(sourceDir, installedOutputDir, { recursive: true });
+	}
 }
 
 function printStatus(currentSources: ReadonlyMap<string, string>, settingsPath: string, piLocal: boolean) {
@@ -779,6 +881,9 @@ export function main(argv: string[] = process.argv) {
 	}
 
 	writeSettings(settingsPath, nextSettings);
+	if (options.mode === "local") {
+		syncLocalRuntimeArtifacts(options.repoPath);
+	}
 	const pi = findPi();
 	updatePiSources(pi, currentSources, desiredSources);
 	if (options.mode === "local") {
