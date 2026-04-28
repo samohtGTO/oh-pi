@@ -40,7 +40,6 @@ export interface PrInfo {
 const PR_PROBE_COOLDOWN_MS = 60_000;
 const FOOTER_POLL_INTERVAL_MS = 60_000;
 const FOOTER_STARTUP_REFRESH_DELAY_MS = 250;
-const FOOTER_STARTUP_DEFER_ENTRY_THRESHOLD = 250;
 
 export interface FooterUsageTotals {
 	input: number;
@@ -137,23 +136,20 @@ export default function (pi: ExtensionAPI) {
 		startupRefreshTimer = null;
 	};
 
-	const scheduleUsageTotalsRefresh = (ctx: Pick<ExtensionContext, "sessionManager">) => {
+	const syncUsageTotalsFromContext = (ctx: Pick<ExtensionContext, "sessionManager">) => {
 		clearStartupRefreshTimer();
 		const entries = ctx.sessionManager.getBranch();
-		const refresh = () => {
-			syncUsageTotalsFromEntries(entries);
-			requestFooterRender?.();
-		};
+		syncUsageTotalsFromEntries(entries);
+		requestFooterRender?.();
+	};
 
-		if (entries.length < FOOTER_STARTUP_DEFER_ENTRY_THRESHOLD) {
-			refresh();
-			return;
-		}
-
+	const scheduleUsageTotalsRefresh = (ctx: Pick<ExtensionContext, "sessionManager">) => {
+		clearStartupRefreshTimer();
 		startupRefreshTimer = setTimeout(() => {
 			startupRefreshTimer = null;
-			refresh();
+			syncUsageTotalsFromContext(ctx);
 		}, FOOTER_STARTUP_REFRESH_DELAY_MS);
+		startupRefreshTimer.unref?.();
 	};
 
 	const refreshWorktreeContext = async (cwd = process.cwd()) => {
@@ -199,6 +195,7 @@ export default function (pi: ExtensionAPI) {
 			worktreeRefreshTimer = null;
 			refreshWorktreeContext(cwd).catch(() => {});
 		}, delayMs);
+		worktreeRefreshTimer.unref?.();
 	};
 
 	const getWorktreeContext = () => {
@@ -257,7 +254,7 @@ export default function (pi: ExtensionAPI) {
 			});
 	};
 
-	pi.on("session_start", async (_event, ctx) => {
+	pi.on("session_start", (_event, ctx) => {
 		const worktreeCwd = ctx.cwd ?? process.cwd();
 		sessionStart = Date.now();
 		activeCtx = ctx;
@@ -281,7 +278,9 @@ export default function (pi: ExtensionAPI) {
 			const timer = setInterval(() => {
 				probeActivePrs();
 			}, FOOTER_POLL_INTERVAL_MS);
-			probeActivePrs();
+			timer.unref?.();
+			const startupPrProbeTimer = setTimeout(probeActivePrs, FOOTER_STARTUP_REFRESH_DELAY_MS);
+			startupPrProbeTimer.unref?.();
 
 			return {
 				dispose() {
@@ -289,6 +288,7 @@ export default function (pi: ExtensionAPI) {
 					unsub();
 					unsubSafeMode();
 					clearInterval(timer);
+					clearTimeout(startupPrProbeTimer);
 				},
 				// Biome-ignore lint/suspicious/noEmptyBlockStatements: Required by footer interface
 				invalidate() {},
@@ -516,6 +516,7 @@ export default function (pi: ExtensionAPI) {
 		async handler(_args, ctx) {
 			const worktreeCwd = ctx.cwd ?? process.cwd();
 			activeCtx = ctx;
+			syncUsageTotalsFromContext(ctx);
 			await refreshWorktreeContext(worktreeCwd);
 			const worktreeSnapshot = getRepoWorktreeSnapshot(worktreeCwd);
 			await ctx.ui.custom(

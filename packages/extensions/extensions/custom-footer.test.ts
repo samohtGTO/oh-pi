@@ -115,7 +115,7 @@ describe("custom-footer extension", () => {
 		};
 
 		await pi._emit("session_start", {}, ctx);
-		expect(getBranch).toHaveBeenCalledTimes(1);
+		expect(getBranch).toHaveBeenCalledTimes(0);
 		expect(footerFactory).toBeTypeOf("function");
 
 		const component = footerFactory(
@@ -123,6 +123,8 @@ describe("custom-footer extension", () => {
 			{ fg: (_color: string, text: string) => text },
 			{ onBranchChange: () => () => undefined, getGitBranch: () => "main" },
 		);
+
+		await vi.waitFor(() => expect(getBranch).toHaveBeenCalledTimes(1));
 
 		const firstRender = component.render(200)[0];
 		expect(firstRender).toContain("1.2k/800");
@@ -161,7 +163,7 @@ describe("custom-footer extension", () => {
 			};
 
 			await pi._emit("session_start", {}, ctx);
-			expect(getBranch).toHaveBeenCalledTimes(1);
+			expect(getBranch).toHaveBeenCalledTimes(0);
 
 			const component = footerFactory(
 				{ requestRender: vi.fn() },
@@ -173,6 +175,7 @@ describe("custom-footer extension", () => {
 
 			await vi.advanceTimersByTimeAsync(500);
 
+			expect(getBranch).toHaveBeenCalledTimes(1);
 			expect(component.render(200)[0]).toContain("$3.00");
 		} finally {
 			vi.useRealTimers();
@@ -297,13 +300,15 @@ describe("custom-footer extension", () => {
 		};
 
 		await pi._emit("session_start", {}, ctx);
-		expect(getBranch).toHaveBeenCalledTimes(1);
+		expect(getBranch).toHaveBeenCalledTimes(0);
 
 		const component = footerFactory(
 			{ requestRender: vi.fn() },
 			{ fg: (_color: string, text: string) => text },
 			{ onBranchChange: () => () => undefined, getGitBranch: () => "main" },
 		);
+
+		await vi.waitFor(() => expect(getBranch).toHaveBeenCalledTimes(1));
 
 		for (let i = 0; i < 100; i++) {
 			component.render(200);
