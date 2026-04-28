@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1 (2026-04-28)
+
+### Fixes
+
+- sync knope dependency versioning
+- route oh-pi to interactive cli
+- Keep internal package dependency versions in lockstep
+- fix(installer): route @ifi/oh-pi through the interactive CLI
+
 ## 0.5.0 (2026-04-28)
 
 ### Breaking Changes
