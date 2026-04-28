@@ -74,7 +74,7 @@ importers:
   packages/adaptive-routing:
     dependencies:
       '@ifi/oh-pi-core':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../core
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -97,7 +97,7 @@ importers:
   packages/analytics-dashboard:
     dependencies:
       '@ifi/pi-analytics-db':
-        specifier: ^0.5.0
+        specifier: 0.5.1
         version: link:../analytics-db
       '@tanstack/react-query':
         specifier: ^5.74.0
@@ -222,7 +222,7 @@ importers:
   packages/analytics-extension:
     dependencies:
       '@ifi/pi-analytics-db':
-        specifier: ^0.5.0
+        specifier: 0.5.1
         version: link:../analytics-db
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -243,7 +243,7 @@ importers:
   packages/ant-colony:
     dependencies:
       '@ifi/oh-pi-core':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../core
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -285,37 +285,37 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       '@ifi/oh-pi-agents':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../agents
       '@ifi/oh-pi-ant-colony':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../ant-colony
       '@ifi/oh-pi-core':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../core
       '@ifi/oh-pi-extensions':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../extensions
       '@ifi/oh-pi-prompts':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../prompts
       '@ifi/oh-pi-skills':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../skills
       '@ifi/oh-pi-themes':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../themes
       '@ifi/pi-extension-subagents':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../subagents
       '@ifi/pi-plan':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../plan
       '@ifi/pi-shared-qna':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../shared-qna
       '@ifi/pi-spec':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../spec
       chalk:
         specifier: ^5.6.2
@@ -418,13 +418,13 @@ importers:
   packages/extensions:
     dependencies:
       '@ifi/oh-pi-core':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../core
       '@ifi/pi-background-tasks':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../background-tasks
       '@ifi/pi-shared-qna':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../shared-qna
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -448,7 +448,7 @@ importers:
   packages/oh-pi:
     dependencies:
       '@ifi/oh-pi-cli':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../cli
 
   packages/ollama:
@@ -519,7 +519,7 @@ importers:
   packages/pi-remote-tailscale:
     dependencies:
       '@ifi/pi-web-server':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../web-server
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -547,10 +547,10 @@ importers:
   packages/plan:
     dependencies:
       '@ifi/pi-extension-subagents':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../subagents
       '@ifi/pi-shared-qna':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../shared-qna
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -573,7 +573,7 @@ importers:
   packages/providers:
     dependencies:
       '@ifi/pi-shared-qna':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../shared-qna
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -620,7 +620,7 @@ importers:
   packages/subagents:
     dependencies:
       '@ifi/oh-pi-core':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../core
       '@mariozechner/pi-agent-core':
         specifier: '>=0.56.1'
@@ -645,7 +645,7 @@ importers:
   packages/web-remote:
     dependencies:
       '@ifi/pi-web-server':
-        specifier: 0.5.0
+        specifier: 0.5.1
         version: link:../web-server
       '@mariozechner/pi-coding-agent':
         specifier: '>=0.56.1'
