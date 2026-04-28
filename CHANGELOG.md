@@ -1,5 +1,673 @@
 # Changelog
 
+## 0.5.0 (2026-04-28)
+
+### Breaking Changes
+
+#### Add several new packages
+
+Document the packages that have been created since the last tagged release (`v0.4.4`) so the next release notes explain what each new workspace package provides.
+
+- `@ifi/pi-extension-adaptive-routing` (`packages/adaptive-routing`) adds optional adaptive and delegated model routing for pi, including routing policy support and evaluation tooling for selecting better models per task.
+- `@ifi/pi-background-tasks` (`packages/background-tasks`) adds reactive background shell tasks with `/bg`, log viewing, keyboard access, and agent wakeups when long-running commands emit output.
+- `@ifi/pi-diagnostics` (`packages/diagnostics`) adds prompt-completion diagnostics with timestamps, per-turn durations, live timing widgets, and observability for pi sessions.
+- `@ifi/pi-provider-catalog` (`packages/providers`) adds an experimental multi-provider catalog backed by `models.dev`, including provider/model discovery and lazy API-key login flows.
+- `@ifi/pi-provider-cursor` (`packages/cursor`) adds an experimental Cursor provider with OAuth login, model discovery, and direct AgentService streaming support.
+- `@ifi/pi-provider-ollama` (`packages/ollama`) adds experimental Ollama local and cloud provider support, including local model discovery, Ollama Cloud login, model management, and streaming integration.
+- `@ifi/pi-remote-tailscale` (`packages/pi-remote-tailscale`) adds secure remote session sharing over Tailscale HTTPS with WebSocket transport, PTY support, QR codes, token auth, and TUI status widgets.
+- `@ifi/pi-bash-live-view` (`packages/pi-bash-live-view`) adds PTY-backed live bash execution with a real-time terminal widget, `/bash-pty`, and a `bash_live_view` tool for interactive command output.
+- `@ifi/pi-pretty` (`packages/pi-pretty`) adds prettier terminal output for pi, including Shiki-highlighted file reads, colored bash summaries, tree-view directory listings, icons, and enhanced search/read tools.
+- `@ifi/pi-analytics-extension` (`packages/analytics-extension`) adds analytics tracking for pi sessions with `/analytics` terminal stats, `/analytics-dashboard`, model/token/cost capture, and SQLite persistence.
+- `@ifi/pi-analytics-db` (`packages/analytics-db`) adds the shared SQLite database layer for analytics, including Drizzle ORM schema, migrations, and typed query helpers for sessions, turns, models, providers, codebases, and aggregates.
+- `@ifi/pi-analytics-dashboard` (`packages/analytics-dashboard`) adds a private React and Vite dashboard for visualizing AI usage across overview, model, codebase, and insight pages.
+- `@ifi/oh-pi-docs` (`packages/docs`) adds the private documentation site package for developing and building the oh-pi documentation site.
+
+### Features
+
+- add experimental Cursor provider package (#81)
+- add experimental Ollama Cloud provider (#93)
+- unify Ollama local and cloud provider (#94)
+- add pi source switcher for local package testing (#101)
+- add adaptive routing mode (#95)
+- include experimental providers in pi source switcher (#106)
+- add external editor draft sync (#114)
+- improve session continuity and resume hints (#116)
+- add continue-until-complete retry mode (#117)
+- emit resume commands on switch and exit (#118)
+- add tool execution metadata (#120)
+- track task creator origins (#115)
+- attribute watchdog slowdowns (#119)
+- add provider catalog package (#121)
+- add pi-managed worktree flows (#123)
+- extract adaptive routing into optional package (#166)
+- add scrollable provider and scheduler pickers (#165)
+- add provider routing dashboard
+- install optional routing packages
+- add standalone prompt diagnostics package (#167)
+- add routing install scope toggle
+- add colon-style subcommand aliases
+- improve delegated routing model selection (#189)
+- add reactive background task watching (#193)
+- `pi` analytics dashboard (#194)
+- add devenv skill for devenv.nix task runner (#212)
+- add documentation site with Vite + React + MDX (#216)
+- add /answer and /answer:auto commands (#211)
+- upgrade Vite from 7.3.2 to 8.0.9 (#227)
+- add kimi-k2.6 to cloud fallback model catalog (#228)
+- add client-side search with minisearch and Cmd+K shortcut (#229)
+- add docs:sync for MDT-integrated content pipeline (#230)
+- performance audit — fix hot-path issues and add benchmarks (#231)
+- reduce context noise, add bg task expiry, label scheduled runs (#233)
+- optimize scheduler hot paths — single-pass iterations and zero-alloc dispatch (#235)
+- remove explicit model overrides from ant_colony tool, use adaptive routing (#236)
+- highlight recommended options in QnA overlay (#238)
+- add Ctrl+O context expansion popup for question details (#244)
+- add @ifi/pi-remote-tailscale, @ifi/pi-bash-live-view, @ifi/pi-pretty (#255)
+- change usage-tracker overlay shortcut from Ctrl+U to Ctrl+Shift+U (#266)
+- add a routing corpus and evaluation harness (#275)
+- add interactive installer with extension picker, progress bars, and changelog display (#277)
+- migrate to tsdown and re-enable no-explicit-any
+- feat: add adaptive routing mode with shadow mode, local telemetry, and usage-aware model selection
+- feat: add an experimental Cursor OAuth provider package for pi
+- Add client-side search (minisearch) and Cmd+K shortcut to the docs site
+- Add documentation website package (Vite + React + MDX) with GitHub Pages deployment
+- Add colon-style subcommand aliases across provider, routing, Ollama, scheduler, spec, and watchdog workflows, update related docs/help text, and keep provider picker search inside overlay UI so escape and typing no longer fall through to the editor.
+- Remove explicit model override parameters from ant_colony tool. Model selection now uses adaptive routing exclusively — scouts, workers, and soldiers each use the best available model for their task category (quick-discovery, implementation-default, review-critical). Configure via /route settings.
+- Add an `external-editor` oh-pi extension with a `/external-editor` command and `Ctrl+Shift+E` shortcut for opening the current draft in `$VISUAL` or `$EDITOR`, then syncing the saved text back into pi.
+- Extract adaptive routing into its own optional package, add delegated startup provider categories for subagents and ant-colony, and remove hard-coded Anthropic defaults from builtin subagents.
+- Implement `@ifi/pi-bash-live-view` package for PTY-backed live terminal viewing of bash commands. Adds `usePTY` parameter to bash tool, live TUI widget with real-time output, and `/bash-pty` slash command.
+- Implement `@ifi/pi-pretty` package for enhanced terminal output. Adds syntax highlighting via Shiki, file icons via Nerd Fonts, tree-view directory listings, colored bash exit summaries, and enhanced find/grep rendering.
+- Implement `@ifi/pi-remote-tailscale` package for secure remote session sharing via Tailscale HTTPS. Provides PTY-based remote access, WebSocket terminal sharing, QR code display, token auth, discovery service, and optional TUI widget.
+- Track which scheduler tasks were created by the current pi instance, surface that origin in the scheduler UI, and add clear-other controls for deleting tasks not created in this instance.
+- Make the repo root a git-installable pi package for personal forks by aggregating the shipped runtime extensions, prompts, skills, and themes, and replace npm-incompatible `workspace:*` dependency specifiers with installable lockstep versions.
+- Add a native worktree extension with centralized pi-owned git worktree metadata, footer/status surfacing, safe cleanup that only targets pi-managed worktrees by default, and allow edits inside pi-managed worktree paths without repeated protected-path prompts.
+- Add a repo-local pi source switcher for toggling oh-pi packages between the current checkout and the published npm packages.
+- Extend the local pi source switcher to manage the experimental provider packages too, and warn users to fully restart pi instead of relying on `/reload` after switching sources.
+- feat: add a diagnostics extension that logs prompt completion timestamps, durations, and per-turn timing details
+- Add an experimental `@ifi/pi-provider-catalog` package that registers a broad set of OpenCode-cataloged API-key providers, refreshes model catalogs from `models.dev` and live provider discovery, and adds `/providers` commands for inspecting and refreshing provider state.
+- Add a user/project install scope toggle when installing optional routing packages from the oh-pi routing dashboard.
+- Let the oh-pi routing dashboard install missing optional routing and provider packages directly from the setup flow.
+- Add a dedicated provider and routing dashboard to the oh-pi setup flow so users can review optional routing packages, available providers/models, delegated assignments, and effective routing for the main session, subagents, and ant-colony.
+- Add a default-on `tool-metadata` extension that appends completion timestamps, elapsed runtimes, approximate tool-context size, and session context snapshots to finished tool results.
+- Teach the watchdog to profile extension runtime activity, surface likely slowdown culprits in `/watchdog`, and emit scheduler task pressure diagnostics for faster blame and safe-mode triage.
+
+#### Add `/answer` extension for interactive Q&A from LLM responses.
+
+- `/answer` extracts questions from the last assistant message and presents them in a QnA overlay powered by `@ifi/pi-shared-qna`
+- `/answer:auto` toggles auto-detection: when enabled, questions in the final LLM response automatically trigger the QnA overlay
+- Uses LLM-powered question extraction with structured output (questions, context, and multiple-choice options)
+- Answers are injected back into the session as a follow-up user message
+
+#### - Add the experimental `@ifi/pi-provider-ollama` package so pi can discover local Ollama models, log in to Ollama Cloud via `/login ollama-cloud`, and expose both local and cloud models in `/model`.
+
+- Add unified `/ollama` commands for refreshing local + cloud model catalogs and inspecting discovered model metadata.
+- Extend usage tracking with best-effort Ollama local/cloud status so `/usage` and `usage_report` include Ollama session visibility and any rate-limit headers Ollama exposes.
+
+#### Add Pi Analytics Dashboard with SQLite persistence, real-time activity stream, and fun insights tracking.
+
+New packages:
+- `@ifi/pi-analytics-db`: Drizzle ORM schema + SQLite client for analytics data
+- `@ifi/pi-analytics-dashboard`: React 19 + Vite 8 dashboard with Overview, Models, Codebases, and Insights pages
+- `@ifi/pi-analytics-extension`: Pi extension that captures session/turn data and opens the dashboard
+
+Features:
+- 4 dashboard pages: Overview, Models, Codebases, Insights (emotions, words, misspellings)
+- Express API server for real data mode (VITE_API_MODE=api)
+- Mock data mode for development (VITE_API_MODE=mock, default)
+- /analytics command for quick terminal stats
+- /analytics-dashboard command to open in browser
+- Emotional tone analysis, word frequency tracking, misspelling detection
+- 47 Vitest unit tests + 73 Playwright E2E browser tests
+- Zero lint warnings, clean build
+
+#### Add a reactive background task extension for shell watchers.
+
+- add the new `@ifi/pi-background-tasks` package with `/bg`, `Ctrl+Shift+B`, a richer multi-pane dashboard, `bg_task`, and compatibility `bash`/`bg_status` tooling
+- move the existing `bg-process` entrypoint in `@ifi/oh-pi-extensions` onto the new shared runtime
+- include the new package in the default `@ifi/oh-pi` installer package list and document it in the repo package listings
+
+#### BREAKING CHANGE: `npx oh-pi` now launches an interactive installer by default.
+
+The CLI entry point replaces the legacy config-wizard flow with a brand-new interactive installer that includes:
+
+- **Custom multi-select extension picker** with `Space` to toggle individual items and `A` to select/deselect all. Default extensions are pre-selected.
+- **Progress bars and loading indicators** during configuration backup, pi-coding-agent installation, and file writing.
+- **Version comparison** showing the currently installed pi version versus the new oh-pi CLI version.
+- **Markdown changelog display** rendered inline for all releases between the current and new version.
+- `-y` / `--yes` flag for non-interactive/auto-install mode that bypasses the TUI and applies defaults immediately.
+
+To keep the old behaviour pass `--yes`:
+
+```bash
+npx oh-pi --yes
+```
+
+#### Consolidate worktree registry into `@ifi/oh-pi-core` and add `worktree` tool
+
+- **Consolidate duplicated worktree implementations**: The worktree registry logic that was
+  duplicated across `packages/extensions/extensions/worktree-shared.ts` and
+  `packages/ant-colony/extensions/ant-colony/worktree-registry.ts` is now consolidated into
+  `@ifi/oh-pi-core`. Both files are now thin re-exports from `@ifi/oh-pi-core`, eliminating
+  code duplication and ensuring a single source of truth for worktree management.
+
+- **Add `RepoWorktreeContext` and caching to core**: The lightweight context probe
+  (which uses only `git rev-parse` without `git worktree list --porcelain`) and the async
+  cache-based refresh functions (`getRepoWorktreeContext`, `getCachedRepoWorktreeContext`,
+  `refreshRepoWorktreeContext`, etc.) are now available in `@ifi/oh-pi-core`, matching the
+  full feature set previously only in the extensions package.
+
+- **Add `worktree` tool**: Register a `worktree` tool alongside the existing `/worktree`
+  command. The AI agent can now programmatically create, list, check status, and clean up
+  pi-owned worktrees without needing to use the slash command. This addresses the problem
+  where the `ant_colony` tool bypassed `/worktree` because commands are TUI-only.
+  The tool supports `create`, `status`, `list`, and `cleanup` actions.
+
+- **Fix `touchManagedWorktreeSeen` throttling**: The `saveWorktreeRegistry` function now
+  clears the worktree snapshot cache after writes, and `touchManagedWorktreeSeen` now
+  throttles updates to avoid excessive I/O (5-minute interval).
+
+#### Add option to disable emoji icons and use plain ASCII fallbacks.
+
+Three ways to enable plain icon mode (in priority order):
+
+1. **Environment variable**: `OH_PI_PLAIN_ICONS=1`
+2. **CLI flag**: `pi --plain-icons`
+3. **settings.json**: `{ "plainIcons": true }` (global `~/.pi/agent/settings.json` or project-local `.pi/settings.json`)
+
+This replaces all emoji icons (🐜, ✅, ❌, 🚀, etc.) with ASCII-safe equivalents (`[ant]`, `[ok]`, `[ERR]`, `[>>]`, etc.) across all oh-pi extensions — helpful for terminals or fonts that don't render Unicode emoji correctly.
+
+Closes #24.
+
+#### Reduce context noise from watchdog/safe-mode messages, add bg task default expiry, and label scheduled task runs
+
+- **Background tasks**: Add a default 10-minute expiry to all background tasks. Expired tasks are automatically stopped and logged. Set `expiresAt: null` to disable. The expiry is displayed in the dashboard and spawn output.
+- **Background task output events**: No longer trigger agent turns (only exit events do), reducing unnecessary LLM context consumption from routine output notifications.
+- **Scheduler dispatches**: Use `sendMessage` with a custom type (`pi-scheduler:dispatched`) instead of `sendUserMessage`. Scheduled task runs now render with a distinct "⏰ Scheduled run" label in the TUI, showing the task ID, mode, and run count, instead of appearing as regular user messages.
+
+#### Upgrade Vite from 7.3.2 to 8.0.9 across the monorepo. Also upgrade
+
+@vitejs/plugin-react from v4 to v6 for Vite 8 compatibility. Convert
+analytics-dashboard's manualChunks from object to function form
+(required by Rolldown/Vite 8).
+
+### Fixes
+
+- use pi shell resolution in bg-process (#100)
+- validate extension paths in management API (#103)
+- secure async config temp file creation (#104)
+- harden system prompt creation via management API (#105)
+- add shared config loader and harden git guard
+- ignore empty scheduler ownership (#112)
+- expand cloud catalog and local downloads
+- improve follow-up reliability
+- improve usage provider picker (#124)
+- harden tool-output rendering against crash inputs (#125)
+- detect pi command more reliably (#126)
+- sanitize tool details for safe fallback rendering (#127)
+- install missing switcher packages (#128)
+- stabilize cloud model startup and streaming (#129)
+- avoid blocking auto-update checks (#130)
+- defer heavy usage startup work (#132)
+- guard auth storage access on startup (#131)
+- defer custom footer startup work (#133)
+- defer worktree startup refresh (#134)
+- defer git-guard startup checks (#135)
+- defer local cli startup refresh (#136)
+- default adaptive routing to off (#137)
+- defer scheduler startup ownership (#138)
+- defer startup state refresh (#139)
+- defer startup artifact cleanup (#140)
+- defer btw startup restore (#141)
+- page login picker (#142)
+- defer adaptive routing startup refresh (#143)
+- defer compact-header settings sync (#144)
+- restore build compatibility (#145)
+- defer global startup cleanup (#147)
+- defer watchdog config loading (#148)
+- lazy-load storage config (#149)
+- align cloud glm reasoning compat (#146)
+- lazy-load config (#150)
+- route cloud requests by provider (#152)
+- avoid blocking startup cleanup (#153)
+- avoid startup watchdog stalls (#157)
+- restore smoke test formatting (#158)
+- use canonical session ids in resume hints (#154)
+- defer usage tracker persisted loads (#160)
+- approve vitest coverage dependency (#162)
+- use session file in resume hint (#177)
+- preserve manual session names (#187)
+- warn about stale workspace installs (#190)
+- improve overlay popup contrast (#198)
+- use native mistral conversations api (#197)
+- resolve tool name conflict with background-tasks extension (#208)
+- add 404.html for GitHub Pages SPA routing (#225)
+- return Widget from worktree renderCall/renderResult (#226)
+- use runtime discovery state for cloud models, surface errors (#232)
+- prefer runtime discovery state in modifyModels for /scoped-models (#234)
+- improve answer extraction to find full question formulations (#237)
+- validate resolved models against available model registry (#246)
+- add deliverAs followUp to scheduler dispatch
+- remove auto-backgrounding from bash tool override (#258)
+- stop scheduler idle heartbeat and cache compact-header catalog
+- add missing extensions to pi:local source switcher
+- use ctx.modelRegistry for registerProvider in handlers
+- remove conflicting bash tool passthrough
+- avoid bash tool conflicts between pretty and live view
+- guard ctx.model getter in compact-header and custom-footer render paths (#265)
+- keep release package metadata in sync
+- filter extension-registered tools from --tools whitelist
+- resolve skills against task cwd
+- prefer current session model
+- cascade parent project agents
+- wrap async widget debug output
+- add deepseek v4 flash fallback model
+- rebuild core from workspace root
+- prevent qna tui width overflow
+- keep footer running for active tools
+- chmod node-pty prebuild spawn helper
+- reduce widget render churn (#287)
+- discover cloud models at startup
+- fix: defer adaptive routing startup refresh
+- Add kimi-k2.6 to Ollama cloud fallback model catalog
+- Reduce ant-colony runtime churn by deduplicating repeated colony status-bar updates, replacing lock spin-waiting with sleeping lock retries, and skipping pre-review TypeScript checks unless worker output actually touched a detectable TS project.
+- fix: lazily resolve ant-colony storage options
+- Approve `@vitest/coverage-v8` in the dependency allowlist so the new coverage workflow passes repository security checks.
+- fix: stop auto session renames after a manual /name override
+- fix: make the auto-update extension check versions without blocking the event loop
+- Improve benchmark robustness by batching fast samples to reduce timer noise, narrowing focused startup hotspots from changed files, and adding tests for benchmark sampling and target selection.
+- fix: defer btw thread restoration on startup
+- Update the CI test matrix to run on Node 22 and Node 24, removing Node 20 from the test job.
+- chore: move stray pending change files into the tracked `.changeset/` directory
+- fix: defer compact header settings sync on startup
+- Add focused coverage for the web server, remote access extension, core worktree helpers, CLI orchestration, provider command routing, shared Q&A TUI flows, and subagent execution paths, and enforce a 100% patch-coverage gate in CI while keeping the overall Codecov project target at 60% for now.
+- Reduce custom-footer idle redraw churn by letting the PR poll timer probe for changed PR state without forcing a footer rerender every minute when the visible footer content is unchanged.
+- fix: defer expensive custom-footer startup refresh work
+- Reduce diagnostics widget idle redraw churn by only running its elapsed-time refresh timer while a prompt is actively in progress. This removes the always-on one-second idle redraw loop that could multiply across several pi instances and contribute to watchdog event-loop warnings.
+- Add initial delegated-model routing research artifacts and runtime selection improvements for subagents and ant-colony, including a reproducible model-intelligence snapshot sourced from public benchmarks and provider catalogs.
+- ci: run push and pull_request workflows for stacked prep branches
+- refactor: apply a repo-wide readability cleanup and stabilize a slow worktree test timeout
+- Fix the `@ifi/pi-bash-live-view` package build by running the normal package test suite during `pnpm build` and keeping coverage behind a dedicated `test:coverage` script.
+- Fix the `bg-process` bash tool override to use pi's shell resolution on Windows instead of hardcoding `spawn("bash")`, and write background logs to the platform temp directory.
+- Keep the diagnostics footer in its running state while tools are still executing, even if the previous prompt completion errored.
+- Reduce diagnostics widget render churn while prompts or tools are active and make session-state restoration scan from the newest entries first.
+- - Clarify the git-workflow skill to disable both `GIT_EDITOR` and `GIT_SEQUENCE_EDITOR` (plus `core.editor`/`sequence.editor` overrides) so agent-run Git commands avoid interactive editors in rebase and merge flows.
+- fix the provider catalog to route native Mistral providers through the Mistral conversations API.
+- Fix the Ollama Cloud provider to discover the public model catalog during bootstrap and refreshes even before login, keep that broader public catalog visible even when authenticated discovery is narrower, extend the bundled fallback catalog with `glm-5.1`, and add CLI-aware local download prompts plus local context-window metadata sourced from the cloud catalog.
+- Fix `pnpm pi:local` so it rebuilds `@ifi/oh-pi-core` from the workspace root before syncing local runtime artifacts, avoiding misleading package-local pnpm failures during local source switching.
+- fix: detect the pi executable more reliably when switching oh-pi packages back to published sources
+- Fix provider-catalog build and typecheck regressions in the paged login flow by tightening extension context types, handling optional refresh timestamps safely, and aligning provider tests with the actual extension harness types.
+- Reduce provider-catalog login clutter by switching to a paged `/providers login` flow that shows at most 10 providers at a time, lazily registers selected providers, and keeps persisted or env-configured providers available across sessions.
+- Keep the lockstep release config and publish metadata in sync with every workspace package so `knope release` and publish verification do not leave newly added packages out of version bumps or packaging checks. Also make dedicated extension copies resilient to symlinked runtime bins during setup.
+- - Fix formatting in `packages/extensions/extensions/smoke.test.ts` after removing the `safe-guard` extension so CI lint passes cleanly.
+- Fix scheduled task dispatching to use `deliverAs: "followUp"` alongside `triggerTurn: true`. This ensures scheduled prompts are properly injected into the agent's message stream and trigger a real LLM turn, matching the behavior of the previous `sendUserMessage` approach.
+- Fix the scheduler so empty instances do not hold or prompt about scheduler ownership when there are no scheduled tasks to review.
+- Improve scheduler reliability by keeping it active across session churn, making manual `Run now` actions immediately runnable, and shortening recurring task expiry defaults to 24 hours with a configurable expiry for recurring monitors.
+- fix: use the canonical session id in resume hints and drop the broken `pi resume` alias
+- Fix the auto-session-name resume hint so it points at the saved session file path that `pi --session` expects.
+- Wrap async subagent widget debug tail lines instead of truncating them with ellipses so long model, cwd, and tool details stay readable in narrow terminals.
+- fix: defer git-guard dirty-repo startup checks
+- fix: defer ollama cli detection during session startup
+- Performance audit: fix hot-path regex compilation, debounce disk writes, optimize array pruning, and add benchmarks.
+- Optimize scheduler hot paths — single-pass iterations, zero-alloc dispatch, and O(n) pruning.
+- Add a clearer local-source-mode reminder to run `pnpm install --frozen-lockfile` after pulling, rebasing, or switching branches so pi does not fail to resolve internal workspace packages from a stale install.
+- fix: make pi source switching install newly added packages and refresh local package manifests
+- fix: defer plan state refresh on startup
+- Remove the translated root README and switch the GitHub issue templates to English-only copy.
+- - Remove the `safe-guard` extension from oh-pi manifests, registry entries, tests, and documentation.
+- Stop tracking TypeScript build info artifacts and ignore future `.tsbuildinfo` files.
+- Add a PR-gated runtime churn benchmark suite that mounts widgets and footers, advances an idle window, and ranks extensions by redraw and status-write churn. This makes steady-state performance issues easier to catch, including cases that can later surface as watchdog event-loop warnings even when startup time looks healthy.
+- improve the contrast of scrollable overlay popups like `/schedule` in dark terminal themes.
+- fix: defer scheduler startup ownership prompts
+- Reduce background UI churn by deduplicating repeated scheduler and watchdog status-bar updates, and by slowing footer PR polling to match the existing GitHub probe cooldown.
+- Improve the scheduler and provider pickers with scrollable overlays that stay within the current window height, and let provider model selection show the full model list instead of truncating it.
+- Treat pnpm audit failures caused by npm's retired audit endpoints as a non-fatal upstream issue in repo security checks, while still preserving allowlist enforcement and real audit failures.
+- Add TypeScript startup benchmarks, convert the existing microbenchmarks to TypeScript, and run the benchmark suite on every pull request with uploaded reports and PR summaries.
+- Reduce idle startup status churn by skipping initial no-op status clear writes for unseen status-bar keys while preserving real clears after visible status text has been shown.
+- Add an RFC for clean-room subagent and ant-colony adaptive routing inspired by selected ideas from oh-my-openagent while preserving pi's minimal, user-owned extension model.
+- Validate subagent models against available models before passing to spawned pi process. Previously, subagents inherited the parent session model (e.g. `github-models/openai/gpt-4o-mini`) without checking whether it was actually available, causing "No models match pattern" warnings. Now, runtime overrides, frontmatter models, and session-default fallbacks are all validated against the available model registry. Invalid models are silently skipped, allowing fallback to delegated category routing or no model override.
+- fix: lazy-load subagent config
+- fix: defer subagents global startup cleanup
+- fix: defer subagent startup artifact cleanup
+- Document the current coverage policy more clearly for contributors and add a `pnpm test:patch-coverage` shortcut for running the local 100% patch-coverage gate.
+- Rewrite the patch coverage enforcement script in TypeScript and run it through `pnpm tsx` in CI.
+- fix: scope usage tracker surfaces to the active or selected provider and improve the /usage picker UX
+- chore(extensions): change usage-tracker overlay shortcut from `Ctrl+U` to `Ctrl+Shift+U` while preserving existing `/usage`, `/usage-toggle`, `/usage-refresh`, and `usage_report` behavior.
+- fix: defer expensive usage-tracker startup refresh work for large sessions
+- Reduce usage-tracker idle startup churn by skipping widget redraw requests when deferred startup probe or persisted-state work does not change the widget's visible content.
+- Reduce usage-tracker widget redraw churn by removing the fixed refresh timer, re-rendering on real usage/probe/session changes instead, and keeping the widget aligned with the latest active session after switches.
+- Use `tsgo` for `tsdown` declaration generation in compiled packages and remove the native TypeScript compiler dependency.
+- fix: defer watchdog config loading on startup
+- Reduce worktree startup overhead by splitting lightweight context refreshes from full worktree inventory snapshots, throttling managed-worktree touch writes, and extending startup benchmarks to track both paths.
+- Reduce idle worktree status churn by removing the startup-time worktree status refresh and only updating the status badge during explicit worktree interactions.
+- fix: defer worktree status refresh on session startup
+
+#### Make adaptive routing opt-in by default.
+
+- change the default adaptive-routing mode from `shadow` to `off`
+- add regression coverage to ensure no route suggestions are emitted without explicit config
+- document that adaptive routing is off by default in the extensions README
+
+#### Add missing `deepseek-v4-flash` to the Ollama Cloud fallback model catalog.
+
+- Register `ollama-cloud/deepseek-v4-flash` in `FALLBACK_OLLAMA_CLOUD_MODELS` with 1M context window, text input, and reasoning support
+
+#### Add a devenv skill for using devenv.nix as the task runner and development environment.
+
+- add `packages/skills/skills/devenv/SKILL.md` with activation rules, core commands, and script conventions
+- add `packages/skills/skills/devenv/REFERENCE.md` with the recommended devenv.nix layout, script options, git hooks, processes, and troubleshooting
+
+#### Add docs:sync script to derive MDX content from docs/*.md source files.
+
+Content now uses MDT markers and stays in sync with the repo's MDT
+documentation reuse system.
+
+#### Add missing extension packages to the `pi:local` source switcher.
+
+`@ifi/pi-bash-live-view`, `@ifi/pi-pretty`, `@ifi/pi-remote-tailscale`, and
+`@ifi/pi-analytics-extension` are now included in `SWITCHER_PACKAGES` so that
+`pnpm pi:local` points them at the local workspace sources along with every
+other oh-pi extension.
+
+#### Add repo-wide coverage reporting with Vitest + Codecov, publish a coverage badge in the README,
+
+and post patch coverage details on pull requests.
+
+#### Add a routing corpus and evaluation harness.
+
+- add `evaluate-corpus.ts` reusable offline evaluation runner
+- expand `fixtures.route-corpus.json` with richer fixture schema including intent, complexity, risk, tier, thinking, and acceptable fallbacks
+- add `evaluate-corpus.test.ts` with regression coverage for classification correctness and model-selection mismatch checks
+- update `engine.test.ts` to use the new `CorpusEntry` fields
+- add `evaluate:corpus` package script
+
+#### Add Ctrl+O context expansion popup for QnA questions.
+
+When a question has a longer original formulation, pressing Ctrl+O opens a
+popup inside the QnA overlay showing the full question text, context, and all
+option descriptions. Escape, Enter, or Ctrl+O again closes the popup.
+
+- Added `fullContext` field to `QnAQuestion` for preserving the verbatim
+  original text alongside the concise `question` summary.
+- LLM extraction prompt now instructs preserving `fullContext` when the
+  question is summarized from a longer original.
+- `QnATuiComponent` toggles a context popup with Ctrl+O.
+- `normalizeExtractedQuestions` passes through `fullContext`.
+
+#### Improve answer extension question extraction to find the most complete formulation with options.
+
+The LLM extraction prompt was updated to:
+- Look for the most complete formulation of each question instead of just extracting from a summary at the end
+- Keep `question` concise while extracting all explicit choices as `options`
+- Support a new `header` field for markdown headings (e.g. "### 2. ...")
+- Add a concrete example showing how to extract choices from a detailed section
+
+`normalizeExtractedQuestions` now extracts and passes through the `header` field, and `toQnAQuestions` maps it to the QnA question object so the TUI can display it.
+
+#### Highlight recommended options in answer extension QnA overlay.
+
+The QnA TUI now renders recommended options with bold text and a `(recommended)` postfix so the user's preferred choice stands out visually.
+
+LLM extraction prompt changes:
+- Instructs the model to mark clearly recommended options with `recommended: true`
+- When there is a recommendation without multiple explicit choices, the model creates a single synthetic recommended option; the TUI already presents an `Other` choice so the user can describe what they actually want.
+- Added example showing single-recommendation extraction
+
+Shared QnA component (`qna-tui.ts`):
+- Added `recommended?: boolean` to `QnAOption` interface
+- Render loop appends `(recommended)` postfix and applies bold styling when `recommended` is true
+
+Answer extension (`answer.ts`):
+- Updated `ExtractedQuestion` option type to carry `recommended`
+- `normalizeExtractedQuestions` passes through the flag and synthesizes a recommended option from a `recommendation` string when no explicit options exist
+
+Tests:
+- Added coverage for recommended flag extraction, defaulting to false, synthesis from recommendation string, and preference for explicit options
+- Updated prompt assertion tests for new recommendation guidelines
+
+#### Add a future-planning document for benchmark-informed adaptive routing.
+
+- add `docs/plans/benchmark-informed-adaptive-routing.md` covering the benchmark platform, objective-aware routing, strategy routing, and phased rollout
+- cross-link the new plan from the existing adaptive-routing spec
+- surface the new planning doc in `docs/00-index.md`
+
+#### Update documentation to include all analytics packages and docs site.
+
+- Added `@ifi/pi-analytics-extension` to architecture diagrams, package lists, and managed local switching
+- Added `@ifi/pi-analytics-db`, `@ifi/pi-analytics-dashboard`, and `@ifi/oh-pi-docs` to contributor-facing documentation
+- Added dedicated "Analytics stack" section in `docs/feature-catalog.md` with details on extension, DB, and dashboard
+- Updated `README.md` packages table, project structure, and opt-in packages note
+- Updated `docs/agent-rules/engineering.md` and `docs/agent-rules/packaging-and-release.md` package references
+- MDT blocks auto-propagated to `docs/00-index.md`, `docs/feature-catalog.md`, `README.md`, and `packages/oh-pi/README.md`
+
+#### Improve the repo documentation to better cover the full oh-pi feature surface.
+
+- add a package-by-package feature catalog covering runtime packages, content packs, and contributor libraries
+- expand the root README with missing extension coverage such as scheduler, BTW/QQ, watchdog, and tool metadata
+- add a clearer running-locally guide that explains how `pnpm pi:local` works for local feature testing and development
+- refresh package lists and package counts to include newer additions like `pi-web-remote` and the expanded skills pack
+- update transitive dependency overrides so security audit checks pass again on the branch
+
+#### Improve extension config resilience and harden git command safety.
+
+- add a shared JSON config loader utility for extension configs that falls back cleanly on missing or invalid files and can forward normalization warnings
+- migrate adaptive-routing config loading to the shared helper and surface warnings for malformed config files and invalid top-level sections
+- teach `git-guard` to block git bash commands that are likely to open interactive editors in agent environments (for example `git rebase --continue` without non-interactive editor overrides)
+
+#### Avoid `bash` tool conflicts between `@ifi/pi-bash-live-view` and `@ifi/pi-pretty`.
+
+Both extensions were registering a tool named `bash`, which made them conflict when
+loaded together via `pnpm pi:local`. They now expose explicit alternative tools
+instead:
+
+- `bash_live_view` for PTY-backed terminal rendering
+- `bash_pretty` for formatted command output summaries
+
+The built-in `bash` tool is left untouched, and regression tests now verify these
+extensions can be loaded together without duplicate tool registrations.
+
+#### Fix tool name conflict between bg-process and background-tasks extensions.
+
+The bg-process extension in the extensions package re-exports the same
+extension from @ifi/pi-background-tasks, causing "Tool bash conflicts with
+bg-process" errors. Replaced the redundant bg-process.ts entry in the root
+pi.extensions config with a direct reference to the background-tasks package,
+eliminating the double-loading conflict.
+
+#### Remove auto-backgrounding from the `bash` tool override in `@ifi/pi-background-tasks`.
+
+The extension no longer intercepts ordinary `bash` calls to promote them into
+background tasks after a timeout. Instead, the `bash` tool passes through to
+pi's built-in execution flow so output stays visible in the foreground.
+
+Background task management remains available through `bg_task`, `bg_status`,
+`/bg`, and `Ctrl+Shift+B` for commands that should explicitly run in the
+background (e.g. dev servers, file watchers, log tails).
+
+#### Remove conflicting `bash` passthrough tool from `@ifi/pi-background-tasks`.
+
+The background-tasks extension was incorrectly registering a `bash` tool as a thin
+passthrough, which conflicted with the actual `bash` tool registered by other
+extensions like `@ifi/pi-bash-live-view` and `@ifi/pi-pretty`. The background tasks
+package should only register `bg_task` and `bg_status` tools.
+
+Also updates the runtime benchmark test to gracefully handle filtered extension
+sets (`OH_PI_BENCH_EXTENSION_FILTER`) so it no longer fails when only a subset
+of extensions is benchmarked.
+
+#### fix(extensions): guard `ctx.model` getter in compact-header and custom-footer render paths
+
+The `ctx.model` getter throws when the underlying ExtensionRunner is no longer active (e.g. during session shutdown). Both `compact-header.ts` and `custom-footer.ts` access `ctx.model` inside TUI `render` callbacks that may fire asynchronously after the session ends. Wrapping those accesses in try/catch prevents the crash.
+
+#### Fix PTY-backed `!` commands when `node-pty` installs its prebuilt `spawn-helper` without executable permissions.
+
+The bash live-view extension now checks the active `node-pty/prebuilds/<platform>-<arch>/spawn-helper` path as well as the legacy `build/Release` path and chmods the helper before launching PTY sessions.
+
+#### Fix Ollama cloud models showing stale data after refresh and surface discovery errors
+
+The `/ollama:refresh-models` command and `/ollama:status` display always read
+cloud models from the stored OAuth credential when one exists, even after a
+successful discovery that updated the runtime state. This meant newly available
+models (like kimi-k2.6) would not appear until the credential was re-stored,
+and the "last refreshed" timestamp shown in status was the credential's
+`lastModelRefresh` — often hours or days stale.
+
+Changes:
+
+- Cloud model display now prefers the runtime discovery state
+  (`cloudEnvDiscoveryState.models`) over the stored credential. The credential
+  models are only used as fallback when the runtime state is empty (e.g. before
+  first discovery).
+- The "last refreshed" age shown in status now uses
+  `cloudEnvDiscoveryState.lastRefresh` (always set to `Date.now()` during
+  refresh) instead of the credential's `lastModelRefresh`.
+- Discovery errors are now surfaced in `/ollama:refresh-models`,
+  `/ollama:status`, and `/ollama-cloud status` output, making it obvious when
+  the cloud catalog couldn't be reached instead of silently falling back to
+  stale data.
+
+#### Fix Ollama cloud models not appearing in /scoped-models after refresh
+
+The `modifyModels` OAuth callback in `createOllamaCloudOAuthProvider` always
+used `getCredentialModels(credentials)` — the stale models stored with the
+login credential — over the freshly discovered runtime state. This meant that
+even after `/ollama:refresh-models` successfully re-discovered all models, the
+model registry (used by `/scoped-models`) would overwrite them with the old
+credential models on the next registry refresh.
+
+Now `modifyModels` prefers `cloudEnvDiscoveryState.models` (the runtime
+discovery state that is always updated during refresh) and only falls back to
+credential models when the runtime state is empty (e.g. before first
+discovery).
+
+#### Fix stale ExtensionAPI crash in provider catalog after session replacement.
+
+The `@mariozechner/pi-coding-agent` extension loader invalidates the `ExtensionAPI`
+instance (`pi`) after a session reload or replacement. The provider catalog extension
+was calling `pi.registerProvider()` from `session_start` handlers and command
+handlers that captured the original `pi`, which threw:
+
+  "This extension instance is stale after session replacement or reload."
+
+All `registerProvider` calls in event and command handlers now use the fresh
+`ctx.modelRegistry` passed to each handler instead. `bootstrapProviders` still
+uses the initial `pi` (which is valid at extension load time).
+
+#### Prevent the shared QnA TUI used by `/answers` from rendering lines wider than the terminal when selected answer text is long in narrow terminals.
+
+Keep the pi-bash-live-view package build from enforcing standalone coverage thresholds during the normal build test step.
+
+#### Fix two sources of typing lag in long-running pi sessions:
+
+1. **Scheduler idle heartbeat**: The scheduler previously started a 1-second heartbeat interval on every `session_start`, even when no tasks were scheduled. Over time this added unnecessary event-loop wake-ups and disk I/O. It now lazily starts the heartbeat only when the first task is added, and stops it when the last task is removed.
+
+2. **Compact-header per-render catalog scan**: The compact header rebuilt the full prompt/skill command list on every render (which fires on every keystroke). The catalog is now computed once at header mount and reused across renders.
+
+This also tightens the runtime-churn benchmark so the isolated scheduler scenario must show exactly zero widget, footer, status, and notification churn when no tasks exist.
+
+#### Fix worktree tool renderCall/renderResult returning strings instead of Widget instances
+
+The worktree tool's `renderCall` and `renderResult` returned plain strings
+instead of TUI `Widget` instances. `Box.render` calls `child.render()` on
+every child, so a bare string caused `TypeError: child.render is not a function`.
+
+#### Fix subagent project agent discovery to cascade through parent workspaces.
+
+Subagent agent and chain discovery now loads project-scoped definitions from every ancestor project agents directory, with the nearest project definition winning on name collisions while still keeping parent-only entries available.
+
+#### Fix subagent routing to prefer the current session model before delegated adaptive routing.
+
+Subagents without an explicit runtime or frontmatter model now inherit the active session model when it is available, instead of silently switching providers through delegated category routing.
+
+#### Fix subagent skill resolution against the task cwd for sync and async runs.
+
+Explicit skills now resolve relative to the subagent task directory instead of the runtime/session cwd, so delegated runs can find project-local skills and inject the expected skill content. CLI resource lookups now also fall back to the shared-qna workspace source when the package is not linked into the hoisted root node_modules tree.
+
+#### Prevent Ollama extension startup crashes when auth storage is not ready yet.
+
+- guard `authStorage.get` and `authStorage.set` calls with safe wrappers
+- make cloud-model refresh on `session_start` best-effort to avoid aborting extension initialization
+- add smoke coverage for `session_start` with throwing auth storage access
+
+#### Improve Ollama Cloud startup behavior and response reliability.
+
+- register `streamSimple` for the `ollama-cloud` provider explicitly
+- refresh cloud models on `session_start` using stored OAuth credentials when present
+- update runtime cloud discovery state from credential-backed model catalogs so scoped model matching is stable
+- add smoke coverage that validates `ollama-cloud` registers a stream handler
+
+#### Align Ollama cloud GLM models with the z.ai request semantics used upstream.
+
+- normalize cloud `glm-*` models to use z.ai-compatible thinking flags and `tool_stream`
+- raise cloud GLM max token defaults so the provider can keep a 32k default output budget
+- add regression coverage for GLM request shaping and visible streamed text
+
+#### Fix Ollama startup and request routing so cloud models can be selected and answered reliably.
+
+- seed fallback Ollama cloud models immediately so startup model scoping can resolve known cloud IDs before async refresh finishes
+- route Ollama `openai-completions` requests by `model.provider` instead of assuming one handler per provider registration
+- keep non-Ollama `openai-completions` models on pi's built-in OpenAI-compatible stream path
+- add regression coverage for both startup fallback models and cloud dispatch when the local provider registers last
+
+#### Refresh Ollama Cloud models during startup so newly released cloud models can be registered before model scope resolution.
+
+- Prime the cloud provider from the live `/v1/models` catalog before registration, with a bounded timeout and fallback behavior.
+- Persist discovered cloud models to a local startup cache so later offline starts can still resolve recently discovered models.
+- Keep the static fallback catalog as a resilient baseline instead of requiring every new cloud model to be added manually.
+
+#### Improve session resume guidance for long-running instances.
+
+- extend `auto-session-name` to emit resume command hints on both `session_switch` and `session_shutdown`
+- include both the direct form (`pi --session <id>`) and an alias-path hint (`pi resume <id>`) in the emitted message
+- keep the existing compaction auto-continue and dynamic session title behavior intact
+
+#### Improve error reporting and robustness for ant colony and subagent swarms.
+
+**Ant Colony:**
+- Fix nest lock file crash (`ENOENT`) when colony storage directory is cleaned up mid-run — the lock now recreates the directory instead of crashing
+- Expand error messages from 80–120 chars to 200–500+ chars across queen, spawner, index, and ui
+- Include full stack traces in colony crash reports and task failure records
+- Surface task failures via `emitSignal` so they appear in the TUI instead of being silently swallowed
+- Include validation issues and scout intelligence in plan recovery failure messages
+- Budget-exceeded messages now report how many tasks completed before the limit
+- Failed tasks in `onAntDone` now include error context in the log entry
+- Model resolution errors now include provider and model details
+- Session dispose errors are logged instead of silently swallowed
+
+**Subagent Swarms:**
+- Add fallback error messages for subagent processes that exit non-zero with no stderr
+- Capture `stderr` from `runPiStreaming` and include it in failure output
+- Track `aborted` flag on results when tasks are killed via signal
+- Count JSON parse errors instead of silently swallowing them
+- Extend `detectSubagentError` to run on all results, not just exit-code-0
+- Write failure result files when the runner process crashes, so the parent knows what happened
+- Process spawn errors now capture the error message
+
+#### Add scheduler support for completion-aware retries.
+
+- extend `schedule_prompt add` with `continueUntilComplete`, `completionSignal`, `retryInterval`, and `maxAttempts`
+- keep compatible tasks in an `awaiting_completion` state and evaluate completion on `agent_end` before deleting or rescheduling
+- persist per-task completion settings and outcome snippets for better `/schedule` and tool observability
+
+#### Improve long-running session continuity and resume ergonomics.
+
+- update `auto-session-name` to refresh titles when conversation focus shifts instead of freezing on the first prompt
+- auto-send a `continue` follow-up after compaction so manual and automatic compaction flows continue working without extra input
+- emit a shutdown message with a resumable session id hint (`pi --session <id>`) to make resume flows faster
+
+#### Harden tool result rendering against oversized or malformed text output.
+
+- sanitize tool-result text blocks before metadata rendering
+- split extremely long single lines into bounded chunks to avoid recursive line-wrap overflows
+- cap total rendered text size/line count and strip NUL bytes before UI fallback rendering
+- attach `outputGuard` details when truncation is applied
+
+#### Further harden interactive tool-result rendering against pathological payloads.
+
+- sanitize large string fields in tool-result `details` before renderer fallback paths consume them
+- strip NUL bytes and bound nested details depth/field counts to avoid shell/text sanitizer crashes
+- keep `outputGuard` metadata with a `detailsSanitized` flag when truncation is applied
+- add tests covering oversized nested `details.stdout/stderr` payloads
+
 ## 0.4.4 (2026-04-02)
 
 ### Features
