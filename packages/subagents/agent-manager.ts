@@ -1,27 +1,31 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
 import type { Component, TUI } from "@mariozechner/pi-tui";
+
 import { matchesKey, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { handleChainDetailInput, renderChainDetail } from "./agent-manager-chain-detail.js";
+
 import type { ChainDetailAction, ChainDetailState } from "./agent-manager-chain-detail.js";
-import { handleDetailInput, renderDetail, renderTaskInput } from "./agent-manager-detail.js";
 import type { DetailAction, DetailState } from "./agent-manager-detail.js";
-import { createEditState, handleEditInput, renderEdit } from "./agent-manager-edit.js";
 import type { EditScreen, EditState, ModelInfo, SkillInfo } from "./agent-manager-edit.js";
-import { handleListInput, renderList } from "./agent-manager-list.js";
 import type { ListAction, ListAgent, ListState } from "./agent-manager-list.js";
+import type { AgentOption, ParallelState } from "./agent-manager-parallel.js";
+import type { AgentTemplate, TemplateItem } from "./agent-templates.js";
+import type { AgentConfig, ChainConfig } from "./agents.js";
+import type { TextEditorState } from "./text-editor.js";
+
+import { handleChainDetailInput, renderChainDetail } from "./agent-manager-chain-detail.js";
+import { handleDetailInput, renderDetail, renderTaskInput } from "./agent-manager-detail.js";
+import { createEditState, handleEditInput, renderEdit } from "./agent-manager-edit.js";
+import { handleListInput, renderList } from "./agent-manager-list.js";
 import {
 	createParallelState,
 	formatParallelTitle,
 	handleParallelInput,
 	renderParallel,
 } from "./agent-manager-parallel.js";
-import type { AgentOption, ParallelState } from "./agent-manager-parallel.js";
 import { serializeAgent } from "./agent-serializer.js";
 import { TEMPLATE_ITEMS } from "./agent-templates.js";
-import type { AgentTemplate, TemplateItem } from "./agent-templates.js";
-import type { AgentConfig, ChainConfig } from "./agents.js";
 import { parseChain, serializeChain } from "./chain-serializer.js";
 import { pad, renderFooter, renderHeader, row } from "./render-helpers.js";
 import { loadRunsForAgent } from "./run-history.js";
@@ -33,7 +37,6 @@ import {
 	renderEditor,
 	wrapText,
 } from "./text-editor.js";
-import type { TextEditorState } from "./text-editor.js";
 
 export type ManagerResult =
 	| { action: "launch"; agent: string; task: string; skipClarify?: boolean }

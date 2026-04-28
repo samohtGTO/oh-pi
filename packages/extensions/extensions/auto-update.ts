@@ -1,3 +1,5 @@
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 /**
  * Oh-pi Auto Update Extension
  *
@@ -6,7 +8,6 @@
  * The check runs in a `setTimeout` to avoid blocking session startup.
  */
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

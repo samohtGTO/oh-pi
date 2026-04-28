@@ -2,7 +2,9 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+
 import type { OhPConfigWithRouting } from "../types.js";
+
 import {
 	writeAdaptiveRoutingConfig,
 	writeAgents,

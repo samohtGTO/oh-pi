@@ -1,13 +1,15 @@
 import * as p from "@clack/prompts";
 import { EXTENSIONS, t } from "@ifi/oh-pi-core";
 import chalk from "chalk";
+
 import type { OhPConfigWithRouting } from "../types.js";
 import type { EnvInfo } from "../utils/detect.js";
+import type { ProviderSetupResult } from "./provider-setup.js";
+
 import { selectAgents } from "./agents-select.js";
 import { selectExtensions } from "./extension-select.js";
 import { selectKeybindings } from "./keybinding-select.js";
 import { setupProviders } from "./provider-setup.js";
-import type { ProviderSetupResult } from "./provider-setup.js";
 import { setupAdaptiveRouting, summarizeAdaptiveRouting } from "./routing-setup.js";
 import { selectTheme } from "./theme-select.js";
 

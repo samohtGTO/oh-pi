@@ -1,8 +1,11 @@
+import type { LucideIcon } from "lucide-react";
+
+import { CalendarDays, Cpu, FolderCode, LayoutDashboard, Network, Sparkles } from "lucide-react";
+
+import type { ViewType } from "@/types";
+
 /* C8 ignore file */
 import { cn } from "@/lib/utils";
-import type { ViewType } from "@/types";
-import { CalendarDays, Cpu, FolderCode, LayoutDashboard, Network, Sparkles } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 interface NavItem {
 	id: ViewType;

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { executePtyCommand, ptyExecuteInternals, toAgentToolResult, toUserBashResult } from "../src/pty-execute.js";
 import {
 	ptySessionInternals,

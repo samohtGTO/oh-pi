@@ -1,3 +1,5 @@
+import type { AuthCredential, ExtensionAPI, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+
 import {
 	type Api,
 	type AssistantMessageEventStream,
@@ -6,7 +8,7 @@ import {
 	type SimpleStreamOptions,
 	streamSimpleOpenAICompletions,
 } from "@mariozechner/pi-ai";
-import type { AuthCredential, ExtensionAPI, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+
 import {
 	type CloudModelsGetter,
 	createOllamaCloudOAuthProvider,

@@ -294,6 +294,7 @@ function stripAnsiForTest(text: string): string {
 // ─── Import ──────────────────────────────────────────────────────────────────
 
 import { existsSync, mkdirSync, promises as fsPromises, readFileSync, writeFileSync } from "node:fs";
+
 import { resetSafeModeStateForTests, setSafeModeState } from "./runtime-mode";
 import usageTracker, { flushPendingWrites } from "./usage-tracker.js";
 

@@ -1,6 +1,9 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
+
 import { matchesKey, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+
 import type { AgentSource } from "./agents.js";
+
 import { formatScrollInfo, fuzzyFilter, pad, renderFooter, renderHeader, row } from "./render-helpers.js";
 
 export interface ListAgent {

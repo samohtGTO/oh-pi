@@ -1,5 +1,15 @@
 /* C8 ignore file */
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import type {
+	AdaptiveRoutingMode,
+	AdaptiveRoutingState,
+	ProviderUsageState,
+	RouteDecision,
+	RouteFeedbackCategory,
+	RouteThinkingLevel,
+} from "./types.js";
+
 import { classifyPrompt } from "./classifier.js";
 import { readAdaptiveRoutingConfig } from "./config.js";
 import { inspectDelegatedSelection } from "./delegated-runtime.js";
@@ -15,14 +25,6 @@ import {
 	hashPrompt,
 	readTelemetryEvents,
 } from "./telemetry.js";
-import type {
-	AdaptiveRoutingMode,
-	AdaptiveRoutingState,
-	ProviderUsageState,
-	RouteDecision,
-	RouteFeedbackCategory,
-	RouteThinkingLevel,
-} from "./types.js";
 
 const STATUS_KEY = "adaptive-routing";
 const STARTUP_STATE_REFRESH_DELAY_MS = 250;

@@ -1,7 +1,11 @@
-import * as p from "@clack/prompts";
 import type { ProviderConfig } from "@ifi/oh-pi-core";
+
+import * as p from "@clack/prompts";
+
 import type { AdaptiveRoutingModeConfig, AdaptiveRoutingSetupConfig } from "../types.js";
 import type { WritablePiPackageInstallScope } from "../utils/pi-packages.js";
+import type { PendingOptionalRoutingPackageSelection } from "./routing-dashboard.js";
+
 import { installPiPackages } from "../utils/pi-packages.js";
 import {
 	buildRoutingDashboard,
@@ -9,7 +13,6 @@ import {
 	ROUTING_CATEGORIES,
 	suggestOptionalRoutingPackages,
 } from "./routing-dashboard.js";
-import type { PendingOptionalRoutingPackageSelection } from "./routing-dashboard.js";
 
 interface SetupAdaptiveRoutingOptions {
 	piInstalled?: boolean;

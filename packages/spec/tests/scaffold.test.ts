@@ -3,6 +3,7 @@ import { mkdir, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+
 import { ensureFeatureArtifacts, ensurePlanArtifact, ensureWorkflowScaffold } from "../extension/scaffold.js";
 import { buildWorkflowPaths } from "../extension/workspace.js";
 

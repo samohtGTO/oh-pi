@@ -1,5 +1,3 @@
-import { classifyPromptHeuristically } from "./classifier.js";
-import { decideRoute } from "./engine.js";
 import type {
 	AdaptiveRoutingConfig,
 	NormalizedRouteCandidate,
@@ -14,6 +12,9 @@ import type {
 	RouteTier,
 	RouteToolIntensity,
 } from "./types.js";
+
+import { classifyPromptHeuristically } from "./classifier.js";
+import { decideRoute } from "./engine.js";
 
 /**
  * A single corpus entry that describes a prompt and its expected routing

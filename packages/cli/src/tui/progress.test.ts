@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { clearProgressLine, renderProgress, runWithProgress } from "./progress.js";
 
 describe("renderProgress", () => {

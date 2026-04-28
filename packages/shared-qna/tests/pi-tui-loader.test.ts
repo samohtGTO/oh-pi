@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { getPiTuiFallbackPaths, requirePiTuiModule } from "../pi-tui-loader.js";
 
 describe("getPiTuiFallbackPaths", () => {

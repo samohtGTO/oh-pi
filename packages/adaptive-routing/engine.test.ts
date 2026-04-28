@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+
 import { classifyPromptHeuristically } from "./classifier.js";
 import { DEFAULT_ADAPTIVE_ROUTING_CONFIG } from "./defaults.js";
 import { decideRoute } from "./engine.js";

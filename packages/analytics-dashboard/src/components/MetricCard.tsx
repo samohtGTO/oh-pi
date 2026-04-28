@@ -1,7 +1,9 @@
+import type { LucideIcon } from "lucide-react";
+
+import { TrendingDown, TrendingUp } from "lucide-react";
+
 /* C8 ignore file */
 import { cn, formatCurrency, formatNumber } from "@/lib/utils";
-import { TrendingDown, TrendingUp } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 interface MetricCardProps {
 	title: string;

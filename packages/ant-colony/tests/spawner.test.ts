@@ -21,9 +21,11 @@ vi.mock("@mariozechner/pi-ai", () => ({ getModel: vi.fn() }));
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+
+import type { ColonyState, Task } from "../extensions/ant-colony/types.js";
+
 import { Nest } from "../extensions/ant-colony/nest.js";
 import { makeAntId, makePheromoneId, makeTaskId, runDrone } from "../extensions/ant-colony/spawner.js";
-import type { ColonyState, Task } from "../extensions/ant-colony/types.js";
 
 describe("makeAntId", () => {
 	it("includes caste name", () => {

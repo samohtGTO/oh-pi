@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 
 const { createBashToolMock, getShellConfigMock, spawnMock } = vi.hoisted(() => ({

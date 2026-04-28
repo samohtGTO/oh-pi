@@ -1,5 +1,6 @@
 import { create, toBinary } from "@bufbuild/protobuf";
 import { describe, expect, it } from "vitest";
+
 import {
 	decodeGetUsableModelsResponse,
 	discoverCursorModels,

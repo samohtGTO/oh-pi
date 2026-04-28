@@ -1,7 +1,5 @@
 /* C8 ignore file */
 
-import { StringEnum } from "@mariozechner/pi-ai";
-import { getShellConfig } from "@mariozechner/pi-coding-agent";
 import type {
 	AgentToolResult,
 	ExtensionAPI,
@@ -9,10 +7,20 @@ import type {
 	ExtensionContext,
 	Theme,
 } from "@mariozechner/pi-coding-agent";
+
+import { StringEnum } from "@mariozechner/pi-ai";
+import { getShellConfig } from "@mariozechner/pi-coding-agent";
 import { matchesKey, Text, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { spawn } from "node:child_process";
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+
+import type {
+	BackgroundTaskEventDetails,
+	BackgroundTaskSnapshot,
+	BackgroundTaskStatus,
+} from "./background-tasks-shared.js";
+
 import {
 	BG_COMMAND,
 	BG_DASHBOARD_MAX_HEIGHT,
@@ -37,11 +45,6 @@ import {
 	tailText,
 	taskDisplayName,
 	trimOutputBuffer,
-} from "./background-tasks-shared.js";
-import type {
-	BackgroundTaskEventDetails,
-	BackgroundTaskSnapshot,
-	BackgroundTaskStatus,
 } from "./background-tasks-shared.js";
 
 type ManagedTask = BackgroundTaskSnapshot & {

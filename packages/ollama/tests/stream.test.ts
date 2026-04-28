@@ -1,3 +1,5 @@
+import type { AddressInfo } from "node:net";
+
 import {
 	type Model,
 	registerApiProvider,
@@ -6,8 +8,8 @@ import {
 	streamSimpleOpenAICompletions,
 } from "@mariozechner/pi-ai";
 import http from "node:http";
-import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import { OLLAMA_API } from "../config.js";
 import ollamaProviderExtension from "../index.js";

@@ -1,11 +1,16 @@
-/* C8 ignore file */
-import * as sharedQna from "@ifi/pi-shared-qna";
 import type {
 	ExtensionAPI,
 	ExtensionCommandContext,
 	ExtensionContext,
 	ProviderConfig,
 } from "@mariozechner/pi-coding-agent";
+
+/* C8 ignore file */
+import * as sharedQna from "@ifi/pi-shared-qna";
+
+import type { ProviderCatalogCredentials, ProviderCatalogModel } from "./catalog.js";
+import type { SupportedProviderDefinition } from "./config.js";
+
 import {
 	createApiKeyOAuthProvider,
 	loginProvider,
@@ -13,9 +18,7 @@ import {
 	refreshProviderCredentialModels,
 } from "./auth.js";
 import { getCatalogModels, getCredentialModels, resolveProviderModels } from "./catalog.js";
-import type { ProviderCatalogCredentials, ProviderCatalogModel } from "./catalog.js";
 import { getEnvApiKey, resolveApiKeyConfig, SUPPORTED_PROVIDERS } from "./config.js";
-import type { SupportedProviderDefinition } from "./config.js";
 
 interface ScrollSelectOption<T> {
 	value: T;

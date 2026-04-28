@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 
 const mocks = vi.hoisted(() => {

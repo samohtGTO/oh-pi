@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import providerCatalogExtension from "../index.js";
 

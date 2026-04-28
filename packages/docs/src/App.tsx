@@ -1,8 +1,9 @@
+import { Route, Routes } from "react-router";
+
 import { HomePage } from "@/components/HomePage";
 import { Layout } from "@/components/Layout";
 import { MdxPage } from "@/components/MdxPage";
 import { useMdxPages } from "@/hooks/useMdxPages";
-import { Route, Routes } from "react-router";
 
 export function App() {
 	const pages = useMdxPages();

@@ -5,8 +5,10 @@
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { analyticsApi } from "../api/analytics";
+
 import type { TimeRange } from "../types";
+
+import { analyticsApi } from "../api/analytics";
 
 const originalApiMode = process.env.VITE_API_MODE;
 const originalApiBase = process.env.VITE_API_BASE;

@@ -5,12 +5,13 @@
  * Detailed view of model usage and performance.
  */
 
+import { Clock, Cpu, Database, DollarSign, TrendingUp } from "lucide-react";
+
 import { BarChart } from "@/components/charts/BarChart";
 import { PieChart } from "@/components/charts/PieChart";
 import { useModelUsage } from "@/hooks/useAnalytics";
 import { cn, formatCurrency, stringToColor } from "@/lib/utils";
 import { useDashboardStore, useTimeRange } from "@/stores/dashboard";
-import { Clock, Cpu, Database, DollarSign, TrendingUp } from "lucide-react";
 
 export function Models() {
 	const timeRange = useTimeRange();

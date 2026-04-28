@@ -4,6 +4,10 @@ import { createRequire } from "node:module";
 import * as os from "node:os";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
+
+import type { RunnerStep, RunnerSubagentStep as SubagentStep } from "./parallel-utils.js";
+import type { ArtifactConfig, ArtifactPaths, MaxOutputConfig } from "./types.js";
+
 import { appendJsonl, getArtifactPaths } from "./artifacts.js";
 import {
 	aggregateParallelOutputs,
@@ -12,11 +16,9 @@ import {
 	mapConcurrent,
 	MAX_PARALLEL_CONCURRENCY,
 } from "./parallel-utils.js";
-import type { RunnerStep, RunnerSubagentStep as SubagentStep } from "./parallel-utils.js";
 import { getPiSpawnCommand } from "./pi-spawn.js";
 import { persistSingleOutput } from "./single-output.js";
 import { DEFAULT_MAX_OUTPUT, getSubagentDepthEnv, truncateOutput } from "./types.js";
-import type { ArtifactConfig, ArtifactPaths, MaxOutputConfig } from "./types.js";
 
 interface SubagentRunConfig {
 	id: string;

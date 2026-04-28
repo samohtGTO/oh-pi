@@ -14,10 +14,11 @@
  * Based on https://github.com/dbachelder/pi-btw by Dan Bachelder (MIT).
  */
 
-import { completeSimple, streamSimple } from "@mariozechner/pi-ai";
 import type { AssistantMessage, Message, ThinkingLevel as AiThinkingLevel } from "@mariozechner/pi-ai";
-import { buildSessionContext } from "@mariozechner/pi-coding-agent";
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import { completeSimple, streamSimple } from "@mariozechner/pi-ai";
+import { buildSessionContext } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 
 const BTW_MESSAGE_TYPE = "btw-note";

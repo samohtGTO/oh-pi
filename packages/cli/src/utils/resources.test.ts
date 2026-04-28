@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { resources } from "./resources.js";
 
 describe("resources", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildWorkflowPrompt, getStepNotes } from "../extension/prompts.js";
 import { buildWorkflowPaths } from "../extension/workspace.js";
 

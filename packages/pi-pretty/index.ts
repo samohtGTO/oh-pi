@@ -3,6 +3,7 @@
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 import { enhanceBashTool } from "./src/bash.js";
 import { enhanceFindTool, enhanceGrepTool, enhanceMultiGrepTool } from "./src/find-grep.js";
 import { enhanceLsTool } from "./src/ls.js";

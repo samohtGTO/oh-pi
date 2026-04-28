@@ -1,4 +1,3 @@
-import { matchesModelRef } from "./normalize.js";
 import type {
 	AdaptiveRoutingConfig,
 	NormalizedRouteCandidate,
@@ -13,6 +12,8 @@ import type {
 	RouteThinkingLevel,
 	RouteTier,
 } from "./types.js";
+
+import { matchesModelRef } from "./normalize.js";
 
 export interface RoutingDecisionInput {
 	config: AdaptiveRoutingConfig;

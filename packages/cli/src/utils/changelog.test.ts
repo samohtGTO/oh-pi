@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { compareVersion, entriesBetween, parseChangelog, renderChangelog } from "./changelog.js";
 
 const FIXTURE = `# Changelog

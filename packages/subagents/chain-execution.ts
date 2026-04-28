@@ -4,11 +4,16 @@
 
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import * as fs from "node:fs";
 import * as path from "node:path";
+
 import type { AgentConfig } from "./agents.js";
-import { ChainClarifyComponent } from "./chain-clarify.js";
 import type { BehaviorOverride, ChainClarifyResult, ModelInfo } from "./chain-clarify.js";
+import type { ChainStep, ParallelTaskResult, ResolvedTemplates, SequentialStep, StepOverrides } from "./settings.js";
+import type { AgentProgress, ArtifactConfig, ArtifactPaths, Details, SingleResult } from "./types.js";
+
+import { ChainClarifyComponent } from "./chain-clarify.js";
 import { runSync } from "./execution.js";
 import { buildChainSummary } from "./formatters.js";
 import { resolveSubagentModelResolution, toAvailableModelRefs } from "./model-routing.js";
@@ -24,10 +29,8 @@ import {
 	resolveParallelBehaviors,
 	resolveStepBehavior,
 } from "./settings.js";
-import type { ChainStep, ParallelTaskResult, ResolvedTemplates, SequentialStep, StepOverrides } from "./settings.js";
 import { discoverAvailableSkills, normalizeSkillInput } from "./skills.js";
 import { MAX_CONCURRENCY } from "./types.js";
-import type { AgentProgress, ArtifactConfig, ArtifactPaths, Details, SingleResult } from "./types.js";
 import { getFinalOutput, mapConcurrent } from "./utils.js";
 
 /** Resolve a model name to its full provider/model format */

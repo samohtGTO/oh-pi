@@ -1,6 +1,7 @@
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+
 import type { AdaptiveRoutingState } from "./types.js";
 
 const DEFAULT_STATE: AdaptiveRoutingState = {};

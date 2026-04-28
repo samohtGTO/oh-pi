@@ -1,7 +1,8 @@
-import { useSearch } from "@/hooks/useSearch";
 import { FileText, Search, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
+
+import { useSearch } from "@/hooks/useSearch";
 
 interface SearchDialogProps {
 	open: boolean;

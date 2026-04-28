@@ -1,8 +1,8 @@
 import type { Api, AssistantMessage, Model } from "@mariozechner/pi-ai";
-import { completeSimple } from "@mariozechner/pi-ai";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { buildFallbackClassification } from "./engine.js";
-import { matchesModelRef } from "./normalize.js";
+
+import { completeSimple } from "@mariozechner/pi-ai";
+
 import type {
 	AdaptiveRoutingConfig,
 	NormalizedRouteCandidate,
@@ -10,6 +10,9 @@ import type {
 	RouteIntent,
 	RouteThinkingLevel,
 } from "./types.js";
+
+import { buildFallbackClassification } from "./engine.js";
+import { matchesModelRef } from "./normalize.js";
 
 export async function classifyPrompt(
 	prompt: string,

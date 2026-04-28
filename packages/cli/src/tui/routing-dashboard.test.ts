@@ -1,5 +1,7 @@
 import type { ProviderConfig } from "@ifi/oh-pi-core";
+
 import { describe, expect, it } from "vitest";
+
 import {
 	buildRoutingDashboard,
 	detectOptionalRoutingPackages,

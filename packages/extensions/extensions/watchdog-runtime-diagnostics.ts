@@ -1,4 +1,5 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 import path from "node:path";
 
 const DIAGNOSTIC_WINDOW_MS = 2 * 60_000;

@@ -28,11 +28,24 @@ Key usage-tracker surfaces:
 */
 
 import type { AssistantMessage } from "@mariozechner/pi-ai";
-import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { existsSync, mkdirSync, promises as fsp, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+
+import type {
+	HistoricalCostPoint,
+	ModelUsage,
+	PiAuthEntry,
+	ProviderKey,
+	ProviderRateLimits,
+	SourceUsage,
+	TurnSnapshot,
+	UsageSample,
+} from "./usage-tracker-shared.js";
+
 import { getSafeModeState, subscribeSafeMode } from "./runtime-mode.js";
 import {
 	clampPercent,
@@ -63,16 +76,6 @@ import {
 	PROBE_COOLDOWN_MS,
 	ROLLING_COST_WINDOW_MS,
 	ROLLING_HISTORY_MAX_POINTS,
-} from "./usage-tracker-shared.js";
-import type {
-	HistoricalCostPoint,
-	ModelUsage,
-	PiAuthEntry,
-	ProviderKey,
-	ProviderRateLimits,
-	SourceUsage,
-	TurnSnapshot,
-	UsageSample,
 } from "./usage-tracker-shared.js";
 
 // ─── Extension entry point ──────────────────────────────────────────────────

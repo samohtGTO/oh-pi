@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { checkSubagentDepth, DEFAULT_SUBAGENT_MAX_DEPTH, getSubagentDepthEnv } from "../types.js";
 
 let savedDepth: string | undefined;

@@ -1,12 +1,15 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
+
 import { matchesKey, truncateToWidth } from "@mariozechner/pi-tui";
+
 import type { AgentConfig } from "./agents.js";
+import type { RunEntry } from "./run-history.js";
+import type { TextEditorState } from "./text-editor.js";
+
 import { formatDuration } from "./formatters.js";
 import { formatPath, formatScrollInfo, pad, renderFooter, renderHeader, row } from "./render-helpers.js";
-import type { RunEntry } from "./run-history.js";
 import { buildSkillInjection, resolveSkills } from "./skills.js";
 import { ensureCursorVisible, getCursorDisplayPos, renderEditor, wrapText } from "./text-editor.js";
-import type { TextEditorState } from "./text-editor.js";
 
 export interface DetailState {
 	resolved: boolean;

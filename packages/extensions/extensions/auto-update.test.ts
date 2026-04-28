@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { isNewer, runAutoUpdateCheck } from "./auto-update.js";
 
 describe("auto-update helpers", () => {

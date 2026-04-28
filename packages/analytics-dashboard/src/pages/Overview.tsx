@@ -5,14 +5,6 @@
  * Main dashboard view with summary metrics, charts, and insights.
  */
 
-import { ActivityHeatmap } from "@/components/charts/ActivityHeatmap";
-import { BarChart } from "@/components/charts/BarChart";
-import { PieChart } from "@/components/charts/PieChart";
-import { TimeSeriesChart } from "@/components/charts/TimeSeriesChart";
-import { MetricCard } from "@/components/MetricCard";
-import { useActivityHeatmap, useDashboardOverview } from "@/hooks/useAnalytics";
-import { cn, stringToColor } from "@/lib/utils";
-import { useTimeRange } from "@/stores/dashboard";
 import {
 	AlertCircle,
 	CheckCircle2,
@@ -24,6 +16,15 @@ import {
 	TrendingUp,
 	Zap,
 } from "lucide-react";
+
+import { ActivityHeatmap } from "@/components/charts/ActivityHeatmap";
+import { BarChart } from "@/components/charts/BarChart";
+import { PieChart } from "@/components/charts/PieChart";
+import { TimeSeriesChart } from "@/components/charts/TimeSeriesChart";
+import { MetricCard } from "@/components/MetricCard";
+import { useActivityHeatmap, useDashboardOverview } from "@/hooks/useAnalytics";
+import { cn, stringToColor } from "@/lib/utils";
+import { useTimeRange } from "@/stores/dashboard";
 
 export function Overview() {
 	const timeRange = useTimeRange();

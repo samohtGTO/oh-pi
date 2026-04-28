@@ -1,9 +1,13 @@
-import { create, fromBinary, fromJson, toBinary, toJson } from "@bufbuild/protobuf";
 import type { JsonValue } from "@bufbuild/protobuf";
-import { ValueSchema } from "@bufbuild/protobuf/wkt";
 import type { Context, Message, ToolResultMessage } from "@mariozechner/pi-ai";
+
+import { create, fromBinary, fromJson, toBinary, toJson } from "@bufbuild/protobuf";
+import { ValueSchema } from "@bufbuild/protobuf/wkt";
 import { createHash, randomUUID } from "node:crypto";
+
 import type { GetBlobArgs } from "./proto/agent_pb.js";
+import type { ConversationStateRecord } from "./runtime.js";
+
 import {
 	AgentClientMessageSchema,
 	AgentConversationTurnStructureSchema,
@@ -28,7 +32,6 @@ import {
 	UserMessageActionSchema,
 	UserMessageSchema,
 } from "./proto/agent_pb.js";
-import type { ConversationStateRecord } from "./runtime.js";
 import { frameConnectMessage } from "./transport.js";
 
 export interface ToolResultInfo {

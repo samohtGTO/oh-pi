@@ -2,6 +2,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import planExtension from "../index.js";
 

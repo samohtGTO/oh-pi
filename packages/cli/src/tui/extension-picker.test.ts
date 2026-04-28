@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { type ExtensionOption, pickExtensions } from "./extension-picker.js";
 
 function createMockStreams() {

@@ -1,5 +1,7 @@
 import type { AgentToolResult, ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 import { createBashTool } from "@mariozechner/pi-coding-agent";
+
 import { FG_GREEN, FG_RED, FG_YELLOW, fillToolBackground, resolveBaseBackground } from "./theme.js";
 
 export const PRETTY_BASH_TOOL = "bash_pretty";

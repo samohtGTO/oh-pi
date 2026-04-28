@@ -8,6 +8,7 @@
  */
 
 import * as os from "node:os";
+
 import type { ConcurrencyConfig, ConcurrencySample } from "./types.js";
 
 const CPU_CORES = os.cpus().length;

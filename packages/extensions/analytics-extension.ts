@@ -5,6 +5,9 @@
  * Enhanced usage tracker that persists analytics to SQLite database.
  */
 
+import type { NewCodebase, NewSession, NewTurn } from "@ifi/pi-analytics-db";
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 import {
 	createSession,
 	endSession,
@@ -18,8 +21,6 @@ import {
 	upsertModel,
 	upsertProvider,
 } from "@ifi/pi-analytics-db";
-import type { NewCodebase, NewSession, NewTurn } from "@ifi/pi-analytics-db";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { createHash } from "node:crypto";
 
 // ═══ State ═══

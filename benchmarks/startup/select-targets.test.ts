@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { computeBenchmarkTargets } from "./select-targets";
 
 describe("startup benchmark target selection", () => {

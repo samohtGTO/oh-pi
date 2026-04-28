@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createJsonlWriter, type DrainableSource, type JsonlWriteStream } from "../jsonl-writer.js";
 
 class MockSource implements DrainableSource {

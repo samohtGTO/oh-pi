@@ -1,3 +1,8 @@
+import { format, parseISO } from "date-fns";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
+import type { TimelineData } from "@/types";
+
 /* C8 ignore file */
 /**
  * Time Series Chart Component
@@ -5,9 +10,6 @@
  * A line/area chart for displaying usage over time.
  */
 import { cn, formatNumber } from "@/lib/utils";
-import type { TimelineData } from "@/types";
-import { format, parseISO } from "date-fns";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface TimeSeriesChartProps {
 	data: TimelineData[];

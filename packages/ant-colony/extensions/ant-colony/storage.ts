@@ -9,6 +9,7 @@ import { expandHomeDir } from "@ifi/oh-pi-core";
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
 import { getManagedWorktreeParentDir } from "./worktree-registry.js";
 
 export type ColonyStorageMode = "shared" | "project";

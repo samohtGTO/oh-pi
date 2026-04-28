@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import { main, parseArgs } from "../src/cli.js";
 import { buildPiCommand, buildRemotePtyEnv, createPtyProcess } from "../src/pty.js";

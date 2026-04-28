@@ -1,4 +1,3 @@
-import { ReconnectManager } from "./reconnect.js";
 import type {
 	AuthOkResponse,
 	CommandInfo,
@@ -13,6 +12,8 @@ import type {
 	SessionStats,
 	ThinkingLevel,
 } from "./types.js";
+
+import { ReconnectManager } from "./reconnect.js";
 
 type Unsubscribe = () => void;
 type EventHandler = (event: unknown) => void;

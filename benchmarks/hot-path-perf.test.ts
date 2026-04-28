@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { runBenchmark } from "./shared/benchmark";
 
 const benchmarkIt = process.env.OH_PI_RUN_BENCHMARKS === "1" ? it : it.skip;

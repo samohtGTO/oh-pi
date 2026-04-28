@@ -1,7 +1,10 @@
-import { requirePiTuiModule } from "@ifi/pi-shared-qna";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { resolveActivePlanFilePath } from "./plan-files";
+
+import { requirePiTuiModule } from "@ifi/pi-shared-qna";
+
 import type { PlanModeState } from "./types";
+
+import { resolveActivePlanFilePath } from "./plan-files";
 import { createInactivePlanModeState, isPlanModeState } from "./utils";
 
 function getPiTui() {

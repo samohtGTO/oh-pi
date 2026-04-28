@@ -1,9 +1,11 @@
-/* C8 ignore file */
-import { analyticsApi } from "@/api/analytics";
-import type { TimeRange } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, MessageSquare, Smile, SpellCheck, TrendingUp } from "lucide-react";
 import { useState } from "react";
+
+import type { TimeRange } from "@/types";
+
+/* C8 ignore file */
+import { analyticsApi } from "@/api/analytics";
 
 export function Insights({ timeRange }: { timeRange: TimeRange }) {
 	const [_selectedModel, _setSelectedModel] = useState<string>("all");

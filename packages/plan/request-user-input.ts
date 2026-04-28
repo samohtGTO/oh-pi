@@ -1,7 +1,9 @@
-import { QnATuiComponent, requirePiTuiModule } from "@ifi/pi-shared-qna";
 import type { QnAResponse, QnAResult } from "@ifi/pi-shared-qna";
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import { QnATuiComponent, requirePiTuiModule } from "@ifi/pi-shared-qna";
+
 import type {
 	NormalizedRequestUserInputQuestion,
 	PlanModeState,
@@ -10,6 +12,7 @@ import type {
 	RequestUserInputQuestion,
 	RequestUserInputResponse,
 } from "./types";
+
 import { findDuplicateId } from "./utils";
 
 function createText(text: string) {

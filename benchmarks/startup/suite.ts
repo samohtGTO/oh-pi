@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import type { BenchmarkDefinition } from "../shared/benchmark";
+
 import { createBenchmarkHarness } from "./harness";
 
 interface ExtensionModule {

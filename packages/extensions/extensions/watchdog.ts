@@ -12,12 +12,16 @@ The watchdog samples CPU, memory, and event-loop lag on an interval, records rec
 <!-- {/extensionsWatchdogAlertBehaviorDocs} -->
 */
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import * as fs from "node:fs";
 import { cpus, homedir } from "node:os";
 import * as path from "node:path";
 import { monitorEventLoopDelay } from "node:perf_hooks";
-import { getSafeModeState, setSafeModeState, subscribeSafeMode } from "./runtime-mode";
+
 import type { SafeModeSource, SafeModeState } from "./runtime-mode";
+import type { ExtensionDiagnostic } from "./watchdog-runtime-diagnostics";
+
+import { getSafeModeState, setSafeModeState, subscribeSafeMode } from "./runtime-mode";
 import { createStatusBarState } from "./ui-status-cache.js";
 import {
 	formatExtensionDiagnostic,
@@ -26,7 +30,6 @@ import {
 	getStartupDiagnostics,
 	installRuntimeDiagnostics,
 } from "./watchdog-runtime-diagnostics";
-import type { ExtensionDiagnostic } from "./watchdog-runtime-diagnostics";
 
 const MB = 1024 * 1024;
 const DEFAULT_SAMPLE_INTERVAL_MS = 5000;

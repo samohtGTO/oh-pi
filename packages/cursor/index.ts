@@ -1,8 +1,10 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
+import type { CursorCredentials } from "./models.js";
+
 import { createCursorOAuthProvider, refreshCursorCredentialModels, refreshCursorToken } from "./auth.js";
 import { CURSOR_API, CURSOR_PROVIDER, getCursorRuntimeConfig } from "./config.js";
 import { getCredentialModels, getFallbackCursorModels, toProviderModels } from "./models.js";
-import type { CursorCredentials } from "./models.js";
 import { streamSimpleCursor } from "./provider.js";
 import { clearCursorRuntimeState, getCursorRuntimeStateSummary } from "./runtime.js";
 

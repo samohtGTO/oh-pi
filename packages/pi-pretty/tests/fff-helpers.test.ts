@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { checkHealth, rescan } from "../src/fff-helpers.js";
 
 describe("fff-helpers", () => {

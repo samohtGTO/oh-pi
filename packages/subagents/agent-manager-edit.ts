@@ -1,6 +1,10 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
+
 import { matchesKey, truncateToWidth } from "@mariozechner/pi-tui";
+
 import type { AgentConfig } from "./agents.js";
+import type { TextEditorState } from "./text-editor.js";
+
 import { formatScrollInfo, pad, renderFooter, renderHeader, row } from "./render-helpers.js";
 import {
 	createEditorState,
@@ -10,7 +14,6 @@ import {
 	renderEditor,
 	wrapText,
 } from "./text-editor.js";
-import type { TextEditorState } from "./text-editor.js";
 
 export interface ModelInfo {
 	provider: string;

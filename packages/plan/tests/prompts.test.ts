@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, test } from "vitest";
+
 import { loadPlanModePrompt } from "../prompts";
 
 const tempDirs: string[] = [];

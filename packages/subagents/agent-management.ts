@@ -1,13 +1,16 @@
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import * as fs from "node:fs";
 import * as path from "node:path";
+
+import type { AgentConfig, AgentScope, AgentSource, ChainConfig, ChainStepConfig } from "./agents.js";
+import type { Details } from "./types.js";
+
 import { serializeAgent } from "./agent-serializer.js";
 import { discoverAgentsAll } from "./agents.js";
-import type { AgentConfig, AgentScope, AgentSource, ChainConfig, ChainStepConfig } from "./agents.js";
 import { serializeChain } from "./chain-serializer.js";
 import { discoverAvailableSkills } from "./skills.js";
-import type { Details } from "./types.js";
 
 /** Maximum system prompt length when set via the management API. */
 const MAX_MANAGEMENT_SYSTEM_PROMPT_LENGTH = 50_000;

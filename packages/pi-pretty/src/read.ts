@@ -1,8 +1,10 @@
 import type { AgentToolResult, ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { BundledLanguage } from "shiki";
+
 import { createReadTool } from "@mariozechner/pi-coding-agent";
 import { codeToANSI } from "@shikijs/cli";
 import { basename, extname } from "node:path";
-import type { BundledLanguage } from "shiki";
+
 import { detectImageProtocol } from "./image-inline.js";
 import { envInt, FG_DIM, fillToolBackground, lnum } from "./theme.js";
 

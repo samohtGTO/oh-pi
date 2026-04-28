@@ -3,17 +3,20 @@
  */
 
 import type { Message } from "@mariozechner/pi-ai";
+
 import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+
 import type { AgentConfig } from "./agents.js";
+import type { AgentProgress, ArtifactPaths, RunSyncOptions, SingleResult } from "./types.js";
+
 import { ensureArtifactsDir, getArtifactPaths, writeArtifact, writeMetadata } from "./artifacts.js";
 import { createJsonlWriter } from "./jsonl-writer.js";
 import { getPiSpawnCommand } from "./pi-spawn.js";
 import { buildSkillInjection, resolveSkills } from "./skills.js";
 import { DEFAULT_IDLE_TIMEOUT_MS, DEFAULT_MAX_OUTPUT, getSubagentDepthEnv, truncateOutput } from "./types.js";
-import type { AgentProgress, ArtifactPaths, RunSyncOptions, SingleResult } from "./types.js";
 import {
 	detectSubagentError,
 	extractTextFromContent,

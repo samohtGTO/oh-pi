@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+
 import { icon, isPlainIcons, setPlainIcons } from "./icons.js";
 
 describe("icons", () => {

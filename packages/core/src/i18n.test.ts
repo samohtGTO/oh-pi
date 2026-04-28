@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+
 import { getLocale, setLocale, t } from "./i18n.js";
 
 afterEach(() => setLocale("en"));

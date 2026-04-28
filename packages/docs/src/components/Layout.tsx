@@ -1,8 +1,10 @@
-import { SearchDialog } from "@/components/SearchDialog";
-import type { MdxPageData } from "@/hooks/useMdxPages";
 import { Code, ExternalLink, Menu, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
+
+import type { MdxPageData } from "@/hooks/useMdxPages";
+
+import { SearchDialog } from "@/components/SearchDialog";
 
 interface LayoutProps {
 	children: React.ReactNode;

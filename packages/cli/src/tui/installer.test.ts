@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { type InstallerDeps, runInstaller } from "./installer.js";
 
 function createMockDeps(overrides: Partial<InstallerDeps> = {}): InstallerDeps {

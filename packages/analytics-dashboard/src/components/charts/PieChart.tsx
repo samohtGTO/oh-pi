@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { Cell, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Sector } from "recharts";
+
 /* C8 ignore file */
 /**
  * Pie/Donut Chart Component
@@ -5,8 +8,6 @@
  * For displaying breakdowns like cost by model or提供商.
  */
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Cell, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Sector } from "recharts";
 
 interface PieDataItem {
 	name: string;

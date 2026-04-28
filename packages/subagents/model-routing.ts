@@ -1,5 +1,3 @@
-/* C8 ignore file */
-import { mergeDelegatedSelectionPolicies, selectDelegatedModel } from "@ifi/oh-pi-core";
 import type {
 	DelegatedAvailableModel,
 	DelegatedSelectionLatencySnapshot,
@@ -7,9 +5,13 @@ import type {
 	DelegatedSelectionUsageSnapshot,
 	ModelTaskProfile,
 } from "@ifi/oh-pi-core";
+
+/* C8 ignore file */
+import { mergeDelegatedSelectionPolicies, selectDelegatedModel } from "@ifi/oh-pi-core";
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import type { AgentConfig } from "./agents.js";
 
 export interface AvailableModelRef {

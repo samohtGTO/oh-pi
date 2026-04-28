@@ -1,6 +1,7 @@
+import type { TimeRange } from "@/types";
+
 /* C8 ignore file */
 import { cn } from "@/lib/utils";
-import type { TimeRange } from "@/types";
 
 const timeRanges: { value: TimeRange; label: string }[] = [
 	{ label: "7D", value: "7d" },

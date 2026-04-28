@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createRoutes } from "../src/routes.js";
+
 import type { AgentSessionLike } from "../src/ws-handler.js";
+
+import { createRoutes } from "../src/routes.js";
 
 function createSession(overrides: Partial<AgentSessionLike> = {}): AgentSessionLike {
 	return {

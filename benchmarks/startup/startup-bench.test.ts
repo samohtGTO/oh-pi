@@ -1,5 +1,6 @@
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
+
 import { createSuiteReport, runBenchmark, writeBenchmarkReport } from "../shared/benchmark";
 import { createStartupBenchmarkSuite } from "./suite";
 

@@ -1,5 +1,6 @@
 import type { AgentSessionLike } from "@ifi/pi-web-server";
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import { createDiscoveryService } from "./src/discovery.js";
 import { createQrRenderer } from "./src/qr.js";
 import {

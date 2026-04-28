@@ -1,7 +1,9 @@
-import * as p from "@clack/prompts";
 import type { DiscoveredModel, ProviderConfig, ProviderSetupStrategy } from "@ifi/oh-pi-core";
+
+import * as p from "@clack/prompts";
 import { PROVIDERS, t } from "@ifi/oh-pi-core";
 import chalk from "chalk";
+
 import type { EnvInfo } from "../utils/detect.js";
 
 /** Provider API base URLs for dynamic model fetching */

@@ -4,9 +4,11 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+
 import type { ChainStep, SequentialStep } from "./settings.js";
-import { isParallelStep } from "./settings.js";
 import type { SingleResult, Usage } from "./types.js";
+
+import { isParallelStep } from "./settings.js";
 
 /**
  * Format token count with k suffix for large numbers

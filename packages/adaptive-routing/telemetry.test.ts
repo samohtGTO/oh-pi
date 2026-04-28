@@ -11,6 +11,8 @@ vi.mock("@mariozechner/pi-coding-agent", () => ({
 	getAgentDir,
 }));
 
+import type { AdaptiveRoutingTelemetryEvent } from "./types.js";
+
 import {
 	appendTelemetryEvent,
 	computeStats,
@@ -19,7 +21,6 @@ import {
 	getAdaptiveRoutingAggregatesPath,
 	readTelemetryEvents,
 } from "./telemetry.js";
-import type { AdaptiveRoutingTelemetryEvent } from "./types.js";
 
 describe("adaptive routing telemetry", () => {
 	afterEach(() => {

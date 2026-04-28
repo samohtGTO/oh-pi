@@ -22,6 +22,7 @@ vi.mock("@ifi/pi-shared-qna", () => ({
 
 import { runSync } from "@ifi/pi-extension-subagents/execution.ts";
 import { getFinalOutput } from "@ifi/pi-extension-subagents/utils.ts";
+
 import { buildTaskAgentRunDetails, normalizeTaskAgentTasks, registerTaskAgentTools } from "../task-agents.js";
 
 type MockRunSync = typeof runSync & ReturnType<typeof vi.fn>;

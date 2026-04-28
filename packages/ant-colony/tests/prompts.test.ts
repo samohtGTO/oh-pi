@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildPrompt, CASTE_PROMPTS } from "../extensions/ant-colony/prompts.js";
+
 import type { Task } from "../extensions/ant-colony/types.js";
+
+import { buildPrompt, CASTE_PROMPTS } from "../extensions/ant-colony/prompts.js";
 
 const mkTask = (overrides: Partial<Task> = {}): Task => ({
 	id: "t-1",

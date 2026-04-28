@@ -1,5 +1,6 @@
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
+
 import { getPiSpawnCommand, type PiSpawnDeps, resolveWindowsPiCliScript } from "../pi-spawn.js";
 
 function makeDeps(input: {

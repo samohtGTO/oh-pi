@@ -1,7 +1,9 @@
 import * as p from "@clack/prompts";
 import { execSync } from "node:child_process";
-import { messages } from "./locales.js";
+
 import type { Locale } from "./types.js";
+
+import { messages } from "./locales.js";
 
 export type { Locale } from "./types.js";
 

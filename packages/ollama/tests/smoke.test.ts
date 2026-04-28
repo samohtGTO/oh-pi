@@ -1,6 +1,8 @@
-import http from "node:http";
 import type { AddressInfo } from "node:net";
+
+import http from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import ollamaProviderExtension from "../index.js";
 import * as localModule from "../local.js";

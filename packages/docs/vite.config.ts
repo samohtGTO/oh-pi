@@ -1,3 +1,5 @@
+import type { Plugin } from "vite";
+
 import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -6,7 +8,6 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import remarkGfm from "remark-gfm";
 import { defineConfig } from "vite";
-import type { Plugin } from "vite";
 
 const __dirname = import.meta.dirname;
 

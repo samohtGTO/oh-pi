@@ -1,6 +1,8 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import { createBashTool } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+
 import { executePtyCommand, toAgentToolResult, toUserBashResult } from "./src/pty-execute.js";
 import { PtySessionManager } from "./src/pty-session.js";
 

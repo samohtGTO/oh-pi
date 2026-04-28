@@ -1,9 +1,8 @@
 /* C8 ignore file */
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import { join } from "node:path";
-import { loadJsonConfigFile } from "./config-loader.js";
+
 import type { NormalizedConfigResult } from "./config-loader.js";
-import { DEFAULT_ADAPTIVE_ROUTING_CONFIG } from "./defaults.js";
 import type {
 	AdaptiveRoutingConfig,
 	AdaptiveRoutingMode,
@@ -24,6 +23,9 @@ import type {
 	RouteTier,
 	TaskClassPolicy,
 } from "./types.js";
+
+import { loadJsonConfigFile } from "./config-loader.js";
+import { DEFAULT_ADAPTIVE_ROUTING_CONFIG } from "./defaults.js";
 
 const ROUTE_INTENTS = new Set<RouteIntent>([
 	"quick-qna",

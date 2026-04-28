@@ -1,5 +1,6 @@
-import { makePheromoneId } from "./spawner.js";
 import type { AntCaste, Pheromone, PheromoneType } from "./types.js";
+
+import { makePheromoneId } from "./spawner.js";
 
 const VALID_CASTES = new Set(["scout", "worker", "soldier", "drone"]);
 const TASK_HEADER_RE = /^\s*#{2,6}\s*task\s*:\s*(.+?)\s*$/i;

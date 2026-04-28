@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { buildWidgetLines, formatElapsedMmSs, PtyLiveWidgetController, widgetInternals } from "../src/widget.js";
 
 const theme = {

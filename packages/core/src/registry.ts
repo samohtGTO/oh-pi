@@ -1,5 +1,6 @@
-import { icon } from "./icons.js";
 import type { ModelCapabilities } from "./types.js";
+
+import { icon } from "./icons.js";
 
 /** Model capability lookup table — maps model IDs to their context window, output limits, and features. */
 export const MODEL_CAPABILITIES: Record<string, ModelCapabilities> = {

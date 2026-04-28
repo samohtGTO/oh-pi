@@ -1,6 +1,8 @@
 import { Hono } from "hono";
-import { validateToken } from "./token.js";
+
 import type { AgentSessionLike } from "./ws-handler.js";
+
+import { validateToken } from "./token.js";
 
 export interface RoutesOptions {
 	token: string;

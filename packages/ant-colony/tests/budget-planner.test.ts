@@ -13,6 +13,8 @@
 
 import { describe, expect, it } from "vitest";
 
+import type { ColonyMetrics, ConcurrencyConfig } from "../extensions/ant-colony/types.js";
+
 import {
 	applyConcurrencyCap,
 	type BudgetPlan,
@@ -26,7 +28,6 @@ import {
 	type ProviderRateLimits,
 	type UsageLimitsEvent,
 } from "../extensions/ant-colony/budget-planner.js";
-import type { ColonyMetrics, ConcurrencyConfig } from "../extensions/ant-colony/types.js";
 
 // ─── Test helpers ────────────────────────────────────────────────────────────
 

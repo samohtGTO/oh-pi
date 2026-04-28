@@ -1,8 +1,11 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
 import type { Component, KeybindingsManager, TUI } from "@mariozechner/pi-tui";
+
 import { truncateToWidth } from "@mariozechner/pi-tui";
-import { getConfiguredExternalEditor, openTextInExternalEditor } from "./external-editor-shared";
+
 import type { ExternalEditorLaunchResult } from "./external-editor-shared";
+
+import { getConfiguredExternalEditor, openTextInExternalEditor } from "./external-editor-shared";
 
 const SHORTCUT = "ctrl+shift+e";
 const COMMAND = "external-editor";

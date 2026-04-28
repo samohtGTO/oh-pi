@@ -3,8 +3,10 @@
  */
 
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
-import { getMarkdownTheme } from "@mariozechner/pi-coding-agent";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { Widget } from "@mariozechner/pi-tui";
+
+import { getMarkdownTheme } from "@mariozechner/pi-coding-agent";
 import {
 	Container,
 	Markdown,
@@ -14,10 +16,11 @@ import {
 	visibleWidth,
 	wrapTextWithAnsi,
 } from "@mariozechner/pi-tui";
-import type { Widget } from "@mariozechner/pi-tui";
+
+import type { AsyncJobState, Details } from "./types.js";
+
 import { formatDuration, formatTokens, formatToolCall, formatUsage, shortenPath } from "./formatters.js";
 import { MAX_WIDGET_JOBS, WIDGET_KEY } from "./types.js";
-import type { AsyncJobState, Details } from "./types.js";
 import { getDisplayItems, getFinalOutput, getLastActivity, getOutputTail } from "./utils.js";
 
 type Theme = ExtensionContext["ui"]["theme"];

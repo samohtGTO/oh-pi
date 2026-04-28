@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { compiledPackages, publishedPackages } from "./package-classes.mjs";
 
 describe("package classes", () => {

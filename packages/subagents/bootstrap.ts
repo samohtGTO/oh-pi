@@ -1,8 +1,10 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getSubagentConfigPath } from "./paths.js";
+
 import type { ExtensionConfig } from "./types.js";
+
+import { getSubagentConfigPath } from "./paths.js";
 
 export function getSubagentSessionRoot(parentSessionFile: string | null): string {
 	if (parentSessionFile) {

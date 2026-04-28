@@ -1,14 +1,17 @@
+import type { AddressInfo } from "node:net";
+
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import http from "node:http";
 import http2 from "node:http2";
-import type { AddressInfo } from "node:net";
+
+import type { AgentClientMessage } from "../proto/agent_pb.js";
+
 import {
 	AgentClientMessageSchema,
 	AgentServerMessageSchema,
 	GetUsableModelsResponseSchema,
 	ModelDetailsSchema,
 } from "../proto/agent_pb.js";
-import type { AgentClientMessage } from "../proto/agent_pb.js";
 import { createConnectFrameParser, frameConnectMessage } from "../transport.js";
 
 export interface TestRunConnection {

@@ -1,7 +1,9 @@
+import type { Context, ToolCall, ToolResultMessage } from "@mariozechner/pi-ai";
+
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import { ValueSchema } from "@bufbuild/protobuf/wkt";
-import type { Context, ToolCall, ToolResultMessage } from "@mariozechner/pi-ai";
 import { describe, expect, it } from "vitest";
+
 import { buildCursorRequestPayload, decodeMcpArgsMap, parseCursorConversation } from "../messages.js";
 import { AgentClientMessageSchema } from "../proto/agent_pb.js";
 import { deriveBridgeKey, deriveConversationKey } from "../runtime.js";

@@ -12,7 +12,9 @@ import {
 	symlinkSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
+
 import type { OhPConfigWithRouting } from "../types.js";
+
 import {
 	writeAdaptiveRoutingConfig,
 	writeAgents,

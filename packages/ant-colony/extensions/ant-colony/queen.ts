@@ -15,19 +15,13 @@
 
 import type { DelegatedSelectionUsageSnapshot } from "@ifi/oh-pi-core";
 import type { AuthStorage, ModelRegistry } from "@mariozechner/pi-coding-agent";
+
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, extname, join, relative, resolve } from "node:path";
-import { applyConcurrencyCap, buildBudgetPromptSection, planBudget } from "./budget-planner.js";
+
 import type { BudgetPlan, UsageLimitsEvent } from "./budget-planner.js";
-import { adapt, defaultConcurrency, sampleSystem } from "./concurrency.js";
-import { buildImportGraph, taskDependsOn } from "./deps.js";
 import type { ImportGraph } from "./deps.js";
-import { preprocessMultimodalTask, shouldEscalateMultimodalRoute } from "./multimodal-routing.js";
-import { Nest } from "./nest.js";
-import { DEFAULT_COLONY_CATEGORIES, resolveColonyCategoryModel, toAvailableModelRefs } from "./routing-config.js";
-import { makePheromoneId, makeTaskId, resetAntCounter, runDrone, spawnAnt } from "./spawner.js";
-import { cleanupEmptyColonyStorageDirs, resolveColonyStorageOptions } from "./storage.js";
 import type { ColonyStorageOptions } from "./storage.js";
 import type {
 	Ant,
@@ -45,6 +39,15 @@ import type {
 	TaskPriority,
 	WorkerClass,
 } from "./types.js";
+
+import { applyConcurrencyCap, buildBudgetPromptSection, planBudget } from "./budget-planner.js";
+import { adapt, defaultConcurrency, sampleSystem } from "./concurrency.js";
+import { buildImportGraph, taskDependsOn } from "./deps.js";
+import { preprocessMultimodalTask, shouldEscalateMultimodalRoute } from "./multimodal-routing.js";
+import { Nest } from "./nest.js";
+import { DEFAULT_COLONY_CATEGORIES, resolveColonyCategoryModel, toAvailableModelRefs } from "./routing-config.js";
+import { makePheromoneId, makeTaskId, resetAntCounter, runDrone, spawnAnt } from "./spawner.js";
+import { cleanupEmptyColonyStorageDirs, resolveColonyStorageOptions } from "./storage.js";
 import { DEFAULT_ANT_CONFIGS } from "./types.js";
 
 export interface QueenCallbacks {

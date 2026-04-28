@@ -14,8 +14,12 @@
 
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext, ReadonlyFooterDataProvider } from "@mariozechner/pi-coding-agent";
+
 import { truncateToWidth } from "@mariozechner/pi-tui";
 import path from "node:path";
+
+import type { RepoWorktreeContext, RepoWorktreeSnapshot } from "./worktree-shared";
+
 import { getSafeModeState, subscribeSafeMode } from "./runtime-mode";
 import { recordRuntimeSample } from "./watchdog-runtime-diagnostics";
 import {
@@ -24,7 +28,6 @@ import {
 	getRepoWorktreeSnapshot,
 	refreshRepoWorktreeContext,
 } from "./worktree-shared";
-import type { RepoWorktreeContext, RepoWorktreeSnapshot } from "./worktree-shared";
 
 /** OSC 8 hyperlink: renders `text` as a clickable terminal link to `url`. */
 export function hyperlink(url: string, text: string): string {

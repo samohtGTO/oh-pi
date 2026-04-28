@@ -4,6 +4,7 @@
  * Tests for utility functions and schema definitions that don't require SQLite.
  */
 import { describe, expect, it } from "vitest";
+
 import { formatDate, formatDateBucket, formatHourBucket, formatMonthBucket, formatWeekBucket } from "../db.js";
 import {
 	codebaseDailyStats,

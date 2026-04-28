@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { execMultiGrep, multiGrep } from "../src/find-grep.js";
 
 vi.mock("@ff-labs/fff-node", async (importOriginal) => {

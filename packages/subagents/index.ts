@@ -13,21 +13,34 @@
  */
 
 import type { ExtensionAPI, ExtensionContext, ToolDefinition } from "@mariozechner/pi-coding-agent";
+
 import { Text } from "@mariozechner/pi-tui";
 import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
+import type { ManagerResult } from "./agent-manager.js";
+import type { AgentConfig, AgentScope } from "./agents.js";
+import type { ChainClarifyResult, ModelInfo } from "./chain-clarify.js";
+import type { ChainStep, SequentialStep } from "./settings.js";
+import type {
+	AgentProgress,
+	ArtifactConfig,
+	ArtifactPaths,
+	AsyncJobState,
+	Details,
+	ExtensionConfig,
+	SingleResult,
+} from "./types.js";
+
 import { handleManagementAction } from "./agent-management.js";
 import { AgentManagerComponent } from "./agent-manager.js";
-import type { ManagerResult } from "./agent-manager.js";
 import { resolveExecutionAgentScope } from "./agent-scope.js";
 import { discoverAgents, discoverAgentsAll } from "./agents.js";
-import type { AgentConfig, AgentScope } from "./agents.js";
 import { cleanupAllArtifactDirs, cleanupOldArtifacts, getArtifactsDir } from "./artifacts.js";
 import { executeAsyncChain, executeAsyncSingle, isAsyncAvailable } from "./async-execution.js";
 import { ensureAccessibleDir, expandTildePath, getSubagentSessionRoot, loadSubagentConfig } from "./bootstrap.js";
 import { ChainClarifyComponent } from "./chain-clarify.js";
-import type { ChainClarifyResult, ModelInfo } from "./chain-clarify.js";
 import { executeChain } from "./chain-execution.js";
 import { registerSubagentCommands } from "./command-registration.js";
 import { runSync } from "./execution.js";
@@ -37,7 +50,6 @@ import { recordRun } from "./run-history.js";
 import { createSubagentRuntimeMonitor } from "./runtime-monitor.js";
 import { StatusParams, SubagentParams } from "./schemas.js";
 import { cleanupOldChainDirs, getStepAgents, isParallelStep, resolveStepBehavior } from "./settings.js";
-import type { ChainStep, SequentialStep } from "./settings.js";
 import { finalizeSingleOutput, injectSingleOutputInstruction, resolveSingleOutputPath } from "./single-output.js";
 import { discoverAvailableSkills, normalizeSkillInput } from "./skills.js";
 import {
@@ -49,15 +61,6 @@ import {
 	MAX_PARALLEL,
 	RESULTS_DIR,
 	WIDGET_KEY,
-} from "./types.js";
-import type {
-	AgentProgress,
-	ArtifactConfig,
-	ArtifactPaths,
-	AsyncJobState,
-	Details,
-	ExtensionConfig,
-	SingleResult,
 } from "./types.js";
 import { findByPrefix, getFinalOutput, mapConcurrent, readStatus } from "./utils.js";
 

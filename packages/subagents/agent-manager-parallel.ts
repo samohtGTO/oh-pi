@@ -1,7 +1,10 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
+
 import { matchesKey, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
-import { fuzzyFilter, pad, renderFooter, renderHeader, row } from "./render-helpers.js";
+
 import type { TextEditorState } from "./text-editor.js";
+
+import { fuzzyFilter, pad, renderFooter, renderHeader, row } from "./render-helpers.js";
 import {
 	createEditorState,
 	ensureCursorVisible,

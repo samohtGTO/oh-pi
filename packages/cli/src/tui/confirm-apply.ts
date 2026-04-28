@@ -1,8 +1,10 @@
 import * as p from "@clack/prompts";
 import { resolvePiAgentDir, t } from "@ifi/oh-pi-core";
 import chalk from "chalk";
+
 import type { OhPConfigWithRouting } from "../types.js";
 import type { EnvInfo } from "../utils/detect.js";
+
 import { applyConfig, backupConfig, installPi } from "../utils/install.js";
 
 /**

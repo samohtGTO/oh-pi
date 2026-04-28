@@ -2,12 +2,14 @@
  * Skill resolution and caching for subagent extension
  */
 
+import type { Skill } from "@mariozechner/pi-coding-agent";
+
 import { expandHomeDir } from "@ifi/oh-pi-core";
 import { loadSkills } from "@mariozechner/pi-coding-agent";
-import type { Skill } from "@mariozechner/pi-coding-agent";
 import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
 import { resolveAgentDir } from "./paths.js";
 
 export type SkillSource =

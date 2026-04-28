@@ -2,8 +2,10 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
-import { createPiWebServer, type PiWebServer } from "../src/server.js";
+
 import type { AgentSessionLike } from "../src/ws-handler.js";
+
+import { createPiWebServer, type PiWebServer } from "../src/server.js";
 
 function createSession(): AgentSessionLike {
 	const listeners = new Set<(event: unknown) => void>();

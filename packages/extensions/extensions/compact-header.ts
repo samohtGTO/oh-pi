@@ -6,10 +6,12 @@
  * to the `OH_PI_PLAIN_ICONS` env var so all oh-pi packages pick it up.
  */
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 import { getAgentDir, VERSION } from "@mariozechner/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { getSafeModeState, subscribeSafeMode } from "./runtime-mode";
 
 /** Read `plainIcons` from settings.json (global or project-local). */

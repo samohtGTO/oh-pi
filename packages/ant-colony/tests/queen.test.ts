@@ -29,6 +29,8 @@ vi.mock("@mariozechner/pi-coding-agent", () => ({
 }));
 vi.mock("@mariozechner/pi-ai", () => ({ getModel: vi.fn() }));
 
+import type { ColonyState, Task } from "../extensions/ant-colony/types.js";
+
 import { Nest } from "../extensions/ant-colony/nest.js";
 import {
 	classifyError,
@@ -42,7 +44,6 @@ import {
 	shouldUseScoutQuorum,
 	validateExecutionPlan,
 } from "../extensions/ant-colony/queen.js";
-import type { ColonyState, Task } from "../extensions/ant-colony/types.js";
 
 // ═══ classifyError ═══
 

@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
-import { CURSOR_ACTIVE_RUN_TTL_MS, CURSOR_CHECKPOINT_TTL_MS, CURSOR_MAX_CHECKPOINTS } from "./config.js";
+
 import type { PendingExec } from "./messages.js";
 import type { McpToolDefinition } from "./proto/agent_pb.js";
 import type { CursorStreamingConnection } from "./transport.js";
+
+import { CURSOR_ACTIVE_RUN_TTL_MS, CURSOR_CHECKPOINT_TTL_MS, CURSOR_MAX_CHECKPOINTS } from "./config.js";
 
 export interface ConversationStateRecord {
 	conversationId: string;

@@ -1,3 +1,5 @@
+import { Bar, BarChart as RechartsBarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 /* C8 ignore file */
 /**
  * Horizontal Bar Chart Component
@@ -5,7 +7,6 @@
  * For ranking lists like top models or codebases.
  */
 import { cn } from "@/lib/utils";
-import { Bar, BarChart as RechartsBarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface BarDataItem {
 	name: string;

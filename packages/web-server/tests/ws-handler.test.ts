@@ -1,6 +1,8 @@
 import { EventEmitter } from "node:events";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import type { AgentSessionLike } from "../src/ws-handler.js";
+
 import { handleWebSocketConnection } from "../src/ws-handler.js";
 
 class MockWebSocket extends EventEmitter {

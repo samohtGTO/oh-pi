@@ -7,15 +7,18 @@
 
 import type { Theme } from "@mariozechner/pi-coding-agent";
 import type { Component, TUI } from "@mariozechner/pi-tui";
+
 import { matchesKey, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { updateFrontmatterField } from "./agent-serializer.js";
+
 import type { AgentConfig, ChainConfig, ChainStepConfig } from "./agents.js";
-import { serializeChain } from "./chain-serializer.js";
-import { getUserAgentsDir } from "./paths.js";
 import type { ResolvedStepBehavior } from "./settings.js";
 import type { TextEditorState } from "./text-editor.js";
+
+import { updateFrontmatterField } from "./agent-serializer.js";
+import { serializeChain } from "./chain-serializer.js";
+import { getUserAgentsDir } from "./paths.js";
 import {
 	createEditorState,
 	ensureCursorVisible,

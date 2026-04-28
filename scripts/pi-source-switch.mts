@@ -63,6 +63,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+
 import { SWITCHER_PACKAGES } from "../packages/oh-pi/bin/package-list.mts";
 
 const IS_WINDOWS = process.platform === "win32";

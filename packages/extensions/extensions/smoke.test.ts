@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import autoUpdateExtension from "./auto-update.js";
 import btwExtension from "./btw.js";

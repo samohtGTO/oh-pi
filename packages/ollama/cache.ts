@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+
 import { type OllamaProviderModel, toOllamaModel } from "./models.js";
 
 const CACHE_VERSION = 1;

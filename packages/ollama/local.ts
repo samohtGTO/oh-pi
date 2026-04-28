@@ -1,7 +1,8 @@
-import { execFile, spawn } from "node:child_process";
 import type { ChildProcessByStdio } from "node:child_process";
-import process from "node:process";
 import type { Readable } from "node:stream";
+
+import { execFile, spawn } from "node:child_process";
+import process from "node:process";
 
 const IS_WINDOWS = process.platform === "win32";
 const OLLAMA_COMMAND_CANDIDATES = IS_WINDOWS ? ["ollama.exe", "ollama"] : ["ollama"];

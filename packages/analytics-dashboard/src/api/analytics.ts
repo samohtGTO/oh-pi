@@ -11,7 +11,6 @@
  * - "api" → real data from the server
  */
 
-import { stringToColor } from "@/lib/utils";
 import type {
 	AggregationLevel,
 	CodebaseContribution,
@@ -25,6 +24,8 @@ import type {
 	TopModelStat,
 	UsageInsight,
 } from "@/types";
+
+import { stringToColor } from "@/lib/utils";
 
 // ─── API Mode ─────────────────────────────────────────────────────────────────
 

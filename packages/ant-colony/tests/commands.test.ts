@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import antColonyExtension from "../extensions/ant-colony/index.js";
 
 const { runColonyMock, resumeColonyMock } = vi.hoisted(() => {

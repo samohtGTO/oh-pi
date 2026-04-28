@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+
 import type { ChecklistSummary, WorkflowPaths, WorkflowStatus } from "./types.js";
+
 import { getLatestFeatureDir, listFeatureDirs } from "./workspace.js";
 
 function countChecklistItems(content: string): { total: number; completed: number; incomplete: number } {

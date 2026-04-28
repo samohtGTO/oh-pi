@@ -1,3 +1,5 @@
+import type { ViewType } from "@/types";
+
 /* C8 ignore file */
 /**
  * App Component
@@ -7,7 +9,6 @@
 import { SidebarLayout } from "@/components/SidebarLayout";
 import { Codebases, Insights, Models, Overview } from "@/pages";
 import useDashboardStore from "@/stores/dashboard";
-import type { ViewType } from "@/types";
 
 function App() {
 	const currentView = useDashboardStore((s) => s.currentView);

@@ -1,4 +1,5 @@
 import type { WebSocket } from "ws";
+
 import { validateToken } from "./token.js";
 
 export interface WsSession {

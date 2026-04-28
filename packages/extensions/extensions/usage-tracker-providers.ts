@@ -1,9 +1,11 @@
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
+import type { PiAuthEntry, ProviderKey, ProviderRateLimits } from "./usage-tracker-shared.js";
+
 import { clampPercent, fmtDuration, fmtTokens, upsertWindow } from "./usage-tracker-formatting.js";
 import { PROBE_TIMEOUT_MS } from "./usage-tracker-shared.js";
-import type { PiAuthEntry, ProviderKey, ProviderRateLimits } from "./usage-tracker-shared.js";
 
 // Pre-compiled regex for OpenAI-style compact duration parsing
 const OPENAI_DURATION_RE = /(\d+(?:\.\d+)?)(ms|s|m|h)/g;

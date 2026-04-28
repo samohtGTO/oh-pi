@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { PiWebClient } from "../src/client.js";
 
 // Minimal mock WebSocket

@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
+
 import type { ColonyState } from "../extensions/ant-colony/types.js";
+
 import {
 	antIcon,
 	boltIcon,

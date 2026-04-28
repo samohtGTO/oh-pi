@@ -11,6 +11,7 @@ import {
 	type ToolCall,
 } from "@mariozechner/pi-ai";
 import { randomUUID } from "node:crypto";
+
 import { CURSOR_RUN_PATH } from "./config.js";
 import {
 	buildCursorRequestPayload,

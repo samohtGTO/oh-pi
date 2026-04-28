@@ -1,5 +1,7 @@
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
+
 import { Text, truncateToWidth } from "@mariozechner/pi-tui";
+
 import { formatDuration, formatTimestamp, summarizeContent, summarizeText } from "./diagnostics-shared.js";
 
 interface PromptTurnDiagnostics {

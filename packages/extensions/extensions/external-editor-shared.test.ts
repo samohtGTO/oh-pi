@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { getConfiguredExternalEditor, openTextInExternalEditor } from "./external-editor-shared";
 
 describe("external editor shared helpers", () => {

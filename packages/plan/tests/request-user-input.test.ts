@@ -1,5 +1,7 @@
 import type { QnAResponse } from "@ifi/pi-shared-qna";
+
 import { describe, expect, test } from "vitest";
+
 import {
 	buildRequestUserInputResponse,
 	buildRequestUserInputSummary,

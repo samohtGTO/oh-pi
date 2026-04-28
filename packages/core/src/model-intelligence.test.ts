@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { findModelIntelligence, mergeDelegatedSelectionPolicies, selectDelegatedModel } from "./model-intelligence.js";
 
 const sampleModels = [

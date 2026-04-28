@@ -1,9 +1,18 @@
 /* C8 ignore file */
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 import path from "node:path";
 import process from "node:process";
+
+import type {
+	GitWorktreeEntry,
+	ManagedWorktreeMetadata,
+	RepoWorktreeContext,
+	RepoWorktreeSnapshot,
+} from "./worktree-shared";
+
 import { recordRuntimeSample } from "./watchdog-runtime-diagnostics";
 import {
 	buildPaiInstanceId,
@@ -15,12 +24,6 @@ import {
 	getRepoWorktreeSnapshot,
 	removeManagedWorktree,
 	touchManagedWorktreeSeen,
-} from "./worktree-shared";
-import type {
-	GitWorktreeEntry,
-	ManagedWorktreeMetadata,
-	RepoWorktreeContext,
-	RepoWorktreeSnapshot,
 } from "./worktree-shared";
 
 const COMMAND = "worktree";

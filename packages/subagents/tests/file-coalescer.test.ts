@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createFileCoalescer } from "../file-coalescer.js";
 
 type TimerTask = { id: number; cb: () => void; delay: number };

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { summarizeProviders } from "./config-wizard.js";
+
 import type { ProviderSetupResult } from "./provider-setup.js";
+
+import { summarizeProviders } from "./config-wizard.js";
 
 const setup = (overrides: Partial<ProviderSetupResult>): ProviderSetupResult => ({
 	providerStrategy: "replace",

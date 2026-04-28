@@ -1,4 +1,5 @@
 import path from "node:path";
+
 import type { PlanModeState } from "./types";
 
 export const PLAN_MODE_STATE_VERSION = 1;

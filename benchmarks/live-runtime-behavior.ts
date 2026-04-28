@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { performance } from "node:perf_hooks";
+
 import { buildCommandCatalog } from "../packages/extensions/extensions/compact-header.ts";
 
 function time(label, fn, iterations) {

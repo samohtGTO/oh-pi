@@ -1,8 +1,10 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { getSessionsBaseDir } from "./paths.js";
+
 import type { ArtifactPaths } from "./types.js";
+
+import { getSessionsBaseDir } from "./paths.js";
 
 const TEMP_ARTIFACTS_DIR = path.join(os.tmpdir(), "pi-subagent-artifacts");
 const CLEANUP_MARKER_FILE = ".last-cleanup";

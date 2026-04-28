@@ -1,9 +1,11 @@
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
-import { keyHint } from "@mariozechner/pi-coding-agent";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import { keyHint } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+
 import { registerPlanModeCommand } from "./flow";
 import { resolveActivePlanFilePath } from "./plan-files";
 import { loadPlanModePrompt } from "./prompts";

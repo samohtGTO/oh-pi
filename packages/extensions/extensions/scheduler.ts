@@ -16,13 +16,17 @@ The scheduler distinguishes between instance-scoped tasks and workspace-scoped t
 <!-- {/extensionsSchedulerOwnershipDocs} -->
 */
 
-import { openScrollableSelect } from "@ifi/pi-shared-qna";
 import type { ScrollSelectOption } from "@ifi/pi-shared-qna";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import { openScrollableSelect } from "@ifi/pi-shared-qna";
 import { Text } from "@mariozechner/pi-tui";
 import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
+import type { ResumeReason, SchedulerLease, ScheduleScope, ScheduleTask } from "./scheduler-shared.js";
+
 import {
 	computeNextCronRunAt,
 	formatDurationShort,
@@ -53,7 +57,6 @@ import {
 	SCHEDULER_SAFE_MODE_HEARTBEAT_MS,
 	THREE_DAYS,
 } from "./scheduler-shared.js";
-import type { ResumeReason, SchedulerLease, ScheduleScope, ScheduleTask } from "./scheduler-shared.js";
 import { createStatusBarState } from "./ui-status-cache.js";
 import { RUNTIME_DIAGNOSTICS_EVENT } from "./watchdog-runtime-diagnostics.js";
 

@@ -1,3 +1,5 @@
+import type { HeatmapDataPoint } from "@/types";
+
 /* C8 ignore file */
 /**
  * Activity Heatmap Component
@@ -5,7 +7,6 @@
  * GitHub-style contribution heatmap showing activity over time.
  */
 import { cn } from "@/lib/utils";
-import type { HeatmapDataPoint } from "@/types";
 
 interface ActivityHeatmapProps {
 	data: HeatmapDataPoint[];

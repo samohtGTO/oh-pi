@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { adapt, defaultConcurrency } from "../extensions/ant-colony/concurrency.js";
+
 import type { ConcurrencyConfig, ConcurrencySample } from "../extensions/ant-colony/types.js";
+
+import { adapt, defaultConcurrency } from "../extensions/ant-colony/concurrency.js";
 
 const mkSample = (o: Partial<ConcurrencySample> = {}): ConcurrencySample => ({
 	timestamp: Date.now(),

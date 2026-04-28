@@ -1,6 +1,10 @@
-import { BorderedLoader } from "@mariozechner/pi-coding-agent";
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
+import { BorderedLoader } from "@mariozechner/pi-coding-agent";
 import path from "node:path";
+
+import type { PlanModeState } from "./types";
+
 import {
 	createFreshPlanFilePath,
 	ensurePlanFileExists,
@@ -12,7 +16,6 @@ import {
 	resolvePlanLocationInput,
 } from "./plan-files";
 import { getFirstUserMessageId, hasEntryInSession } from "./state";
-import type { PlanModeState } from "./types";
 import {
 	buildImplementationPrefill,
 	PLAN_MODE_END_OPTIONS,

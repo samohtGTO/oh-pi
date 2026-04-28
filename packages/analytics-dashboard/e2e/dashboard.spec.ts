@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import type { Page } from "@playwright/test";
 /* C8 ignore file */
 /**
  * Pi Analytics Dashboard — Playwright Test Suite
@@ -8,7 +8,7 @@ import { expect, test } from "vitest";
  */
 
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import { expect, test } from "vitest";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

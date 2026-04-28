@@ -1,6 +1,8 @@
-import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import type { JsonValue } from "@bufbuild/protobuf";
 import type { OAuthCredentials } from "@mariozechner/pi-ai";
+
+import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
+
 import { CURSOR_GET_MODELS_PATH } from "./config.js";
 import { GetUsableModelsRequestSchema, GetUsableModelsResponseSchema } from "./proto/agent_pb.js";
 import { callCursorUnaryRpc, decodeConnectUnaryBody } from "./transport.js";

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { parseChain, serializeChain } from "../chain-serializer.js";
 
 describe("parseChain", () => {

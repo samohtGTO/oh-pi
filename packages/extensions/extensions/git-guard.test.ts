@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { createExtensionHarness } from "../../../test-utils/extension-runtime-harness.js";
 import gitGuardExtension, { detectInteractiveGitCommand, INTERACTIVE_GIT_WARNING_PREFIX } from "./git-guard.js";
 

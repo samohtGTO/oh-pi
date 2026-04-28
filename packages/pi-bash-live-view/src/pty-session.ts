@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+
 import { ensureSpawnHelperExecutable } from "./spawn-helper.js";
 
 const DEFAULT_COLUMNS = 120;

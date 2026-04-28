@@ -1,10 +1,12 @@
 import type { ProviderConfig } from "@ifi/oh-pi-core";
+
 import type { AdaptiveRoutingSetupConfig } from "../types.js";
 import type {
 	PiPackageInstallScope,
 	PiPackageInstallState,
 	WritablePiPackageInstallScope,
 } from "../utils/pi-packages.js";
+
 import { detectPiPackageInstallScopes } from "../utils/pi-packages.js";
 
 export const ROUTING_CATEGORIES = [

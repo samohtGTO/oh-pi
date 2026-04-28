@@ -1,6 +1,9 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
+
 import { matchesKey, truncateToWidth } from "@mariozechner/pi-tui";
+
 import type { ChainConfig, ChainStepConfig } from "./agents.js";
+
 import { formatPath, formatScrollInfo, renderFooter, renderHeader, row } from "./render-helpers.js";
 
 export interface ChainDetailState {

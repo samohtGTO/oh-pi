@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { resolveExecutionAgentScope } from "../agent-scope.js";
 
 describe("resolveExecutionAgentScope", () => {

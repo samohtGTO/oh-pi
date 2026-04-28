@@ -5,12 +5,13 @@
  * Project/workspace usage analytics.
  */
 
+import { Clock, DollarSign, FolderCode, GitBranch } from "lucide-react";
+
 import { BarChart } from "@/components/charts/BarChart";
 import { useCodebaseContributions } from "@/hooks/useAnalytics";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useDashboardStore, useTimeRange } from "@/stores/dashboard";
-import { Clock, DollarSign, FolderCode, GitBranch } from "lucide-react";
 
 export function Codebases() {
 	const timeRange = useTimeRange();

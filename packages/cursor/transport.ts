@@ -1,6 +1,8 @@
+import type { ClientHttp2Session, ClientHttp2Stream, IncomingHttpHeaders } from "node:http2";
+
 import { randomUUID } from "node:crypto";
 import http2, { constants } from "node:http2";
-import type { ClientHttp2Session, ClientHttp2Stream, IncomingHttpHeaders } from "node:http2";
+
 import { CURSOR_HEARTBEAT_MS, getCursorRuntimeConfig } from "./config.js";
 
 const CONNECT_END_STREAM_FLAG = 0b0000_0010;

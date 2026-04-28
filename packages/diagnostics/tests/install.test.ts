@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
+
 // @ts-ignore missing declaration file for runtime installer script
 import { findPi, main, PACKAGE_NAME, parseArgs, printHelp, run } from "../install.mjs";
 

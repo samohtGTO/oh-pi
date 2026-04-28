@@ -3,6 +3,7 @@ import { execFile, execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import { hostname } from "node:os";
 import * as path from "node:path";
+
 import { getMirroredWorkspacePathSegments, resolvePiAgentDir } from "./agent-paths.js";
 
 export interface ManagedWorktreeOwner {

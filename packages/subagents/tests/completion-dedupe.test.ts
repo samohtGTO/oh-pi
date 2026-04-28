@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildCompletionKey, getGlobalSeenMap, markSeenWithTtl } from "../completion-dedupe.js";
 
 describe("buildCompletionKey", () => {

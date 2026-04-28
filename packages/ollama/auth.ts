@@ -1,4 +1,7 @@
 import type { OAuthCredentials, OAuthLoginCallbacks, OAuthProviderInterface } from "@mariozechner/pi-ai";
+
+import type { OllamaCloudCredentials, OllamaProviderModel } from "./models.js";
+
 import {
 	getOllamaCloudRuntimeConfig,
 	OLLAMA_API,
@@ -7,7 +10,6 @@ import {
 	OLLAMA_CLOUD_PROVIDER,
 } from "./config.js";
 import { enrichOllamaCloudCredentials, getCredentialModels } from "./models.js";
-import type { OllamaCloudCredentials, OllamaProviderModel } from "./models.js";
 
 const STATIC_CREDENTIAL_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 

@@ -1,5 +1,10 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+
 import { Type } from "@sinclair/typebox";
+
+import type { ScheduleScope, TaskKind } from "./scheduler-shared.js";
+import type { SchedulerRuntime } from "./scheduler.js";
+
 import {
 	formatDurationShort,
 	normalizeDuration,
@@ -14,8 +19,6 @@ import {
 	MAX_RECURRING_EXPIRY_MS,
 	MAX_TASKS,
 } from "./scheduler-shared.js";
-import type { ScheduleScope, TaskKind } from "./scheduler-shared.js";
-import type { SchedulerRuntime } from "./scheduler.js";
 
 const STARTUP_OWNERSHIP_DELAY_MS = 250;
 

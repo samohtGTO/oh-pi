@@ -1,6 +1,7 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
 import type { WorkflowPaths } from "./types.js";
 
 const WORKFLOW_README = `# Native /spec Workflow

@@ -1,5 +1,9 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+
 import { Text } from "@mariozechner/pi-tui";
+
+import type { SpecSubcommand, WorkflowPaths, WorkflowStep } from "./types.js";
+
 import { createGitClient } from "./git.js";
 import { buildWorkflowPrompt, getStepNotes } from "./prompts.js";
 import {
@@ -17,7 +21,6 @@ import {
 	summarizeChecklists,
 } from "./status.js";
 import { SPEC_SUBCOMMANDS } from "./types.js";
-import type { SpecSubcommand, WorkflowPaths, WorkflowStep } from "./types.js";
 import {
 	buildWorkflowPaths,
 	findRepoRoot,

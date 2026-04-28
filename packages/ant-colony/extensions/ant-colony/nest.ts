@@ -20,9 +20,11 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { getColonyStateParentDir, migrateLegacyProjectColonies, resolveColonyStorageOptions } from "./storage.js";
+
 import type { ColonyStorageOptions } from "./storage.js";
 import type { Ant, ColonyState, ConcurrencySample, EscalationReason, Pheromone, Task, TaskStatus } from "./types.js";
+
+import { getColonyStateParentDir, migrateLegacyProjectColonies, resolveColonyStorageOptions } from "./storage.js";
 
 /** Minimum pheromone strength to keep (below this, entries are garbage-collected). */
 const PHEROMONE_MIN_STRENGTH = 0.05;

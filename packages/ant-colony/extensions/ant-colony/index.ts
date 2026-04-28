@@ -10,13 +10,16 @@
  */
 
 import type { ExtensionAPI, ModelRegistry } from "@mariozechner/pi-coding-agent";
+
 import { Container, matchesKey, Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+
+import type { QueenCallbacks } from "./queen.js";
+
 import { Nest } from "./nest.js";
 import { createUsageLimitsTracker, resumeColony, runColony } from "./queen.js";
-import type { QueenCallbacks } from "./queen.js";
 import { createStatusBarState } from "./status-cache.js";
 import { resolveColonyStorageOptions, shouldManageProjectGitignore } from "./storage.js";
 
@@ -34,6 +37,7 @@ import type {
 	ColonyState,
 	ColonyWorkspace,
 } from "./types.js";
+
 import {
 	antIcon,
 	boltIcon,

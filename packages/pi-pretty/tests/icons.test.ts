@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { areIconsEnabled, enableIcons, getDirectoryIcon, getFileIcon } from "../src/icons.js";
 
 describe("getFileIcon", () => {

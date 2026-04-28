@@ -7,6 +7,8 @@
  * - Shared auth & model registry
  */
 
+import type { AgentSession, AgentSessionEvent, ResourceLoader } from "@mariozechner/pi-coding-agent";
+
 import { getModel } from "@mariozechner/pi-ai";
 import {
 	AuthStorage,
@@ -23,12 +25,13 @@ import {
 	SessionManager,
 	SettingsManager,
 } from "@mariozechner/pi-coding-agent";
-import type { AgentSession, AgentSessionEvent, ResourceLoader } from "@mariozechner/pi-coding-agent";
+
 import type { Nest } from "./nest.js";
-import { extractPheromones, parseSubTasks } from "./parser.js";
 import type { ParsedSubTask } from "./parser.js";
-import { buildPrompt, CASTE_PROMPTS } from "./prompts.js";
 import type { Ant, AntCaste, AntConfig, AntStreamEvent, AntUsageEvent, DroneCommandPolicy, Task } from "./types.js";
+
+import { extractPheromones, parseSubTasks } from "./parser.js";
+import { buildPrompt, CASTE_PROMPTS } from "./prompts.js";
 
 let antCounter = 0;
 

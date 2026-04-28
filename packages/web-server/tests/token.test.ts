@@ -2,6 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+
 import { generateInstanceId, generateToken, loadOrCreateToken, validateToken } from "../src/token.js";
 
 describe("generateToken", () => {

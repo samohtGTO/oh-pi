@@ -5,10 +5,12 @@
  * TanStack Query hooks for fetching analytics data with caching and refetching.
  */
 
+import { useQueries, useQuery } from "@tanstack/react-query";
+
+import type { AggregationLevel, TimeRange } from "@/types";
+
 import { analyticsApi } from "@/api/analytics";
 import { useTimeRange } from "@/stores/dashboard";
-import type { AggregationLevel, TimeRange } from "@/types";
-import { useQueries, useQuery } from "@tanstack/react-query";
 
 // Query keys factory for consistent caching
 const analyticsKeys = {

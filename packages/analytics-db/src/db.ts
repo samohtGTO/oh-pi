@@ -6,13 +6,15 @@
  * better-sqlite3 is synchronous — no async/await needed.
  */
 
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+
 import Database from "better-sqlite3";
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+
 import * as schema from "./schema.js";
 
 export * from "./schema.js";

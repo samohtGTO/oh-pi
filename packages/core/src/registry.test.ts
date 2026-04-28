@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { EXTENSIONS, KEYBINDING_SCHEMES, MODEL_CAPABILITIES, PROVIDERS, THEMES } from "./registry.js";
 
 describe("MODEL_CAPABILITIES", () => {

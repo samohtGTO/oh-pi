@@ -1,9 +1,11 @@
+import type { AgentToolResult } from "@mariozechner/pi-agent-core";
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
 import { runSync } from "@ifi/pi-extension-subagents/execution.ts";
 import { getFinalOutput } from "@ifi/pi-extension-subagents/utils.ts";
 import { requirePiTuiModule } from "@ifi/pi-shared-qna";
-import type { AgentToolResult } from "@mariozechner/pi-agent-core";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { randomBytes } from "node:crypto";
+
 import type {
 	NormalizedTaskAgentTask,
 	PlanModeState,
@@ -16,6 +18,7 @@ import type {
 	TaskAgentTaskProgress,
 	TaskAgentTaskResult,
 } from "./types.js";
+
 import { resolveTaskAgentConcurrency } from "./utils.js";
 
 interface PlanningAgentConfig {
